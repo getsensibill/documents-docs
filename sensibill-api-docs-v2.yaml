@@ -22,12 +22,8 @@ tags:
     description: Users
 
 servers:
-  - url: https://{environment}.sensibill.io/api/v2
-    variables:
-      environment:
-        default: receipts-sandbox
-        enum:
-          - receipts-sandbox
+  - url: https://receipts-sandbox.sensibill.io/api/v2
+  - url: https://beta.getsensibill.com/api/v2
 
 paths:
   # Home endpoints #######################
