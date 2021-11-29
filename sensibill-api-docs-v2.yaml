@@ -2344,7 +2344,7 @@ components:
             type: string
             description: "Indicates which formats should be generated. Valid values are:
               <br/>'csv' - indicates a comma separated file should be produced summarizing the exported data
-              <br/>'xls' - indicates an excel spreadsheet should be produced summarizing the exported data
+              <br/>'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
               <br/>'pdf' - indicates individual receipts should be exported to a PDF file"
             example: csv
         criteria:
@@ -2466,14 +2466,11 @@ components:
           type: string
           format: date-time
           example: '2021-01-01T21:58:15.880Z'
+          description: "The date and time of when this export object will be deleted from the system."
         createdAt:
           type: string
           format: date-time
           example: '2020-12-18T21:58:15.875Z'
-        updatedAt:
-          type: string
-          format: date-time
-          example: '2020-12-18T21:58:18.787Z'
         criteria:
           $ref: '#/components/schemas/CriteriaDto'
           description: The search criteria used to find the receipts to be exported. This
@@ -2485,18 +2482,20 @@ components:
             type: string
             description: "Indicates which formats should be generated. Valid values are:
               <br/>'csv' - indicates a comma separated file should be produced summarizing the exported data
-              <br/>'xls' - indicates an excel spreadsheet should be produced summarizing the exported data
+              <br/>'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
               <br/>'pdf' - indicates individual receipts should be exported to a PDF file"
             example: csv
-        documents:
-          type: array
-          example: []
-          items:
-            type: object
+        documentsCount:
+          type: number
+          example: 5
+          description: "The number of documents that matches the given criteria. The final number of documents
+            in the export can be different from this one if documents are created or deleted between this POST
+            request and the time when the request is processed."
         status:
           type: string
           enum:
             - queued
+            - noDocumentsFound
         id:
           type: string
           example: IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA
@@ -2546,7 +2545,7 @@ components:
             type: string
             description: "Indicates which formats should be generated. Valid values are:
               <br/>'csv' - indicates a comma separated file should be produced summarizing the exported data
-              <br/>'xls' - indicates an excel spreadsheet should be produced summarizing the exported data
+              <br/>'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
               <br/>'pdf' - indicates individual receipts should be exported to a PDF file"
             example: csv
         documents:
@@ -2567,6 +2566,7 @@ components:
             - processing
             - queued
             - running
+            - noDocumentsFound
             
           description: "The status of the export. Possible values are: ''queued'', ''processing'',
             ''completed'', ''failed''"
