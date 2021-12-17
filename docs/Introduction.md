@@ -6,7 +6,7 @@ There is a concept of a **Client Account** and a **User Account** in Sensibill's
 
 At the moment receipt processing and management features of the Sensibill API can only be used through a User Account. Client Accounts are only used to manage User Accounts.
 
-![Relation between Clients, Users and Receipts](../assets/images/entity-relations.png 'Relation between Clients, Users and Receipts')
+![Relation between Clients, Users and Receipts](https://github.com/getsensibill/receipts-docs/raw/main/assets/images/entity-relations.png 'Relation between Clients, Users and Receipts')
 
 The general high-level flow is:
 - A client creates a Client Account with Sensibill through the Sensibill Support Team;
@@ -16,6 +16,9 @@ The general high-level flow is:
 
 <!--theme: danger-->
 > You cannot use a single User Account for all the end-user accounts on the client side. The requests related to the same User Account are processed in sequence and not parallelized. For instance, if you submit two images, the second one will get processed after the previous one is complete.
+
+<!--theme: danger-->
+> You should not be creating separate user accounts each time you need to process a receipt due to the concurrency management approach mentioned above. It would violate fair use policy and makes it harder to manage resources. If such use cases are detected, they may become a reason for escalation and even temporary suspension of accounts if not addressed.
 
 <!--theme: info-->
 > To get your Client Account set up please contact Sensibill Support Team.

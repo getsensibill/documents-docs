@@ -28,13 +28,18 @@
       ]
     },
     {
+      "type": "item",
+      "title": "Receipt Data Format",
+      "uri": "docs/Receipt-Data-Format.md"
+    },
+    {
       "type": "divider",
       "title": "APIS"
     },
     {
       "type": "item",
       "title": "Sensibill API",
-      "uri": "sensibill-api-docs-v2.yaml"
+      "uri": "sensibill-api-docs.yaml"
     }
   ]
 }
