@@ -25,7 +25,7 @@ Once the **User Account** is created you can then acquire the **User Access Toke
 
 Considering the SSO approach mentioned above here is how the OAuth 2.0 flow looks like with Sensibill.
 
-![Oauth 2.0 Flow with Sensibill](https://github.com/getsensibill/receipts-docs/raw/main/assets/images/oauth2-flow.png 'Oauth 2.0 Flow with Sensibill')
+![Oauth 2.0 Flow with Sensibill](https://github.com/getsensibill/documents-docs/raw/main/assets/images/oauth2-flow.png 'Oauth 2.0 Flow with Sensibill')
 
 Let's review all the steps in detail.
 
@@ -43,7 +43,7 @@ The Client Key and Secret are supplied as a [Basic Auth header](https://en.wikip
 title: "Requesting Client Access Token using Basic Auth header"
 -->
 ```curl
-curl --request POST 'https://receipts-sandbox.sensibill.io/api/v1/accessToken' \
+curl --request POST 'https://receipts-sandbox.sensibill.io/api/v2/accessToken' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Basic dGVzdEFwaUtleTp0ZXN0QXBpU2VjcmV0' \
 --data-raw '{
@@ -69,7 +69,7 @@ The rest of the fields are optional for this endpoint. Please refer to the API r
 title: "Registering new User Account with generated User Access ID and Secret"
 -->
 ```curl
-curl --request POST 'https://receipts-sandbox.sensibill.io/api/v1/users' \
+curl --request POST 'https://receipts-sandbox.sensibill.io/api/v2/users' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer AZjaZzze0koUawD4wEg9uatbEIzodERHfNybys8REDiTevwZKZeYg9VejLyioLpdBiDy4cVAfueMF4v0pg9Q' \
 --data-raw '{
@@ -99,7 +99,7 @@ You will also need to provide `credential_type`, `redirect_uri` and `client_id` 
 title: "Requesting authorization code for the User Account"
 -->
 ```curl
-curl --request GET 'https://receipts-sandbox.sensibill.io/api/v1/authorizationGrant?credential_type=some_bank&response_type=code&redirect_uri=https://test-bank.example.com&client_id=vxxPt53IFll1Ua6K3ZwM1SML_lSCLpCRXftkc8bcegKo&redirect=false' \
+curl --request GET 'https://receipts-sandbox.sensibill.io/api/v2/authorizationGrant?credential_type=some_bank&response_type=code&redirect_uri=https://test-bank.example.com&client_id=vxxPt53IFll1Ua6K3ZwM1SML_lSCLpCRXftkc8bcegKo&redirect=false' \
 --header 'Authorization: Basic c29tZVVzZXJuYW1lOnNvbWVQYXNzd29yZA=='
 ```
 
@@ -115,7 +115,7 @@ With the Authorization Code at hand you can now request the User Access Token (a
 User the `POST /accessToken` endpoint and supply you Client Key and Secret in the [Basic Auth Authorization header](https://en.wikipedia.org/wiki/Basic_access_authentication) by concatenating those values with a semicolon (`:`) and encoding the resulting string in base64. In the body of the request, you will need to supply the Authorization Code acquired in the previous step as well as the grant type and redirect URI configured for your Client Account (please see the warning in the previous section about the redirect URIs).
 
 ```curl
-curl --request POST 'https://receipts-sandbox.sensibill.io/api/v1/accessToken' \
+curl --request POST 'https://receipts-sandbox.sensibill.io/api/v2/accessToken' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Basic dGVzdEFwaUtleTp0ZXN0QXBpU2VjcmV0' \
 --data-raw '{
