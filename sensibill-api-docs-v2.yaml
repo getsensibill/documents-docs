@@ -5,6 +5,12 @@ info:
   description: ""
   version: 2.0.0
 
+x-json-schema-faker:
+  locale: en
+  min-items: 1
+  max-items: 3
+  resolve-json-path: true
+
 tags:
   - name: Home
     description: Home
@@ -30,7 +36,7 @@ servers:
           - receipts-sandbox
 
 paths:
-  # Home endpoints #######################
+  # Home endpoints ########################
   /:
     get:
       operationId: 'getApiInfo'
@@ -379,7 +385,7 @@ paths:
             type: string
         - name: filter.documentType
           in: query
-          description: 'Array of documentType to filter the documents. Currently valid value is invoice.
+          description: 'Array of documentType to filter the documents. Currently valid values are [invoice, receipt].
             <br/>Example: <code>filter.documentType=''invoice''</code>'
           required: false
           schema:
@@ -522,6 +528,7 @@ paths:
     post:
       tags:
         - Documents
+      operationId: postDocument
       summary: Create a new document
       description: 'This allows clients to submit new documents to be processed by the system'
       requestBody:
@@ -545,10 +552,12 @@ paths:
     delete:
       tags:
         - Documents
+      operationId: deleteDocuments
       summary: Delete documents
-      description: 'This endpoint will allow you to batch delete documents.
+      description: |
+        This endpoint will allow you to batch delete documents.
         To delete one or more documents pass their ids as an array in the request body
-        <br/><br/><strong>Important</strong>: If any of the documents fail to delete the whole request will fail'
+        **Important**: If any of the documents fail to delete the whole request will fail
       requestBody:
         $ref: '#/components/requestBodies/DocumentDeleteRequest'
       responses:
@@ -599,9 +608,9 @@ paths:
       tags:
         - Documents
       summary: Update a document
-      description: 'This endpoint allows you to update a specific subset of data for a single document given its ID.
-      The schema defined below outlines the fields which can be updated.'
       operationId: editDocument
+      description: 'This endpoint allows you to update a specific subset of data for a single document given its ID.
+        The schema defined below outlines the fields which can be updated.'
       parameters:
         - name: id
           in: path
@@ -634,6 +643,52 @@ paths:
         500:
           description: Internal Server Error.
 
+  /documents/status:
+    get:
+        tags:
+          - Documents
+        summary: 'Query document(s) for status updates'
+        description: 'Query a list of documents (using their id) for their processing status'
+        operationId: getDocumentsStatus
+        parameters:
+          - name: id
+            in: query
+            description: 'The unique identifier for the document in the Sensibill system. You can query one to ten Ids at once by appending each pair with the `$` character'
+            required: true
+            schema:
+              type: array
+              minItems: 1
+              maxItems: 10
+              items:
+                type: string
+              example: id=12345&id=29473&id=56384
+          - name: timeout
+            in: query
+            description: 'The most amount of time (in seconds) the client wants to wait for a response from the server.
+              A response is immediately returned if timeout is ommited, but its value cannot be more than 28 seconds if provided.'
+            required: false
+            schema:
+              type: integer
+              maximum: 28
+              minimum: 1
+              example: 20
+        
+        responses:
+          200:
+            description: Success. The list of document statuses was successfully retrieved.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/DocumentsStatusResponseDto'
+          400:
+            description: Bad Request. This will occur if you omit a required parameter, send an invalid parameter or if you provide an invalid value for a parameter.
+          401:
+            description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
+          403: 
+            description: Forbidden. This will occur if you try to use this endpoint without being setup for documents. 
+          500:
+            description: Internal Server Error.
+            
   # Export endpoints #######################
 
   /exports:
@@ -982,11 +1037,6 @@ paths:
 components:
 
   schemas:
-
-    AnyType:
-      oneOf:
-      - type: string
-      - type: object
 
     ApiInfoDto:
       type: object
@@ -1882,10 +1932,27 @@ components:
           example: 'doc-123-sub'
         documentType:
           type: string
-          description:  "The type of the document being submitted. 
-          <br/>Enum: [invoice]"
+          description:  |
+            The type of the document being submitted. Supported types include :
+            - invoice
+            - receipt
           enum:
             - invoice
+            - receipt
+
+    DocumentDeleteDto:
+      type: object
+      required:
+        - ids
+      properties:
+        ids:
+          description: "An array of documents ids that should be deleted from the system."
+          type: array
+          items:
+            type: string
+          example:
+            - XuncoaVG7XMTY0iWHTCa
+            - BuDcoaVG74MTY0iWIYKq
     
     TenderTypesEnum:
       type: string
@@ -2154,6 +2221,31 @@ components:
           format: date
           example: '2017-05-30T17:42:34.407Z'
 
+    SimplifiedFolderDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 6OeYUlNyyeVHEmHMLmgZ
+          description: The id of the folder
+        name:
+          type: string
+          example: Renovations-2021-Jan
+          description: The name for this folder. A user may not have two folders with the
+            same name.
+        color:
+          type: string
+          example: cc0000
+          description: Six hex digits representing the color of this folder.
+        updatedAt:
+          type: string
+          format: date
+          example: '2015-09-30T17:56:45.236Z'
+        createdAt:
+          type: string
+          format: date
+          example: '2015-11-30T17:56:45.236Z'
+
     AlertDto:
       type: object
       properties:
@@ -2171,6 +2263,41 @@ components:
           items:
             $ref: '#/components/schemas/UserReceiptDto'
 
+    
+    UserReceiptDto:
+      type: object
+      properties:
+        objectType:
+          type: string
+          example: receipt
+        receiptDate:
+          type: string
+          format: date
+          example: '2015-08-30T00:00:00.000Z'
+        listingSortDate:
+          type: string
+          format: date
+          example: '2015-08-30T00:00:00.000Z'
+        merchantName:
+          type: string
+          example: Home Depot
+          description: The name of the merchant. If no merchant is set this will contain the string 'Merchant?'
+        renderURL:
+          type: string
+          example: https://receipts-sandbox.sensibill.io/#/receipt/8eteXZALOgVRBz7jqQY_U1A7_pwO_jDW5yb-aSNkbaGgLSzVyEvN8VNSEfzIFw4koEc
+        total:
+          type: object
+          properties:
+            grand:
+              type: number
+              example: 71.79
+            currencyCode:
+              type: string
+              example: GBP
+        id:
+          type: string
+          example: 8eteXZALOgVRBz7jqQY_U1A7_pwO_jDW5yb-aSNkbaGgLSzVyEvN8VNSEfzIFw4koEc
+    
     EmptyObjectResponseDto:
       description: An empty object.  The noProperties property is a placeholder to help API generation
       type: object
@@ -2317,21 +2444,6 @@ components:
 
     #Exports
 
-    LogicalOperator:
-      type: object
-      description: 'Logical query operator to be used in filters and export criteria.'
-      properties:
-        gte:
-          description: 'Greater than or equal logical operator value'
-          oneOf:
-            - type: number
-            - type: string
-        lte:
-          description: 'Less than or equal logical operator value'
-          oneOf:
-            - type: number
-            - type: string
-
     ExportCreateDto:
       type: object
       required:
@@ -2342,122 +2454,214 @@ components:
           type: array
           items:
             type: string
-            description: "Indicates which formats should be generated. Valid values are:
-              <br/>'csv' - indicates a comma separated file should be produced summarizing the exported data
-              <br/>'xls' - indicates an excel spreadsheet should be produced summarizing the exported data
-              <br/>'pdf' - indicates individual receipts should be exported to a PDF file"
+            description: |
+              Indicates which formats should be generated. Valid values are:
+              * 'csv' - indicates a comma separated file should be produced summarizing the exported data
+              * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
+              * 'pdf' - indicates individual receipts should be exported to a PDF file
             example: csv
         criteria:
-          $ref: '#/components/schemas/CriteriaDto'
+          $ref: '#/components/schemas/FlatCriteriaDto'
         locale:
           type: string
           description: Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to /lookups/locales. It defaults to the user's locale.
           example: en-CA
 
-    CriteriaDto:
+    FlatCriteriaDto:
       type: object
       description: The export criteria are the same used in the GET documents endpoint filters.
       properties:
         amountDue:
-          description: 'Array of amountDue or logical operators to filter the documents. The value considered is afterTax.'
-          oneOf:
-            - type: array
-              items:
-                type: number
-            - $ref: '#/components/schemas/LogicalOperator'
-        arrivalDateTime:
-          description: 'This is a filter condition on the arrivalDateTime to filter the documents. ArrivalDateTime field does not accept exact match and is considered to be UTC.'
-          $ref: '#/components/schemas/LogicalOperator'
+          type: array
+          items:
+            type: string
+          description: |
+            Array of amountDue to filter the documents. The value considered is afterTax.
+            Example:`['1000.55&', '1010.90']`
+          example: ['1000.55&', '1010.90']
+        amountDue.gte:
+          type: string
+          description: |
+            This is a filter condition *greater than or equal* on the amountDue value to filter the documents. The value considered is afterTax.
+            Example: `amountDue.gte=1000.55`
+          example: '1000.55'
+        amountDue.lte:
+          type: number
+          description: |
+            This is a filter condition *less than or equal* on the amountDue value to filter the documents. The value considered is afterTax.
+            Example: `amountDue.lte=1000.55`
+          example: '1000.55'
+        arrivalDateTime.gte:
+          type: string
+          description: |
+            This is a filter condition *greater than or equal* on the `arrivalDateTime` to filter the documents.
+            ArrivalDateTime value does not accept exact match and is expected to be UTC.
+            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`.
+            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
+            
+            * Example with just date: `arrivalDateTime.gte='2012-12-28'`
+            * Example with date and time: `arrivalDateTime.gte='2012-12-28T21:27'`
+            * Example with date and time: `arrivalDateTime.gte='2012-12-28 21:27:55.827'`
+        arrivalDateTime.lte:
+          type: string
+          description: |
+            This is a filter condition *less than or equal* on the `arrivalDateTime` to filter the documents.
+            ArrivalDateTime value does not accept exact match and is expected to be UTC.
+            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`.
+            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
+            
+            * Example with just date: `arrivalDateTime.lte='2012-12-28'`
+            * Example with date and time: `arrivalDateTime.lte='2012-12-28T21:27'`
+            * Example with date and time: `arrivalDateTime.lte='2012-12-28 21:27:55.827'` 
         categoryCode:
-          description: 'Array of categoryCode to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
+          type: array
+          items:
+            type: string
+          description: |
+            Array of categoryCode to filter the documents.
+            Example: `categoryCode=['business']`
+          example: ['business']
         currencyCode:
-          description: 'Array of currencyCode to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
+          type: array
+          items:
+            type: string 
+          description: |
+            Array of currencyCode to filter the documents.
+            Example: `currencyCode=['CAD', 'USD']`
+          example: ['CAD', 'USD']
         documentDate:
-          description: 'Array of documentDate or logical operators to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
-            - $ref: '#/components/schemas/LogicalOperator'
+          type: array
+          items:
+            type: string
+          description: |
+            Array of documentDate to filter the documents.
+            Example: `documentDate=['2021-04-04']`
+          example: ['2021-04-04']
+        documentDate.gte:
+          type: string
+          description: |
+            This is a filter condition `greater than or equal` on the documentDate to filter the documents.
+            Example with single operator: `documentDate.gte='2012-12-28'`
+          example: '2012-12-28'
+        documentDate.lte:
+          type: string
+          description: |
+            This is a filter condition `less than or equal` on the documentDate to filter the documents.
+            Example with single operator: `documentDate.lte='2023-12-28'`
+          example: '2023-12-28'
         documentNumber:
-          description: 'Array of documentNumber to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
+          type: array
+          items:
+            type: string
+          description: |
+            Array of documentNumber to filter the documents.
+            Example: `documentNumber=['1122334455']`
+          example: ['1122334455']
         documentTime:
-          description: 'Array of documentTime or logical operators to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
-            - $ref: '#/components/schemas/LogicalOperator'
+          type: array
+          items:
+            type: string
+          description: |
+            Array of documentTime to filter the documents.
+            Example: `documentTime=['21:12', '22:13', '23:14']`
+          example: ['21:12', '22:13', '23:14']
+        documentTime.gte:
+          type: string
+          description: |
+            This is a filter condition `greater than or equal` on the documentTime to filter the documents.
+            Example with single operator: `documentTime.gte='10:00'`
+        documentTime.lte:
+          type: string
+          description: |
+            This is a filter condition `less than or equal` on the documentTime to filter the documents.
+            Example with single operator: `filter.documentTime.gte='10:00'`
         documentType:
-          description: 'Array of documentType to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
+          type: array
+          items:
+            type: string
+          description: |
+            Array of documentType to filter the documents. Currently allowed types are [invoice, receipt]
         foreignId:
+          type: array
+          items:
+            type: string
           description: 'Array of foreignId to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
         id:
+          type: array
+          items:
+            type: string
           description: 'Array of document id to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
-        lastUpdateDateTime:
-          description: 'This is a filter condition on the lastUpdateDateTime to filter the documents. LastUpdateDateTime field does not accept exact match and is considered to be UTC.'
-          $ref: '#/components/schemas/LogicalOperator'
+        lastUpdateDateTime.gte:
+          type: string
+          description: |
+            This is a filter condition *greater than or equal* on the `lastUpdateDateTime` to filter the documents.
+            `lastUpdateDateTime` field does not accept exact match.
+            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`. 
+            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
+
+            * Example with just date: `lastUpdateDateTime.gte='2012-12-28'`
+            * Example with date and time: `lastUpdateDateTime.gte='2012-12-28T21:27'`
+            * Example with date and time: `lastUpdateDateTime.gte='2012-12-28 21:27:55.827'`
+        lastUpdateDateTime.lte:
+          type: string
+          description: |
+            This is a filter condition *less than or equal* on the `lastUpdateDateTime` to filter the documents.
+            `lastUpdateDateTime` field does not accept exact match.
+            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`. 
+            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
+
+            * Example with just date: `lastUpdateDateTime.lte='2012-12-28'`
+            * Example with date and time: `lastUpdateDateTime.lte='2012-12-28T21:27'`
+            * Example with date and time: `lastUpdateDateTime.lte='2012-12-28 21:27:55.827'`
         merchantName:
           description: 'Array of merchantName to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
+          type: array
+          items:
+            type: string
         merchantTaxIdNumber:
           description: 'Array of merchantTaxIdNumber to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
+          type: array
+          items:
+            type: string
         paymentTender:
           description: 'Payment Tender array to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                $ref: '#/components/schemas/TenderTypesEnum'
+          type: array
+          items:
+            $ref: '#/components/schemas/TenderTypesEnum'
         total:
-          description: 'Array of total or logical operators to filter the documents. The value considered is afterTax.'
-          oneOf:
-            - type: array
-              items:
-                type: number
-            - $ref: '#/components/schemas/LogicalOperator'
+          description: |
+            Array of total to filter the documents. The value considered is afterTax.
+            Items in the array will compose a logial `OR` chain in the query.
+          type: array
+          items:
+            type: string
+          example: ["1000.55", "1010.90"]
+        total.gte:
+          description: |
+            This is a filter condition *greater than or equal* on the total value to filter the documents. The value considered is afterTax.
+            All filter conditions will compose a logical `AND` chain in the query.
+
+            Example: `total.gte=1000.55`
+          type: string
+          example: "1000.55"
+        total.lte:
+          description: |
+            This is a filter condition *less than or equal* on the total value to filter the documents. The value considered is afterTax.
+            All filter conditions will compose a logical `AND` chain in the query.
+
+            Example: `total.lte=1000.55`
+          type: string
+          example: "1000.55"
         status:
           description: 'Array of status to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
+          type: array
+          items:
+            type: string
         sourceFormat:
           description: 'Array of sourceFormat to filter the documents.'
-          oneOf:
-            - type: array
-              items:
-                type: string
+          type: array
+          items:
+            type: string
 
     ExportCreateResponseDto:
       type: object
@@ -2466,16 +2670,13 @@ components:
           type: string
           format: date-time
           example: '2021-01-01T21:58:15.880Z'
+          description: "The date and time of when this export object will be deleted from the system."
         createdAt:
           type: string
           format: date-time
           example: '2020-12-18T21:58:15.875Z'
-        updatedAt:
-          type: string
-          format: date-time
-          example: '2020-12-18T21:58:18.787Z'
         criteria:
-          $ref: '#/components/schemas/CriteriaDto'
+          $ref: '#/components/schemas/FlatCriteriaDto'
           description: The search criteria used to find the receipts to be exported. This
             will be identical to the fieldsset in the 'POST /exports' request for creating
             the export in question.
@@ -2483,20 +2684,23 @@ components:
           type: array
           items:
             type: string
-            description: "Indicates which formats should be generated. Valid values are:
-              <br/>'csv' - indicates a comma separated file should be produced summarizing the exported data
-              <br/>'xls' - indicates an excel spreadsheet should be produced summarizing the exported data
-              <br/>'pdf' - indicates individual receipts should be exported to a PDF file"
+            description: |
+              Indicates which formats should be generated. Valid values are:
+              * 'csv' - indicates a comma separated file should be produced summarizing the exported data
+              * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
+              * 'pdf' - indicates individual receipts should be exported to a PDF file
             example: csv
-        documents:
-          type: array
-          example: []
-          items:
-            type: object
+        documentsCount:
+          type: number
+          example: 5
+          description: "The number of documents that matches the given criteria. The final number of documents
+            in the export can be different from this one if documents are created or deleted between this POST
+            request and the time when the request is processed."
         status:
           type: string
           enum:
             - queued
+            - noDocumentsFound
         id:
           type: string
           example: IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA
@@ -2536,7 +2740,7 @@ components:
           example: "https://receipts-sandbox.sensibill.io/api/v1/exports/IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA/contents"
           description: The URL that can be used to download the contents of the export.
         criteria:
-          $ref: '#/components/schemas/CriteriaDto'
+          $ref: '#/components/schemas/FlatCriteriaDto'
           description: The search criteria used to find the documents to be exported. This
             will be identical to the fieldsset in the 'POST /exports' endpoint for creating
             the export in question.
@@ -2544,10 +2748,11 @@ components:
           type: array
           items:
             type: string
-            description: "Indicates which formats should be generated. Valid values are:
-              <br/>'csv' - indicates a comma separated file should be produced summarizing the exported data
-              <br/>'xls' - indicates an excel spreadsheet should be produced summarizing the exported data
-              <br/>'pdf' - indicates individual receipts should be exported to a PDF file"
+            description: |
+              Indicates which formats should be generated. Valid values are:
+              * 'csv' - indicates a comma separated file should be produced summarizing the exported data
+              * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
+              * 'pdf' - indicates individual receipts should be exported to a PDF file
             example: csv
         documents:
           type: array
@@ -2567,6 +2772,7 @@ components:
             - processing
             - queued
             - running
+            - noDocumentsFound
             
           description: "The status of the export. Possible values are: ''queued'', ''processing'',
             ''completed'', ''failed''"
@@ -2773,6 +2979,20 @@ components:
         type:
           $ref: '#/components/schemas/DiscountTypesEnum'
 
+    TaxableAmountDto:
+      type: object
+      properties:
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxDto'
+        beforeTax:
+          type: number
+          example: 12.20
+        afterTax:
+          type: number
+          example: 12.20
+    
     DocumentDiscountDto:
       description: "Contains info about one applied discount."
       allOf:
@@ -3158,8 +3378,8 @@ components:
           description: "The url to get or view the original receipt file (image, PDF or html)"
         imagePreview:
           type: string
-          description: "The url of an image file to preview this receipt. In case of image receipts, this content
-          will be the same of the url field."
+          description: |
+            The url of an image file to preview this receipt. In case of image receipts, this content will be the same of the url field.
 
     SourceDocumentFormatsEnum:
       description: "Defines the possible original formats for a receipt to have come from."
@@ -3177,6 +3397,67 @@ components:
             $ref: '#/components/schemas/DocumentDto'
           error:
             $ref: '#/components/schemas/DocumentErrorDto'
+
+    DocumentsStatusResponseDto:
+      description: 'Response schema for the documents/status endpoint'
+      type: object
+      required:
+        - documents
+      properties:
+        documents:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/DocumentStatusListItemDto'
+        errors:
+          description: 'Optional property used to indicate and describe errors encountered while handling the request'
+          type: array
+          items:
+            type: string
+            x-faker: random.words
+          
+    
+    DocumentStatusListItemDto:
+      description: 'Schema for an entry in the documents/status endpoint response'
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 20
+          minLength: 20
+          pattern: ^[a-zA-Z0-9]*$
+          example: z6uuM0iqnvf8sCDBRYLJ
+          description: "This is a unique identifier which is used to identify the document in the Sensibill system."
+        foreignId:
+          description: "A unique identifier that was passed on upload to ensure that retries can happen without overriding data."
+          type: string
+          maxLength: 20
+          minLength: 20
+          pattern: ^[a-zA-Z0-9]*$
+          example: z6uuM0iqnvf8sCDBRYLJ
+        arrivalDateTime:
+          description: "The date and time that the document was submitted to our system. With no explicit timezone information."
+          type: string
+          format: date-time
+          example: 2017-10-26T16:01:13.836Z
+        lastUpdateDateTime:
+          type: string
+          description: "The date and time that the document was last updated in our system. This will typically be when a user has last changed data on the document. With no explicit timezone information."
+          format: date-time
+          example: 2017-10-26T16:01:13.836Z
+        documentType:
+          description: "The structural type of the document"
+          type: string
+          example: invoice
+          enum:
+            - invoice
+        status:
+          description: "The current status of the document"
+          type: string
+          example: CompletedSuccess
+          enum:
+            - CompletedSuccess
+            - CompletedFailed
 
     GetDocumentListResponseDto:
       description: "Structure of the response on the document list endpoint"
@@ -3477,7 +3758,7 @@ components:
           type: array
           nullable: true
           description: "The taxes of this amount. The content passed in the
-          PATCH call will completely replace the current content."
+            PATCH call will completely replace the current content."
           items:
             $ref: '#/components/schemas/DocumentTaxDto'
         beforeTax:
@@ -3891,18 +4172,7 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - ids
-            properties:
-              ids:
-                description: "An array of documents ids that should be deleted from the system."
-                type: array
-                items:
-                  type: string
-                example:
-                  - XuncoaVG7XMTY0iWHTCa
-                  - BuDcoaVG74MTY0iWIYKq
+            $ref: '#/components/schemas/DocumentDeleteDto'
 
   securitySchemes:
     bearerAuth:
