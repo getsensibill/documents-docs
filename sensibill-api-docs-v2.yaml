@@ -30,7 +30,7 @@ tags:
     description: Users
 
 servers:
-  - url: https://{environment}.sensibill.io/api/v2
+  - url: https://{environment}.sensibill.io/api/v1
     variables:
       environment:
         default: receipts-sandbox
@@ -2015,6 +2015,7 @@ components:
 
     DocumentCreateDto:
       type: object
+      additionalProperties: false
       required:
         - sourceFile
         - documentType
@@ -3644,6 +3645,7 @@ components:
           $ref: '#/components/schemas/NullableDocumentAccountMetadataDto'
         content:
           type: object
+          additionalProperties: false
           properties:
             merchant:
               $ref: '#/components/schemas/EditDocumentMerchantDto'
