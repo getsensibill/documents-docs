@@ -2,8 +2,10 @@
 openapi: 3.0.3
 info:
   title: Sensibill API
-  description: ""
+  description: The Sensibill Platform API
   version: 2.0.0
+  contact:
+    url: https://getsensibill.com/contact
 
 x-json-schema-faker:
   locale: en
@@ -228,13 +230,14 @@ paths:
       tags:
         - Documents
       summary: Returns a paginated list of documents from a user.
-      description: 'This will retrieve a list of documents for the current user. The list is paginated'
+      description: This will retrieve a paginated list of documents for the current user.
       operationId: getDocuments
       parameters:
         - name: limit
           in: query
-          description: 'Specify the number of documents to return.
-                If no value is passed it will use the default to limit the number of items in the list'
+          description: |
+            Specify the number of documents to return. \
+            If no value is passed it will use the default to limit the number of items in the list
           required: false
           schema:
             type: integer
@@ -243,308 +246,378 @@ paths:
             maximum: 100
         - name: offset
           in: query
-          description: 'Page number for the resources to be returned. The page count uses the limit value to define which resources will be returned.<br>
-                    It is zero based index, so first page is 0.
-                   <br>Example for starting at the third page in a list of results:<br> `?offset=2`.'
+          description: |
+            Page number for the documents to be returned. The page count uses the limit value to define which documents will be returned. \
+            It is zero based index, so first page is 0. \
+            Example for starting at the third page in a list of results: `?offset=2`
           required: false
           schema:
             type: integer
             minimum: 0
+            maximum: 100
             default: 0
         - name: filter.accountMetadata.account
           in: query
-          description: 'Array of accountMetadata.account to filter the documents. Must satisfy the pattern /^[a-zA-Z0-9]+$/
-            <br/>Example: <code>filter.accountMetadata.account=''ACC102030''&filter.accountMetadata.account=''405060''</code>'
+          description: |
+            Array of `accountMetadata.account` to filter the documents. Should ideally satisfy the `/^[a-zA-Z0-9-_:.]+$/` pattern \
+            **Example:** `filter.accountMetadata.account='ACC102030'&filter.accountMetadata.account='405060'`
           required: false
           schema:
             type: array
             items:
-              type: string
+              $ref: "#/components/schemas/GenericIdString"
+            maxItems: 20
         - name: filter.accountMetadata.account.exists
           in: query
-          description: 'This is a filter condition `exists` on the accountMetadata.account value to filter the documents. Accepted values are [true, false].
-            A mix of operators with basic values is not supported. If account.exists is provided together with plain account values, this operator is ignored.
-            <br/>Example to filter all documents with accountMetadata.account not set: `filter.accountMetadata.account.exists=false`'
+          description: |
+            This is used to match and include documents where a value *exixts* for the `accountMetadata.account` property. \
+            Only `true` or `false` boolean values are accepted. A mix of operators with basic values are not supported. 
+            If `accountMetadata.account.exists` is provided together with plain values for account, this `exists` operator is ignored. \
+            **Example:** To filter all documents with `accountMetadata.account` not set, use `filter.accountMetadata.account.exists=false`
           required: false
           schema:
-            type: string
+            $ref: "#/components/schemas/BooleanEnum"
         - name: filter.accountMetadata.transactionId
           in: query
-          description: 'Array of accountMetadata.transactionId to filter the documents. Must satisfy the pattern /^[a-zA-Z0-9]+$/
-            <br/>Example: <code>filter.accountMetadata.transactionId=''TX00001''&filter.accountMetadata.transactionId=''TX00002''</code>'
+          description: |
+            Array of `accountMetadata.transactionId` to filter the documents. Should ideally satisfy the `/^[a-zA-Z0-9-_:.]+$/` pattern. \
+            **Example:** `filter.accountMetadata.transactionId='TX00001'&filter.accountMetadata.transactionId='TX00002'`
           required: false
           schema:
             type: array
             items:
-              type: string
+              $ref: "#/components/schemas/GenericIdString"
+            maxItems: 20
         - name: filter.amountDue
           in: query
-          description: 'Array of amountDue to filter the documents. The value considered is afterTax.
-            <br/>Example: `filter.amountDue=1000.55&filter.amountDue=1010.90`'
+          description: |
+            Array of `amountDue` values to filter the documents. `afterTax` is the document property considered for the match. \
+            **Example:** `filter.amountDue=1000.55&filter.amountDue=1010.90`
           required: false
           schema:
             type: array
             items:
               type: number
+              minimum: 0.0
+            maxItems: 20
         - name: filter.amountDue.gte
           in: query
-          description: 'This is a filter condition `greater than or equal` on the amountDue value to filter the documents. The value considered is afterTax.
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: `filter.amountDue.gte=1000.55`
-            <br/>Example with operators (behave like AND): `filter.amountDue.gte=1000.55&filter.amountDue.lte=1010.90`'
+          description: |
+            This is a *greater than or equal to* filter on the `amountDue` value to filter the documents. `afterTax` is the document property considered for the match. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values are not supported. \
+            **Examples:** \
+            * with single operator: `filter.amountDue.gte=1000.55`
+            * with other operators (behave like AND): `filter.amountDue.gte=1000.55&filter.amountDue.lte=1010.90`
           required: false
           schema:
             type: number
+            minimum: 0.0
         - name: filter.amountDue.lte
           in: query
-          description: 'This is a filter condition `less than or equal` on the amountDue value to filter the documents. The value considered is afterTax.
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: `filter.amountDue.lte=1000.55`
-            <br/>Example with operators (behave like AND): `filter.amountDue.gte=1000.55&filter.amountDue.lte=1010.90`'
+          description: |
+            This is a *lesser than or equal to* filter on the `amountDue` value to filter the documents. `afterTax` is the document property considered for the match. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
+            **Examples:** \
+            * with single operator: `filter.amountDue.lte=1000.55`
+            * with other operators (behave like AND): `filter.amountDue.lte=1000.55&filter.amountDue.gte=1010.90`
           required: false
           schema:
             type: number
+            minimum: 0.0
         - name: filter.arrivalDateTime.gte
           in: query
-          description: 'This is a filter condition `greater than or equal` on the arrivalDateTime to filter the documents.
-            All filter conditions will compose a logical `AND` chain in the query. ArrivalDateTime field does not accept exact match and is considered to be UTC.
-            Date time formats allowed are: ''YYYY-MM-DDTHH:mm:ss.SSS'' or ''YYYY-MM-DD HH:mm:ss.SSS''. Time fields can be suppressed from the end to the beginning i.e. ''YYYY-MM-DD HH:mm'' is acceptable.
-            <br/>Example with just date: `filter.arrivalDateTime.gte=''2012-12-28''`
-            <br/>Example with date and time: `filter.arrivalDateTime.gte=''2012-12-28T21:27''`
-            <br/>Example with date and time: `filter.arrivalDateTime.gte=''2012-12-28 21:27:55.827''`
-            <br/>Example with operators (behave like AND): `filter.arrivalDateTime.gte=''2012-12-28T21:27''&filter.arrivalDateTime.lte=''2012-12-28T21:27:59''`'
+          description: |
+            This is a *greater than or equal to* filter on the `arrivalDateTime` to filter the documents.
+            All filter conditions will compose a logical `AND` chain in the query. The `arrivalDateTime` filter does not match exact values and is considered to be UTC. \
+            Date-time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`. Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable. \
+            **Examples:** \
+            * with just date: `filter.arrivalDateTime.gte='2012-12-28'`
+            * with date and time: `filter.arrivalDateTime.gte='2012-12-28T21:27'`
+            * with date and time: `filter.arrivalDateTime.gte='2012-12-28 21:27:55.827'`
+            * with other operators (behave like AND): `filter.arrivalDateTime.gte='2012-12-28T21:27'&filter.arrivalDateTime.lte='2012-12-28T21:27:59'`
           required: false
           schema:
             type: string
+            format: date-time
         - name: filter.arrivalDateTime.lte
           in: query
-          description: 'This is a filter condition `less than or equal` on the arrivalDateTime to filter the documents.
-            All filter conditions will compose a logical `AND` chain in the query.  ArrivalDateTime field does not accept exact match.
-            Date time formats allowed are: ''YYYY-MM-DDTHH:mm:ss.SSS'' or ''YYYY-MM-DD HH:mm:ss.SSS''. Time fields can be suppressed from the end to the beginning i.e. ''YYYY-MM-DD HH:mm'' is acceptable.
-            <br/>Example with just date: `filter.arrivalDateTime.lte=''2012-12-28''`
-            <br/>Example with date and time: `filter.arrivalDateTime.lte=''2012-12-28T21:27''`
-            <br/>Example with date and time: `filter.arrivalDateTime.lte=''2012-12-28 21:27:55.827''`
-            <br/>Example with operators (behave like AND): `filter.arrivalDateTime.gte=''2012-12-28T21:27''&filter.arrivalDateTime.lte=''2012-12-28T21:27:59''`'
+          description: |
+            This is a *lesser than or equal to* filter on the arrivalDateTime to filter the documents.
+            All filter conditions will compose a logical `AND` chain in the query. The `arrivalDateTime` field does not match exact values and is considered to be UTC. \
+            Date-time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`. Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable. \
+            **Examples:** \
+            * with just date: `filter.arrivalDateTime.lte='2012-12-28'`
+            * with date and time: `filter.arrivalDateTime.lte='2012-12-28T21:27'`
+            * with date and time: `filter.arrivalDateTime.lte='2012-12-28 21:27:55.827'`
+            * with other operators (behave like AND): `filter.arrivalDateTime.lte='2012-12-28T21:27'&filter.arrivalDateTime.gte='2012-12-28T21:27:59'`
           required: false
           schema:
             type: string
+            format: date-time
         - name: filter.categoryCode
           in: query
-          description: 'Array of categoryCode to filter the documents.
-            <br/>Example: `filter.categoryCode=''shopping''&filter.categoryCode=''business''`'
+          description: |
+            Array of `categoryCode` values to filter the documents. \
+            **Example:** `filter.categoryCode='shopping'&filter.categoryCode='business'`
           required: false
           schema:
             type: array
             items:
               type: string
+              format: /^[a-zA-Z0-9-_ ]+$/
+              maxLength: 25
+            maxItems: 20
         - name: filter.currencyCode
           in: query
-          description: 'Array of currencyCode to filter the documents.
-            <br/>Example: `filter.currencyCode=''CAD''&filter.currencyCode=''USD''`'
+          description: |
+            Array of `currencyCode` values to filter the documents. \
+            **Example:** `filter.currencyCode='CAD'&filter.currencyCode='USD'`
           required: false
           schema:
             type: array
             items:
-              type: string
+              $ref: "#/components/schemas/CurrencyCodeDto"
+            maxItems: 20
         - name: filter.description
           in: query
-          description: 'Array of description values to filter the documents. The filter is case insentive and matches any document where the
-            description contains the given value. Must satisfy the pattern /^[a-zA-Z0-9 ]+$/
-            <br/>Example: <code>filter.description=''Dinner with friends''&filter.description=''Children winter gear''&filter.description=''My very specific description''</code>'
+          description: |
+            Array of `description` values to filter the documents. The filter is case insentive and matches any document where the
+            description contains the given value. Should ideally satisfy the /^[a-zA-Z0-9 ]+$/ pattern \
+            **Example:** `filter.description='Dinner with friends'&filter.description='Children winter gear'
           required: false
           schema:
             type: array
             items:
               type: string
+              maxLength: 75
+              pattern: ^[a-zA-Z0-9 ]+$
+            maxItems: 20
         - name: filter.documentDate
           in: query
-          description: 'Array of documentDate to filter the documents.
-            <br/>Example: `filter.documentDate=''2021-04-04''&filter.documentDate=''2021-12-08''&filter.documentDate=''2021-12-28''`'
+          description: |
+            Array of `documentDate` values to filter the documents. \
+            **Example:** `filter.documentDate='2021-04-04'&filter.documentDate='2021-12-08'`
           required: false
           schema:
             type: array
             items:
               type: string
+              format: date
+            maxItems: 20
         - name: filter.documentDate.gte
           in: query
-          description: 'This is a filter condition `greater than or equal` on the documentDate to filter the documents.
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: `filter.documentDate.gte=''2012-12-28''`
-            <br/>Example with operators (behave like AND): `filter.documentDate.gte=''2012-12-28''&filter.documentDate.lte=''2023-12-28''`'
+          description: |
+            This is a *greater than or equal to* filter on the `documentDate` to filter the documents. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values are not supported. \
+            **Examples:** \
+            * with single operator: `filter.documentDate.gte='2012-12-28'`
+            * with other operators (behave like AND): `filter.documentDate.gte='2012-12-28'&filter.documentDate.lte='2023-12-28'`
           required: false
           schema:
             type: string
+            format: date
         - name: filter.documentDate.lte
           in: query
-          description: 'This is a filter condition `less than or equal` on the documentDate to filter the documents.
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: `filter.documentDate.lte=''2023-12-28''`
-            <br/>Example with operators (behave like AND): `filter.documentDate.gte=''2012-12-28''&filter.documentDate.lte=''2023-12-28''`'
+          description: |
+            This is a *lesser than or equal to* filter on the `documentDate` to filter the documents. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values are not supported. \
+            **Examples:** \
+            * with single operator: `filter.documentDate.lte='2012-12-28'`
+            * with other operators (behave like AND): `filter.documentDate.lte='2012-12-28'&filter.documentDate.gte='2023-12-28'`
           required: false
           schema:
             type: string
+            format: date
         - name: filter.documentNumber
           in: query
-          description: 'Array of documentNumber to filter the documents.
-            <br/>Example: `filter.documentNumber=''112233''&filter.documentNumber=''445566''`'
+          description: |
+            Array of `documentNumber` values to filter the documents. \
+            **Example:** `filter.documentNumber='112233'&filter.documentNumber='445566'`
           required: false
           schema:
             type: array
             items:
-              type: string
+              $ref: "#/components/schemas/GenericIdString"
+            maxItems: 20
         - name: filter.documentTime
           in: query
-          description: 'Array of documentTime to filter the documents.
-            <br/>Example: `filter.documentTime=''21:12''&filter.documentTime=''22:13''&filter.documentTime=''23:14''`'
+          description: |
+            Array of `documentTime` values to filter the documents. \
+            **Example:** `filter.documentTime='21:12'&filter.documentTime='22:13'`
           required: false
           schema:
             type: array
             items:
-              type: string
+              $ref: "#/components/schemas/DocumentTimeDto"
+            maxItems: 20
         - name: filter.documentTime.gte
           in: query
-          description: 'This is a filter condition `greater than or equal` on the documentTime to filter the documents.
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: `filter.documentTime.gte=''10:00''`
-            <br/>Example with operators (behave like AND): `filter.documentTime.gte=''10:00''&filter.documentTime.lte=''14:00''`'
+          description: |
+            This is a *greater than or equal to* filter on the `documentTime` to filter the documents. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
+            **Example:** \
+            * with single operator: `filter.documentTime.gte='10:00'`
+            * with other operators (behave like AND): `filter.documentTime.gte='10:00'&filter.documentTime.lte='14:00'`
           required: false
           schema:
-            type: string
+            $ref: "#/components/schemas/DocumentTimeDto"
         - name: filter.documentTime.lte
           in: query
-          description: 'This is a filter condition `less than or equal` on the documentTime to filter the documents.
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: `filter.documentTime.gte=''10:00''`
-            <br/>Example with operators (behave like AND): `filter.documentTime.gte=''10:00''&filter.documentTime.lte=''14:00''`'
+          description: |
+            This is a *lesser than or equal to* filter on the `documentTime` to filter the documents. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
+            **Example:** \
+            * with single operator: `filter.documentTime.lte='10:00'`
+            * with other operators (behave like AND): `filter.documentTime.lte='10:00'&filter.documentTime.gte='14:00'`
           required: false
           schema:
-            type: string
+            $ref: "#/components/schemas/DocumentTimeDto"
         - name: filter.documentType
           in: query
-          description: 'Array of documentType to filter the documents. Currently valid values are [invoice, receipt].
-            <br/>Example: `filter.documentType=''invoice''`'
+          description: |
+            Array of `documentType` to filter the documents. Currently supported values are [invoice, receipt]. \
+            **Example:** `filter.documentType='invoice'`
           required: false
           schema:
             type: array
             items:
-              type: string
+              $ref: "#/components/schemas/DocumentTypeEnum"
+            maxItems: 2
         - name: filter.foreignId
           in: query
-          description: 'Array of foreignId to filter the documents.
-            <br/>Example: `filter.foreignId=''20210930_001''`'
+          description: |
+            Array of `foreignId` to filter the documents. Example: `filter.foreignId='20210930_001'`
           required: false
           schema:
             type: array
             items:
-              type: string
+              $ref: "#/components/schemas/GenericIdString"
+            maxItems: 20
         - name: filter.id
           in: query
-          description: 'Array of ids to filter the documents.
-            <br/>Example: `filter.id=''mE0wyhAwJoPMUWlzrbVY''`'
+          description: |
+            Array of ids to filter the documents. Example: `filter.id='mE0wyhAwJoPMUWlzrbVY'`
           required: false
           schema:
             type: array
             items:
-              type: string
+              $ref: "#/components/schemas/GenericIdString"
+            maxItems: 20
         - name: filter.lastUpdateDateTime.gte
           in: query
-          description: 'This is a filter condition `greater than or equal` on the lastUpdateDateTime to filter the documents.
-            All filter conditions will compose a logical `AND` chain in the query. ArrivalDateTime field does not accept exact match and is considered to be UTC.
-            Date time formats allowed are: ''YYYY-MM-DDTHH:mm:ss.SSS'' or ''YYYY-MM-DD HH:mm:ss.SSS''. Time fields can be suppressed from the end to the beginning i.e. ''YYYY-MM-DD HH:mm'' is acceptable.
-            <br/>Example with just date: `filter.lastUpdateDateTime.gte=''2012-12-28''`
-            <br/>Example with date and time: `filter.lastUpdateDateTime.gte=''2012-12-28T21:27''`
-            <br/>Example with date and time: `filter.lastUpdateDateTime.gte=''2012-12-28 21:27:55.827''`
-            <br/>Example with operators (behave like AND): `filter.lastUpdateDateTime.gte=''2012-12-28T21:27''&filter.lastUpdateDateTime.lte=''2012-12-28T21:27:59''`'
+          description: |
+            This is a *greater than or equal to* filter on the `lastUpdateDateTime` to filter the documents. \
+            All filter conditions will compose a logical `AND` chain in the query. The `lastUpdateDateTime` filter does not match exact values and is considered to be UTC. \
+            Date time formats allowed are: 'YYYY-MM-DDTHH:mm:ss.SSS' or 'YYYY-MM-DD HH:mm:ss.SSS'. Time fields can be suppressed from the end to the beginning i.e. 'YYYY-MM-DD HH:mm' is acceptable. \
+            **Examples:** \
+            * with just date: `filter.lastUpdateDateTime.gte='2012-12-28'`
+            * with date and time: `filter.lastUpdateDateTime.gte='2012-12-28T21:27'`
+            * with date and time: `filter.lastUpdateDateTime.gte='2012-12-28 21:27:55.827'`
+            * with other operators (behave like AND): `filter.lastUpdateDateTime.gte='2012-12-28T21:27'&filter.lastUpdateDateTime.lte='2012-12-28T21:27:59'`
           required: false
           schema:
             type: string
+            format: date-time
         - name: filter.lastUpdateDateTime.lte
           in: query
-          description: 'This is a filter condition `less than or equal` on the lastUpdateDateTime to filter the documents.
-            All filter conditions will compose a logical `AND` chain in the query.  ArrivalDateTime field does not accept exact match.
-            Date time formats allowed are: ''YYYY-MM-DDTHH:mm:ss.SSS'' or ''YYYY-MM-DD HH:mm:ss.SSS''. Time fields can be suppressed from the end to the beginning i.e. ''YYYY-MM-DD HH:mm'' is acceptable.
-            <br/>Example with just date: `filter.lastUpdateDateTime.lte=''2012-12-28''`
-            <br/>Example with date and time: `filter.lastUpdateDateTime.lte=''2012-12-28T21:27''`
-            <br/>Example with date and time: `filter.lastUpdateDateTime.lte=''2012-12-28 21:27:55.827''`
-            <br/>Example with operators (behave like AND): `filter.lastUpdateDateTime.gte=''2012-12-28T21:27''&filter.lastUpdateDateTime.lte=''2012-12-28T21:27:59''`'
+          description: |
+            This is a *greater than or equal to* filter on the `lastUpdateDateTime` to filter the documents. \
+            All filter conditions will compose a logical `AND` chain in the query. The `lastUpdateDateTime` filter does not match exact values and is considered to be UTC. \
+            Date time formats allowed are: 'YYYY-MM-DDTHH:mm:ss.SSS' or 'YYYY-MM-DD HH:mm:ss.SSS'. Time fields can be suppressed from the end to the beginning i.e. 'YYYY-MM-DD HH:mm' is acceptable. \
+            **Examples:** \
+            * with just date: `filter.lastUpdateDateTime.lte='2012-12-28'`
+            * with date and time: `filter.lastUpdateDateTime.lte='2012-12-28T21:27'`
+            * with date and time: `filter.lastUpdateDateTime.lte='2012-12-28 21:27:55.827'`
+            * with other operators (behave like AND): `filter.lastUpdateDateTime.lte='2012-12-28T21:27'&filter.lastUpdateDateTime.gte='2012-12-28T21:27:59'`
           required: false
           schema:
             type: string
+            format: date-time
         - name: filter.merchantName
           in: query
-          description: 'Array of merchantName to filter the documents.
-            <br/>Example: `filter.merchantName=''Home Sense''&filter.merchantName=''IKAE''`'
+          description: |
+            Array of `merchantName` values to filter the documents. Example: `filter.merchantName='Home Sense'&filter.merchantName='IKAE'`
           required: false
           schema:
             type: array
             items:
               type: string
+              format: /^[a-zA-Z0-9-_ ]+$/
+            maxItems: 20
         - name: filter.merchantTaxIdNumber
           in: query
-          description: 'Array of merchantTaxIdNumber to filter the documents.
-            <br/>Example: `filter.merchantTaxIdNumber=''1111 RT0001''&filter.merchantTaxIdNumber=''2222 RT0002''`'
+          description: |
+            Array of `merchantTaxIdNumber` values to filter the documents. \
+            **Example:** `filter.merchantTaxIdNumber='1111 RT0001'&filter.merchantTaxIdNumber='2222 RT0002'`
           required: false
           schema:
             type: array
             items:
               type: string
+              format: /^[a-zA-Z0-9-_:. ]+$/
+            maxItems: 20
         - name: filter.paymentTender
           in: query
-          description: 'Array of paymentTender to filter the documents.
-            Valid values: ''Amex'' | ''Cash'' | ''Check'' | ''Coupon'' | ''Credit'' | ''CreditDebit'' | ''CustomerAccount'' | ''Debit'' | ''DinersClub'' | ''Fleet'' | ''GiftCard'' | ''GiftCertificate'' | ''HouseAccount'' | ''Interac'' | ''InternationalMaestro'' | ''Loyalty'' | ''MasterCard'' | ''Paypal'' | ''Prepaid'' | ''StoreCard'' | ''StoredValue'' | ''TravelersCheck'' | ''UKMaestro'' | ''VisaCredit'' | ''VisaDebit'' | ''Visa'' | ''Voucher''
-            <br/>Example: `filter.paymentTender=''Amex''&filter.paymentTender=''Cash''`'
+          description: |
+            Array of `paymentTender` values to filter the documents. \
+            **Example:** `filter.paymentTender='Amex'&filter.paymentTender='Cash'`
           required: false
           schema:
             type: array
             items:
               $ref: '#/components/schemas/TenderTypesEnum'
+            maxItems: 20
         - name: filter.total
           in: query
-          description: 'Array of total to filter the documents. The value considered is afterTax.
-            When an array of filter.total is provided,
-            they will compose a logial `OR` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example (behave like OR): `filter.total=1000.55&filter.total=1010.90`'
+          description: |
+            Array of `total` values to filter the documents. `afterTax` is the document property considered for the match. \
+            When an array of filter.total is provided, they will compose a logial `OR` chain in the query. A mix of operators with basic values are not supported. \
+            **Example:** (behave like OR): `filter.total=1000.55&filter.total=1010.90`
           required: false
           schema:
             type: array
             items:
               type: number
+              minimum: 0.0
+            maxItems: 20
         - name: filter.total.gte
           in: query
-          description: 'This is a filter condition `greater than or equal` on the total value to filter the documents. The value considered is afterTax.
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: `filter.total.gte=1000.55`
-            <br/>Example with operators (behave like AND): `filter.total.gte=1000.55&filter.total.lte=1010.90`'
+          description: |
+            This is a *greater than or equal to* filter on the `total` to filter the documents. `afterTax` is the document property considered for the match. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values are not supported. \
+            **Examples:**
+            * with single operator: `filter.total.gte=1000.55`
+            * with other operators (behave like AND): `filter.total.gte=1000.55&filter.total.lte=1010.90`
           required: false
           schema:
             type: number
+            minimum: 0.0
         - name: filter.total.lte
           in: query
-          description: 'This is a filter condition `less than or equal` on the total value to filter the documents. The value considered is afterTax.
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: `filter.total.lte=1000.55`
-            <br/>Example with operators (behave like AND): `filter.total.gte=1000.55&filter.total.lte=1010.90`'
+          description: |
+            This is a *lesser than or equal to* filter on the `total` to filter the documents. `afterTax` is the document property considered for the match. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values are not supported. \
+            **Examples:**
+            * with single operator: `filter.total.lte=1000.55`
+            * with other operators (behave like AND): `filter.total.lte=1000.55&filter.total.gte=1010.90`
           required: false
           schema:
             type: number
+            minimum: 0.0
         - name: filter.status
           in: query
-          description: 'Array of status to filter the documents. Valid values: [''InProcessing'', ''CompletedFailed'', ''CompletedSuccess'']
-            <br/>Example: `filter.status=''InProcessing''&filter.status=''CompletedSuccess''`'
+          description: |
+            Array of `status` values to filter the documents. Example: `filter.status='CompletedFailed'&filter.status='CompletedSuccess'`
           required: false
           schema:
-            type: array
-            items:
-              type: string
+            $ref: "#/components/schemas/DocumentStatusTypesArray"
         - name: filter.sourceFormat
           in: query
-          description: 'Array of sourceFormat to filter the documents. Currently accepted values are: ''image'' and ''pdf''.
-            <br/>Example: `filter.sourceFormat=''image''&filter.sourceFormat=''pdf''`'
           required: false
+          description: |
+            Array of `sourceFormat` values to filter the documents. Example: `filter.sourceFormat='image'&filter.sourceFormat='pdf'`
           schema:
-            type: array
-            items:
-              type: string
+            $ref: "#/components/schemas/DocumentSourceFormatsArray"
         
       responses:
         '200':
@@ -618,8 +691,8 @@ paths:
     get:
       tags:
         - Documents
-      summary: Get Document
-      description: "This endpoint will retrieve the details of a single document with the given ID."
+      summary: Get a document
+      description: This endpoint will retrieve the details of a single document with the given ID.
       operationId: getDocumentById
       parameters:
         - $ref: '#/components/parameters/DocumentIdParameter'
@@ -645,15 +718,16 @@ paths:
         - Documents
       summary: Update a document
       operationId: editDocument
-      description: 'This endpoint allows you to update a specific subset of data for a single document given its ID.
-        The schema defined below outlines the fields which can be updated.'
+      description: |
+        This endpoint allows you to update a specific subset of data for a single document given its ID. \
+        The schema defined below outlines the fields which can be updated.
       parameters:
         - name: id
           in: path
           description: A unique ID that identifies this document in the Sensibill system.
           required: true
           schema:
-            type: string
+            $ref: "#/components/schemas/GenericIdString"
       requestBody:
         description: An object composed of all the fields you want to edit for the given document.
         required: true
@@ -683,21 +757,22 @@ paths:
     get:
         tags:
           - Documents
-        summary: 'Query document(s) for status updates'
+        summary: 'Query documents for processing status updates'
         description: 'Query a list of documents (using their id) for their processing status'
         operationId: getDocumentsStatus
         parameters:
           - name: id
             in: query
-            description: 'The unique identifier for the document in the Sensibill system. You can query one to ten Ids at once by appending each pair with the `$` character'
+            description: |
+              The unique identifier for the document in the Sensibill system. \
+              You can query up to ten Ids at once by appending each pair with the `&` character
             required: true
             schema:
               type: array
               minItems: 1
               maxItems: 10
               items:
-                type: string
-              example: id=12345&id=29473&id=56384
+                $ref: "#/components/schemas/GenericIdString"
           - name: timeout
             in: query
             description: |
@@ -734,7 +809,9 @@ paths:
       tags:
         - Exports
       summary: Export documents
-      description: "This API call allows you to export a set of documents for a user. To call this endpoint, you must use a user-token. You can not call this endpoint without it.<br/><br/>Users can have as many exports as they need. Exports are kept in Sensibill's system for the period of 14 days."
+      description: |
+        This API call allows you to export a set of documents for a user. To call this endpoint, you must use a user-token. You can not call this endpoint without it. \
+        Users can have as many exports as they need. Exports are kept in Sensibill's system for the period of 14 days.
       requestBody:
         $ref: '#/components/requestBodies/ExportCreateRequest'
       responses:
@@ -754,9 +831,9 @@ paths:
       operationId: getExports
       tags:
         - Exports
-      summary: Get export status
-      description: This endpoint provides the ability to retrieve the list of exports for a
-        user. A user-token is required to access this endpoint.
+      summary: Get exports
+      description: |
+        This endpoint provides the ability to retrieve the list of exports for a user. A user-token is required to access this endpoint.
       responses:
         '200':
           description: Success. The list of exports is successfully returned.
@@ -777,8 +854,9 @@ paths:
       tags:
         - Exports
       summary: Get export status
-      description: This endpoint provides the ability to periodically poll for the export status.
-        The ID is the export ID received during the first step (asynchronous POST). </br>
+      description: |
+        This endpoint provides the ability to periodically poll for the export status.
+        The id is the export id received during the first step (asynchronous POST). \
         The response contains status information on the export.
       parameters:
         - $ref: '#/components/parameters/ExportIdParameter'
@@ -788,7 +866,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExportStatusDto'
+                $ref: '#/components/schemas/ExportsResponseDto'
         '400':
           description: Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.
         '401':
@@ -1095,8 +1173,7 @@ components:
           example: 'Sensibill API Architecture - Receipts Sandbox'
         booted_at:
           type: string
-          format: date
-          example: 'Wed Sep 23 2015 12:46:00 GMT+0000 (UTC)'
+          format: date-time
         base_url:
           type: string
           example: 'https://receipts-sandbox.sensibill.io/'
@@ -1651,20 +1728,17 @@ components:
             a third-party single-sign-on based solution, this should be set to the credentialType
             that you were issued with your client credentials.
         accessID:
-          default: ''
           type: string
           example: test@test.com
           description: If you are using third-party single-sign-on, then this parameter
             is what is used to uniquely identify this user account to Sensibill systems.
             It is equivalent to a username.
         accessSecret:
-          default: ''
           type: string
           description: If you are using third-party single-sign-on, then this parameter
             is what is used to verify that you are the owner of this Sensibill account.
             It is equivalent to a password.
         email:
-          default: ''
           type: string
           format: email
           example: test@test.com
@@ -1672,7 +1746,6 @@ components:
             want to allow sending email notifications directly from Sensibill. May be required,
             depending on your client configuration.
         password:
-          default: ''
           type: string
           description: The password for the user account. If you are creating a Sensibill
             account, this parameter is required. If you are using third-party single-sign-on,
@@ -1689,7 +1762,6 @@ components:
         - client
       properties:
         client:
-          default: ''
           type: string
           description: The clientID of the new user's client.
 
@@ -1740,7 +1812,6 @@ components:
       type: object
       properties:
         receiptAccountEmail:
-          default: ''
           example: test@billpass.ca
           type: string
           description: The email address to the users receipt account. This must be unique
@@ -1750,18 +1821,15 @@ components:
             is required during registration, or if it is optional so that it can be specified
             later.The email address must use a permitted domain for your client.
         firstName:
-          default: ''
           example: John
           type: string
           description: The first name of the user. It is strongly encouraged that this be
             set to provide a more personalized experience for users.
         lastName:
-          default: ''
           example: Smith
           type: string
           description: The last name of the user.
         defaultCurrency:
-          default: ''
           type: string
           description: Provides the default currency for the user. Must be an currency-code
             on the supported list of currencies, which can be obtained by going to /lookups/currencies
@@ -1781,12 +1849,28 @@ components:
           description: Every element of the array should be an object with the folder's `name`,
             `color` (as six hex digits) and `id`.
         createTestReceipts:
-          default: 'false'
           type: boolean
           description: Can be either "true" or "false". This parameter can be used by early
             integration partners during testing to create a number of ake testing receipts
             for the accounts they create.
 
+    GenericIdString:
+      type: string
+      maxLength: 75
+      pattern: ^[a-zA-Z0-9-_:.]{3,75}$
+    
+    BooleanEnum:
+      type: boolean
+      enum:
+        - true
+        - false
+
+    CurrencyCodeDto:
+      type: string
+      maxLength: 3
+      minLength: 3
+      pattern: ^[A-Z]{3}$
+      
     DocumentTaxDto:
       type: object
       properties:
@@ -1800,91 +1884,146 @@ components:
           type: string
           example: GST
 
-    CurrencyCode:
-      description: 3 character ISO-4217
+    CurrencyCodeEnum:
+      description: 3 character ISO-4217 currency code
       type: string
-      enum: [ 'USD',
-              'CAD',
-              'GBP',
-              'EUR',
-              'NZD',
-              'AUD',
-              'BRL',
-              'CLP',
-              'CNY',
-              'CZK',
-              'DKK',
-              'HKD',
-              'HUF',
-              'INR',
-              'IDR',
-              'ILS',
-              'JPY',
-              'MYR',
-              'MXN',
-              'NOK',
-              'PKR',
-              'PHP',
-              'PLN',
-              'RUB',
-              'SGD',
-              'ZAR',
-              'KRW',
-              'SEK',
-              'CHF',
-              'TWD',
-              'THB',
-              'TRY' ]
+      enum:
+        - USD
+        - CAD
+        - GBP
+        - EUR
+        - NZD
+        - AUD
+        - BRL
+        - CLP
+        - CNY
+        - CZK
+        - DKK
+        - HKD
+        - HUF
+        - INR
+        - IDR
+        - ILS
+        - JPY
+        - MYR
+        - MXN
+        - NOK
+        - PKR
+        - PHP
+        - PLN
+        - RUB
+        - SGD
+        - ZAR
+        - KRW
+        - SEK
+        - CHF
+        - TWD
+        - THB
+        - TRY
 
-    EditCurrencyCode:
-      description: 3 character ISO-4217
+    EditableCurrencyCodeEnum:
+      description: 3 character ISO-4217 currency code
       type: string
       nullable: true
-      enum: [ 'USD',
-              'CAD',
-              'GBP',
-              'EUR',
-              'NZD',
-              'AUD',
-              'BRL',
-              'CLP',
-              'CNY',
-              'CZK',
-              'DKK',
-              'HKD',
-              'HUF',
-              'INR',
-              'IDR',
-              'ILS',
-              'JPY',
-              'MYR',
-              'MXN',
-              'NOK',
-              'PKR',
-              'PHP',
-              'PLN',
-              'RUB',
-              'SGD',
-              'ZAR',
-              'KRW',
-              'SEK',
-              'CHF',
-              'TWD',
-              'THB',
-              'TRY' ]
+      enum:
+        - USD
+        - CAD
+        - GBP
+        - EUR
+        - NZD
+        - AUD
+        - BRL
+        - CLP
+        - CNY
+        - CZK
+        - DKK
+        - HKD
+        - HUF
+        - INR
+        - IDR
+        - ILS
+        - JPY
+        - MYR
+        - MXN
+        - NOK
+        - PKR
+        - PHP
+        - PLN
+        - RUB
+        - SGD
+        - ZAR
+        - KRW
+        - SEK
+        - CHF
+        - TWD
+        - THB
+        - TRY
+        
+    DocumentTimeDto:
+      type: string
+      format: ^\d{2}:\d{2}$
+    
+    DocumentSourceFormatEnum:
+      type: string
+      enum:
+        - pdf
+        - image
+
+    DocumentSourceFormatsArray:
+      type: array
+      description: 'Array of sourceFormats for the operation.'
+      items:
+        $ref: "#/components/schemas/DocumentSourceFormatEnum"
+      maxItems: 2
+    
+    DocumentTypeEnum:
+      type: string
+      enum:
+        - invoice
+        - receipt
+
+    DocumentStatusTypeEnum:
+      type: string
+      description: |
+        The status of the document involved or used for the operation. Supported statusses include :
+        * CompletedSuccess
+        * CompletedFailed
+        * InProcessing
+      enum:
+        - CompletedSuccess
+        - CompletedFailed
+        - InProcessing
+
+    DocumentStatusTypesArray:
+      type: array
+      description: Array of document status to use for the operation.
+      items:
+        $ref: "#/components/schemas/DocumentStatusTypeEnum"
+      maxItems: 3
+
+    ExportItemStatusEnum:
+      type: string
+      description: |
+        The status of the export. Possible values are: `'queued'`, `'processing'`, `'completed'`, `'failed'`
+      example: completed
+      enum:
+        - failed
+        - queued
+        - completed
+        - processing
+        - noDocumentsFound
 
     DocumentCreateDto:
       type: object
-      additionalProperties: false
       required:
         - sourceFile
         - documentType
       properties:
         description:
           type: string
-          description: 'A user specified name / description for this document'
+          description: 'A user specified name or description for this document'
           pattern: ^[a-zA-Z0-9 ]+$
-          maxLength: 100
+          maxLength: 75
         sourceFile:
           type: string
           format: binary
@@ -1892,14 +2031,7 @@ components:
             The binary data to be attached within a multi-part form.
             The file type can be either JPG, GIF, PNG or PDF and the maximum file size for the file is 5 MB.
         documentType:
-          type: string
-          description: |
-            The type of the document being submitted. Supported types include :
-            * invoice
-            * receipt
-          enum:
-            - invoice
-            - receipt
+          $ref: '#/components/schemas/DocumentTypeEnum'
         foreignId:
           type: string
           description: |
@@ -1925,33 +2057,34 @@ components:
     
     TenderTypesEnum:
       type: string
-      enum: [ 'Amex',
-              'Cash',
-              'Check',
-              'Coupon',
-              'Credit',
-              'CreditDebit',
-              'CustomerAccount',
-              'Debit',
-              'DinersClub',
-              'Fleet',
-              'GiftCard',
-              'GiftCertificate',
-              'HouseAccount',
-              'Interac',
-              'InternationalMaestro',
-              'Loyalty',
-              'MasterCard',
-              'Paypal',
-              'Prepaid',
-              'StoreCard',
-              'StoredValue',
-              'TravelersCheck',
-              'UKMaestro',
-              'VisaCredit',
-              'VisaDebit',
-              'Visa',
-              'Voucher' ]
+      enum: 
+        - Amex
+        - Cash
+        - Check
+        - Coupon
+        - Credit
+        - CreditDebit
+        - CustomerAccount
+        - Debit
+        - DinersClub
+        - Fleet
+        - GiftCard
+        - GiftCertificate
+        - HouseAccount
+        - Interac
+        - InternationalMaestro
+        - Loyalty
+        - MasterCard
+        - Paypal
+        - Prepaid
+        - StoreCard
+        - StoredValue
+        - TravelersCheck
+        - UKMaestro
+        - VisaCredit
+        - VisaDebit
+        - Visa
+        - Voucher
 
     #Responses:
 
@@ -2129,7 +2262,7 @@ components:
             properties:
               scanTime:
                 type: string
-                format: date
+                format: date-time
                 example: '2015-09-10T15:43:29.594Z'
               emailsDownloaded:
                 type: integer
@@ -2294,6 +2427,253 @@ components:
 
     #Exports
 
+    FlatCriteriaDto:
+      type: object
+      description: |
+        The search criteria used to find the documents to be exported. \
+        This will be identical to the filters used in the GET documents endpoint.
+      properties:
+        accountMetadata.account:
+          type: array
+          items:
+            $ref: "#/components/schemas/GenericIdString"
+          maxItems: 20
+          description: |
+            Array of `accountMetadata.account` to filter the documents. Should ideally satisfy the `/^[a-zA-Z0-9-_:.]+$/` pattern \
+            **Example:** `accountMetadata.account='ACC102030'&accountMetadata.account='405060'`
+        accountMetadata.account.exists:
+          type: boolean
+          enum:
+            - true
+            - false
+          description: |
+            This is used to match and include documents where a value *exixts* for the `accountMetadata.account` property. \
+            Only `true` or `false` boolean values are accepted. A mix of operators with basic values are not supported. 
+            If `accountMetadata.account.exists` is provided together with plain values for account, this `exists` operator is ignored. \
+            **Example:** To filter all documents with `accountMetadata.account` not set, use `accountMetadata.account.exists=false`
+        accountMetadata.transactionId:
+          type: array
+          items:
+            $ref: "#/components/schemas/GenericIdString"
+          maxItems: 20
+          description: |
+            Array of `accountMetadata.transactionId` to filter the documents. Should ideally satisfy the `/^[a-zA-Z0-9-_:.]+$/` pattern. \
+            **Example:** `accountMetadata.transactionId='TX00001'&accountMetadata.transactionId='TX00002'`
+        amountDue:
+          type: array
+          items:
+            type: number
+            minimum: 0.0
+          maxItems: 20
+          description: |
+            Array of `amountDue` values to filter the documents. `afterTax` is the document property considered for the match. \
+            **Example:** `filter.amountDue=1000.55&filter.amountDue=1010.90`
+        amountDue.gte:
+          type: number
+          minimum: 0.0
+          description: |
+            This is a *greater than or equal to* filter on the `amountDue` value to filter the documents. `afterTax` is the document property considered for the match. \
+            **Example:** `filter.amountDue.gte=1000.55`
+        amountDue.lte:
+          type: number
+          minimum: 0.0
+          description: |
+            This is a *lesser than or equal to* filter on the `amountDue` value to filter the documents. `afterTax` is the document property considered for the match. \
+            Example: `amountDue.lte=1000.55`
+        arrivalDateTime.gte:
+          type: string
+          format: date-time
+          description: |
+            This is a filter condition *greater than or equal* on the `arrivalDateTime` to filter the documents.
+            ArrivalDateTime value does not accept exact match and is expected to be UTC.
+            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`.
+            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
+            
+            * Example with just date: `arrivalDateTime.gte='2012-12-28'`
+            * Example with date and time: `arrivalDateTime.gte='2012-12-28T21:27'`
+            * Example with date and time: `arrivalDateTime.gte='2012-12-28 21:27:55.827'`
+        arrivalDateTime.lte:
+          type: string
+          format: date-time
+          description: |
+            This is a filter condition *less than or equal* on the `arrivalDateTime` to filter the documents.
+            ArrivalDateTime value does not accept exact match and is expected to be UTC.
+            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`.
+            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
+            
+            * Example with just date: `arrivalDateTime.lte='2012-12-28'`
+            * Example with date and time: `arrivalDateTime.lte='2012-12-28T21:27'`
+            * Example with date and time: `arrivalDateTime.lte='2012-12-28 21:27:55.827'` 
+        categoryCode:
+          type: array
+          items:
+            type: string
+            format: /^[a-zA-Z0-9-_ ]+$/
+            maxLength: 25
+          maxItems: 20
+          description: |
+            Array of categoryCode to filter the documents. Example: `categoryCode=['business']`
+        currencyCode:
+          type: array
+          items:
+            $ref: "#/components/schemas/CurrencyCodeDto"
+          maxItems: 20
+          description: |
+            Array of currencyCode to filter the documents. Example: `currencyCode=['CAD', 'USD']`
+        description:
+          type: array
+          items:
+            type: string
+            maxLength: 75
+            pattern: ^[a-zA-Z0-9 ]+$
+          description: |
+            Array of description values to filter the documents. The filter is case insentive and matches any document where the
+            description contains the given value. Should ideally satisfy the pattern /^[a-zA-Z0-9 ]+$/
+            Example: `description=['Dinner with friends','Children winter gear','My very specific description']`
+          example: ['Dinner with friends','Children winter gear','My very specific description']
+        documentDate:
+          type: array
+          items:
+            type: string
+            format: date
+          description: |
+            Array of documentDate to filter the documents. Example: `documentDate=['2021-04-04']`
+          example: ['2021-04-04']
+        documentDate.gte:
+          type: string
+          format: date
+          description: |
+            This is a filter condition `greater than or equal` on the documentDate to filter the documents. \
+            Example with single operator: `documentDate.gte='2012-12-28'`
+          example: '2012-12-28'
+        documentDate.lte:
+          type: string
+          format: date
+          description: |
+            This is a filter condition `less than or equal` on the documentDate to filter the documents. \
+            Example with single operator: `documentDate.lte='2023-12-28'`
+          example: '2023-12-28'
+        documentNumber:
+          type: array
+          items:
+            $ref: "#/components/schemas/GenericIdString"
+          maxItems: 20
+          description: |
+            Array of documentNumber to filter the documents. Example: `documentNumber=['1122334455']`
+          example: ['1122334455']
+        documentTime:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentTimeDto"
+          maxItems: 20
+          description: |
+            Array of documentTime to filter the documents. Example: `documentTime=['21:12', '22:13', '23:14']`
+          example: ['21:12', '22:13', '23:14']
+        documentTime.gte:
+          type: string
+          format: ^\d{2}:\d{2}$
+          description: |
+            This is a filter condition `greater than or equal` on the documentTime to filter the documents.
+            Example with single operator: `documentTime.gte='10:00'`
+        documentTime.lte:
+          type: string
+          format: ^\d{2}:\d{2}$
+          description: |
+            This is a filter condition `less than or equal` on the documentTime to filter the documents.
+            Example with single operator: `filter.documentTime.gte='10:00'`
+        documentType:
+          type: array
+          description: Array of `documentType` to filter the documents. Currently supported values are [invoice, receipt].
+          items:
+            $ref: "#/components/schemas/DocumentTypeEnum"
+          maxItems: 20
+        foreignId:
+          type: array
+          items:
+            $ref: "#/components/schemas/GenericIdString"
+          maxItems: 20
+          description: 'Array of foreignId to filter the documents.'
+        id:
+          type: array
+          items:
+            $ref: "#/components/schemas/GenericIdString"
+          maxItems: 20
+          description: 'Array of document id to filter the documents.'
+        lastUpdateDateTime.gte:
+          type: string
+          format: date-time
+          description: |
+            This is a filter condition *greater than or equal* on the `lastUpdateDateTime` to filter the documents.
+            `lastUpdateDateTime` field does not accept exact match.
+            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`. 
+            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
+
+            * Example with just date: `lastUpdateDateTime.gte='2012-12-28'`
+            * Example with date and time: `lastUpdateDateTime.gte='2012-12-28T21:27'`
+            * Example with date and time: `lastUpdateDateTime.gte='2012-12-28 21:27:55.827'`
+        lastUpdateDateTime.lte:
+          type: string
+          format: date-time
+          description: |
+            This is a filter condition *less than or equal* on the `lastUpdateDateTime` to filter the documents.
+            `lastUpdateDateTime` field does not accept exact match.
+            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`. 
+            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
+
+            * Example with just date: `lastUpdateDateTime.lte='2012-12-28'`
+            * Example with date and time: `lastUpdateDateTime.lte='2012-12-28T21:27'`
+            * Example with date and time: `lastUpdateDateTime.lte='2012-12-28 21:27:55.827'`
+        merchantName:
+          description: 'Array of merchantName to filter the documents.'
+          type: array
+          items:
+            type: string
+            format: ^[a-zA-Z0-9-_ ]+$
+            maxLength: 25
+        merchantTaxIdNumber:
+          description: 'Array of merchantTaxIdNumber to filter the documents.'
+          type: array
+          items:
+            $ref: "#/components/schemas/GenericIdString"
+          maxItems: 20
+        paymentTender:
+          description: 'Payment Tender array to filter the documents.'
+          type: array
+          items:
+            $ref: '#/components/schemas/TenderTypesEnum'
+          maxItems: 20
+        total:
+          description: |
+            Array of total to filter the documents. The value considered is afterTax.
+            Items in the array will compose a logial `OR` chain in the query.
+          type: array
+          items:
+            type: number
+            minimum: 0.0
+          example: [1000.55, 1010.90]
+        total.gte:
+          description: |
+            This is a filter condition *greater than or equal* on the total value to filter the documents. The value considered is afterTax.
+            All filter conditions will compose a logical `AND` chain in the query. \
+
+            Example: `total.gte=1000.55`
+          type: number
+          minimum: 0.0
+          example: 1000.55
+        total.lte:
+          description: |
+            This is a filter condition *less than or equal* on the total value to filter the documents. The value considered is afterTax.
+            All filter conditions will compose a logical `AND` chain in the query. \
+
+            Example: `total.lte=1000.55`
+          type: number
+          minimum: 0.0
+          example: 1000.55
+        status:
+          $ref: '#/components/schemas/DocumentStatusTypesArray'
+        sourceFormat:
+          $ref: "#/components/schemas/DocumentSourceFormatsArray"
+    
     ExportCreateDto:
       type: object
       required:
@@ -2316,237 +2696,13 @@ components:
           type: string
           description: Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to /lookups/locales. It defaults to the user's locale.
           example: en-CA
-
-    FlatCriteriaDto:
-      type: object
-      description: |
-        The search criteria used to find the documents to be exported. \
-        This will be identical to the filters used in the GET documents endpoint.
-      properties:
-        accountMetadata.account:
-          type: array
-          items:
-              type: string
-          description: |
-            Array of accountMetadata.account to filter the documents. Must satisfy the pattern /^[a-zA-Z0-9]+$/
-            Example: `['ACC102030','405060']`
-          example: ['ACC102030','405060']
-        accountMetadata.account.exists:
-          type: string
-          description: |
-            This is a filter condition `exists` on the accountMetadata.account value to filter the documents. Accepted values are [true, false].
-            A mix of operators with basic values is not supported. If account.exists is provided together with plain account values, this operator is ignored.
-            Example to filter all documents with accountMetadata.account not set: `filter.accountMetadata.account.exists=false`
-          example: 'false'
-        accountMetadata.transactionId:
-          type: array
-          items:
-            type: string
-          description: |
-            Array of accountMetadata.transactionId to filter the documents. Must satisfy the pattern /^[a-zA-Z0-9]+$/
-            Example: `['TX00001','TX00002']`
-          example: ['TX00001','TX00002']
-        amountDue:
-          type: array
-          items:
-            type: string
-          description: |
-            Array of amountDue to filter the documents. The value considered is afterTax.
-            Example:`['1000.55&', '1010.90']`
-          example: ['1000.55&', '1010.90']
-        amountDue.gte:
-          type: string
-          description: |
-            This is a filter condition *greater than or equal* on the amountDue value to filter the documents. The value considered is afterTax.
-            Example: `amountDue.gte=1000.55`
-          example: '1000.55'
-        amountDue.lte:
-          type: string
-          description: |
-            This is a filter condition *less than or equal* on the amountDue value to filter the documents. The value considered is afterTax.
-            Example: `amountDue.lte=1000.55`
-          example: '1000.55'
-        arrivalDateTime.gte:
-          type: string
-          description: |
-            This is a filter condition *greater than or equal* on the `arrivalDateTime` to filter the documents.
-            ArrivalDateTime value does not accept exact match and is expected to be UTC.
-            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`.
-            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
-            
-            * Example with just date: `arrivalDateTime.gte='2012-12-28'`
-            * Example with date and time: `arrivalDateTime.gte='2012-12-28T21:27'`
-            * Example with date and time: `arrivalDateTime.gte='2012-12-28 21:27:55.827'`
-        arrivalDateTime.lte:
-          type: string
-          description: |
-            This is a filter condition *less than or equal* on the `arrivalDateTime` to filter the documents.
-            ArrivalDateTime value does not accept exact match and is expected to be UTC.
-            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`.
-            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
-            
-            * Example with just date: `arrivalDateTime.lte='2012-12-28'`
-            * Example with date and time: `arrivalDateTime.lte='2012-12-28T21:27'`
-            * Example with date and time: `arrivalDateTime.lte='2012-12-28 21:27:55.827'` 
-        categoryCode:
-          type: array
-          items:
-            type: string
-          description: |
-            Array of categoryCode to filter the documents.
-            Example: `categoryCode=['business']`
-          example: ['business']
-        currencyCode:
-          type: array
-          items:
-            type: string 
-          description: |
-            Array of currencyCode to filter the documents.
-            Example: `currencyCode=['CAD', 'USD']`
-          example: ['CAD', 'USD']
-        description:
-          type: array
-          items:
-            type: string
-          description: |
-            Array of description values to filter the documents. The filter is case insentive and matches any document where the
-            description contains the given value. Must satisfy the pattern /^[a-zA-Z0-9 ]+$/
-            Example: `description=['Dinner with friends','Children winter gear','My very specific description']`
-          example: ['Dinner with friends','Children winter gear','My very specific description']
-        documentDate:
-          type: array
-          items:
-            type: string
-          description: |
-            Array of documentDate to filter the documents.
-            Example: `documentDate=['2021-04-04']`
-          example: ['2021-04-04']
-        documentDate.gte:
-          type: string
-          description: |
-            This is a filter condition `greater than or equal` on the documentDate to filter the documents.
-            Example with single operator: `documentDate.gte='2012-12-28'`
-          example: '2012-12-28'
-        documentDate.lte:
-          type: string
-          description: |
-            This is a filter condition `less than or equal` on the documentDate to filter the documents.
-            Example with single operator: `documentDate.lte='2023-12-28'`
-          example: '2023-12-28'
-        documentNumber:
-          type: array
-          items:
-            type: string
-          description: |
-            Array of documentNumber to filter the documents.
-            Example: `documentNumber=['1122334455']`
-          example: ['1122334455']
-        documentTime:
-          type: array
-          items:
-            type: string
-          description: |
-            Array of documentTime to filter the documents.
-            Example: `documentTime=['21:12', '22:13', '23:14']`
-          example: ['21:12', '22:13', '23:14']
-        documentTime.gte:
-          type: string
-          description: |
-            This is a filter condition `greater than or equal` on the documentTime to filter the documents.
-            Example with single operator: `documentTime.gte='10:00'`
-        documentTime.lte:
-          type: string
-          description: |
-            This is a filter condition `less than or equal` on the documentTime to filter the documents.
-            Example with single operator: `filter.documentTime.gte='10:00'`
-        documentType:
-          type: array
-          items:
-            type: string
-          description: |
-            Array of documentType to filter the documents. Currently allowed types are [invoice, receipt]
-        foreignId:
-          type: array
-          items:
-            type: string
-          description: 'Array of foreignId to filter the documents.'
-        id:
-          type: array
-          items:
-            type: string
-          description: 'Array of document id to filter the documents.'
-        lastUpdateDateTime.gte:
-          type: string
-          description: |
-            This is a filter condition *greater than or equal* on the `lastUpdateDateTime` to filter the documents.
-            `lastUpdateDateTime` field does not accept exact match.
-            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`. 
-            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
-
-            * Example with just date: `lastUpdateDateTime.gte='2012-12-28'`
-            * Example with date and time: `lastUpdateDateTime.gte='2012-12-28T21:27'`
-            * Example with date and time: `lastUpdateDateTime.gte='2012-12-28 21:27:55.827'`
-        lastUpdateDateTime.lte:
-          type: string
-          description: |
-            This is a filter condition *less than or equal* on the `lastUpdateDateTime` to filter the documents.
-            `lastUpdateDateTime` field does not accept exact match.
-            Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`. 
-            Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
-
-            * Example with just date: `lastUpdateDateTime.lte='2012-12-28'`
-            * Example with date and time: `lastUpdateDateTime.lte='2012-12-28T21:27'`
-            * Example with date and time: `lastUpdateDateTime.lte='2012-12-28 21:27:55.827'`
-        merchantName:
-          description: 'Array of merchantName to filter the documents.'
-          type: array
-          items:
-            type: string
-        merchantTaxIdNumber:
-          description: 'Array of merchantTaxIdNumber to filter the documents.'
-          type: array
-          items:
-            type: string
-        paymentTender:
-          description: 'Payment Tender array to filter the documents.'
-          type: array
-          items:
-            $ref: '#/components/schemas/TenderTypesEnum'
-        total:
-          description: |
-            Array of total to filter the documents. The value considered is afterTax.
-            Items in the array will compose a logial `OR` chain in the query.
-          type: array
-          items:
-            type: string
-          example: ["1000.55", "1010.90"]
-        total.gte:
-          description: |
-            This is a filter condition *greater than or equal* on the total value to filter the documents. The value considered is afterTax.
-            All filter conditions will compose a logical `AND` chain in the query.
-
-            Example: `total.gte=1000.55`
-          type: string
-          example: "1000.55"
-        total.lte:
-          description: |
-            This is a filter condition *less than or equal* on the total value to filter the documents. The value considered is afterTax.
-            All filter conditions will compose a logical `AND` chain in the query.
-
-            Example: `total.lte=1000.55`
-          type: string
-          example: "1000.55"
-        status:
-          description: 'Array of status to filter the documents.'
-          type: array
-          items:
-            type: string
-        sourceFormat:
-          description: 'Array of sourceFormat to filter the documents.'
-          type: array
-          items:
-            type: string
-
+    
+    ExportResponseStatusEnum:
+      type: string
+      enum:
+        - queued
+        - noDocumentsFound
+    
     ExportCreateResponseDto:
       type: object
       properties:
@@ -2573,15 +2729,15 @@ components:
             example: csv
         documentsCount:
           type: number
+          maximum: 500
+          minimum: 0
+          format: integer
           example: 5
           description: "The number of documents that matches the given criteria. The final number of documents
             in the export can be different from this one if documents are created or deleted between this POST
             request and the time when the request is processed."
         status:
-          type: string
-          enum:
-            - queued
-            - noDocumentsFound
+          $ref: '#/components/schemas/ExportResponseStatusEnum'
         id:
           type: string
           example: IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA
@@ -2590,10 +2746,11 @@ components:
 
     ExportsStatusDto:
       type: array
+      maxItems: 500
       items:
-        $ref: '#/components/schemas/ExportStatusDto'
+        $ref: '#/components/schemas/ExportsResponseDto'
 
-    ExportStatusDto:
+    ExportsResponseDto:
       type: object
       properties:
         destructionTime:
@@ -2610,6 +2767,7 @@ components:
           example: '2020-12-18T21:58:18.787Z'
         resultSize:
           type: integer
+          maximum: 500
           example: 5
           description: The number of documents captured in the export.
         completionTime:
@@ -2641,19 +2799,7 @@ components:
                 type: string
                 example: xE1IVKvIRiUq5gqN_z04
         status:
-          type: string
-          example: completed
-          enum:
-            - deleted
-            - completed
-            - failed
-            - processing
-            - queued
-            - running
-            - noDocumentsFound
-            
-          description: "The status of the export. Possible values are: ''queued'', ''processing'',
-            ''completed'', ''failed''"
+          $ref: '#/components/schemas/ExportItemStatusEnum'
         id:
           type: string
           example: IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA
@@ -2756,15 +2902,15 @@ components:
         percent:
           description: "May be set if this discount is percent based, where a value of N represents an N% discount."
           type: number
-          example: Home Sense
         type:
           $ref: '#/components/schemas/DiscountTypesEnum'
 
     DiscountTypesEnum:
       description: "May be set to describe how this discount was obtained."
       type: string
-      enum: [ 'general',
-              'coupon' ]
+      enum:
+        - general
+        - coupon
 
     DocumentFeeDto:
       description: "Contains info about one applied fee."
@@ -2780,10 +2926,11 @@ components:
     FeeTypesEnum:
       description: "May be set to give more details on the type of fee."
       type: string
-      enum: [ 'donation',
-              'shipping',
-              'duties',
-              'general' ]
+      enum: 
+        - donation
+        - shipping
+        - duties
+        - general
 
     DocumentItemDto:
       properties:
@@ -2928,7 +3075,7 @@ components:
           description: " Change amount that was actually issued (after rounding if any) for cash payments"
           example: 9.99
         currencyCode:
-          $ref: '#/components/schemas/CurrencyCode'
+          $ref: '#/components/schemas/CurrencyCodeEnum'
         maskedCardNumber:
           type: string
           description: "A masked version of the card (if any) used in the payment.
@@ -2991,8 +3138,9 @@ components:
     OrderChannelTypesEnum:
       type: string
       description: "Indicates if the receipt came from a brick and mortar or online channel. Not related to format of receipt."
-      enum: [ 'online',
-              'physical' ]
+      enum:
+        - online
+        - physical
 
     DeliveryDto:
       type: object
@@ -3036,13 +3184,13 @@ components:
     DeliveryTypesEnum:
       type: string
       description: "Type of delivery"
-      enum: [ 'pickup',
-              'delivery',
-              'shipping' ]
+      enum:
+        - pickup
+        - delivery
+        - shipping
 
     DocumentAccountMetadataDto:
       type: object
-      additionalProperties: false
       properties:
         account:
           type: string
@@ -3059,7 +3207,6 @@ components:
 
     NullableDocumentAccountMetadataDto:
       type: object
-      additionalProperties: false
       properties:
         account:
           type: string
@@ -3093,10 +3240,11 @@ components:
     SourceDocumentFormatsEnum:
       description: "Defines the possible original formats for a receipt to have come from."
       type: string
-      enum: [ 'html',
-              'image',
-              'pdf',
-              'text' ]
+      enum:
+        - html
+        - image
+        - pdf
+        - text
 
     GetDocumentResponseDto:
       description: "Structure of the response on the document details endpoint"
@@ -3108,8 +3256,8 @@ components:
             $ref: '#/components/schemas/DocumentErrorDto'
 
     DocumentsStatusResponseDto:
-      description: 'Response schema for the documents/status endpoint'
       type: object
+      description: 'Response schema for the documents/status endpoint'
       required:
         - documents
       properties:
@@ -3153,18 +3301,9 @@ components:
           format: date-time
           example: 2017-10-26T16:01:13.836Z
         documentType:
-          description: "The structural type of the document"
-          type: string
-          example: invoice
-          enum:
-            - invoice
+          $ref: "#/components/schemas/DocumentTypeEnum"
         status:
-          description: "The current status of the document"
-          type: string
-          example: CompletedSuccess
-          enum:
-            - CompletedSuccess
-            - CompletedFailed
+          $ref: '#/components/schemas/DocumentStatusTypeEnum'
 
     GetDocumentListResponseDto:
       description: "Structure of the response on the document list endpoint"
@@ -3205,10 +3344,7 @@ components:
           format: date-time
           example: 2017-10-26T16:01:13.836Z
         documentType:
-          description: "The structural type of the document"
-          type: string
-          enum:
-            - invoice
+          $ref: "#/components/schemas/DocumentTypeEnum"
         description:
           description: 'A user specified name / description for this document'
           pattern: ^[a-zA-Z0-9 ]+$
@@ -3216,13 +3352,7 @@ components:
           type: string
           example: "My document description"
         status:
-          description: "The current status of the document"
-          type: string
-          example: CompletedSuccess
-          enum:
-            - CompletedSuccess
-            - CompletedFailed
-            - InProcessing
+          $ref: '#/components/schemas/DocumentStatusTypeEnum'
         content:
           $ref: '#/components/schemas/DocumentListItemContentDto'
         source:
@@ -3236,8 +3366,7 @@ components:
           type: string
           example: "123910293-12"
         currencyCode:
-          description: "The currency code that appears on the document."
-          $ref: '#/components/schemas/CurrencyCode'
+          $ref: '#/components/schemas/CurrencyCodeEnum'
         documentDate:
           type: string
           format: date
@@ -3298,23 +3427,14 @@ components:
           format: date-time
           example: 2017-10-26T16:01:13.836Z
         documentType:
-          description: "The structural type of the document"
-          type: string
-          enum:
-            - invoice
+          $ref: "#/components/schemas/DocumentTypeEnum"
         description:
           description: "The document description. Might be also used as the document name or note."
           type: string
           pattern: ^[a-zA-Z0-9 ]+$
           example: "My document description"
         status:
-          description: "The current status of the document"
-          type: string
-          example: CompletedSuccess
-          enum:
-            - CompletedSuccess
-            - CompletedFailed
-            - InProcessing
+          $ref: '#/components/schemas/DocumentStatusTypeEnum'
         content:
           $ref: '#/components/schemas/DocumentContentDto'
         source:
@@ -3335,7 +3455,7 @@ components:
         countryCode:
           $ref: '#/components/schemas/CountryCode'
         currencyCode:
-          $ref: '#/components/schemas/CurrencyCode'
+          $ref: '#/components/schemas/CurrencyCodeEnum'
         customer:
           $ref: '#/components/schemas/DocumentContentCustomerDto'
         discounts:
@@ -3511,7 +3631,6 @@ components:
 
     EditDocumentRequestDto:
       type: object
-      additionalProperties: false
       description: "Object that contains the field that will be updated in a Document"
       properties:
         description:
@@ -3525,7 +3644,6 @@ components:
           $ref: '#/components/schemas/NullableDocumentAccountMetadataDto'
         content:
           type: object
-          additionalProperties: false
           properties:
             merchant:
               $ref: '#/components/schemas/EditDocumentMerchantDto'
@@ -3558,7 +3676,7 @@ components:
             total:
               $ref: '#/components/schemas/EditDocumentTaxableAmountDto'
             currencyCode:
-              $ref: '#/components/schemas/EditCurrencyCode'
+              $ref: '#/components/schemas/EditableCurrencyCodeEnum'
 
     EditDocumentResponseDto:
       description: "Object with the Id of the updated Document"
@@ -3678,6 +3796,7 @@ components:
         this argument is required. Otherwise, this parameter should be omitted. This parameter
         is the refresh_token which you obtained when you last used the `/accessToken` endpoint.
 
+
     #Users
 
     UserIdParameter:
@@ -3761,7 +3880,7 @@ components:
       description: A unique ID that identifies this export in the Sensibill system.
       required: true
       schema:
-        type: string
+        $ref: "#/components/schemas/GenericIdString"
     
     # Merchants
 
@@ -3781,7 +3900,7 @@ components:
       description: A unique Id that identifies this document in the Sensibill system.
       required: true
       schema:
-        type: string
+        $ref: "#/components/schemas/GenericIdString"
 
   requestBodies:
 
@@ -3830,7 +3949,7 @@ components:
     #Exports
 
     ExportCreateRequest:
-      description: Create a receipt export
+      description: Create a document export
       required: true
       content:
         application/json:
