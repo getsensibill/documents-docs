@@ -28,7 +28,7 @@ tags:
     description: Users
 
 servers:
-  - url: https://{environment}.sensibill.io/api/v2
+  - url: https://{environment}.sensibill.io/api/v1
     variables:
       environment:
         default: receipts-sandbox
@@ -160,7 +160,7 @@ paths:
       description: "Allows clients to request an authorization grant to begin the OAuth2 flow. As an OAuth2 endpoint, all of the parameters and result variables from this endpoint have names that use underscores, versus the rest of the API which is camel-cased.
         <br/><br/>Clients must provide a username and password in the Authorization header of the request (or equivalent accessID, accessSecret and credentialType for SSO clients).
         This can be accomplished by setting a 'basic' authentication header using the user's username and password in compliance with Section 2 of RFC 2617 like shown below:
-        <br/><br/><code>Authorization: 'Basic base64(username:password)'</code>
+        <br/><br/>`Authorization: 'Basic base64(username:password)'`
         <br/><br/><strong>Types of secrets</strong>
         <br/><br/>Sensibill supports 2 modes of operation for client secrets:
         <br/><br/>In the case where a client can guarantee a secret that is closely guarded, it allows for user administration support (e.g, deactivate, reactivate users, etc)
@@ -193,15 +193,15 @@ paths:
       description: "Allows a client to use its credentials to obtain an access token, to swap an authorization grant for an access token, or to swap a refresh token for a new access token. There are two types of access tokens - user tokens and client tokens.
         <br/><br/>A client token authenticates a specific client, e.g. your architecture and servers. client tokens can be used to access any resources owned by the client, such as general information on users your client has created. Client tokens are also required to register new users or make requests on their behalf such as the user posting a receipt.
         <br/><br/>A user token authenticates a specific user to our system, e.g. Jane Doe of Winnipeg, Manitoba. A user token will be required if you want to access specific data about a user, such as the details of that user's receipts.
-        <br/><br/>Token expiry information is in the <code>expires_in</code> and <code>refresh_expires_in</code> fields.
-        <br/><br/>You can also retrieve the expiration times for user and client access tokens using the user GET endpoint, <code>/users/:userID</code>, and the clientInfo GET endpoint, <code>/clientInfo</code>, respectively.
+        <br/><br/>Token expiry information is in the `expires_in` and `refresh_expires_in` fields.
+        <br/><br/>You can also retrieve the expiration times for user and client access tokens using the user GET endpoint, `/users/:userID`, and the clientInfo GET endpoint, `/clientInfo`, respectively.
         <br/><br/>No matter which kind of access token is being requested, the client MUST include their Client Key and Client Secret as the username and password, respectively, in the HTTP Authorization header, on top of providing required parameters below.
         <br/><br/>This can be accomplished by setting a 'basic' authentication header using the Client Key and Client Secret as username and password like shown below:
-        <br/><br/><code>Authorization: 'Basic base64(ClientKey:ClientSecret)'</code>
+        <br/><br/>`Authorization: 'Basic base64(ClientKey:ClientSecret)'`
         <br/><br/>The access token is currently always a bearer token, which should be sent in the 'Authorization' header in the format 'Bearer accessToken'.
-        <br/><br/>In the future, other token types may also be used, so please check the <code>token_type</code> provided in the response.
+        <br/><br/>In the future, other token types may also be used, so please check the `token_type` provided in the response.
         <br/><br/>For an example, please refer to <a href='./apiref/demo.html#step_six'>'Authentication Step Six' of the jQuery Demo</a>.
-        <br/><br/>The response also returns a <code>token_id</code>. This can not be used for authenticating regular requests, but is required for using our query parameter based signature method."
+        <br/><br/>The response also returns a `token_id`. This can not be used for authenticating regular requests, but is required for using our query parameter based signature method."
       parameters:
         - $ref: '#/components/parameters/GrantTypeParameter'
         - $ref: '#/components/parameters/TokenRedirectURIParameter'
@@ -245,16 +245,42 @@ paths:
           in: query
           description: 'Page number for the resources to be returned. The page count uses the limit value to define which resources will be returned.<br>
                     It is zero based index, so first page is 0.
-                   <br>Example for starting at the third page in a list of results:<br> <code>?offset=2</code>.'
+                   <br>Example for starting at the third page in a list of results:<br> `?offset=2`.'
           required: false
           schema:
             type: integer
             minimum: 0
             default: 0
+        - name: filter.accountMetadata.account
+          in: query
+          description: 'Array of accountMetadata.account to filter the documents. Must satisfy the pattern /^[a-zA-Z0-9]+$/
+            <br/>Example: <code>filter.accountMetadata.account=''ACC102030''&filter.accountMetadata.account=''405060''</code>'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: filter.accountMetadata.account.exists
+          in: query
+          description: 'This is a filter condition `exists` on the accountMetadata.account value to filter the documents. Accepted values are [true, false].
+            A mix of operators with basic values is not supported. If account.exists is provided together with plain account values, this operator is ignored.
+            <br/>Example to filter all documents with accountMetadata.account not set: `filter.accountMetadata.account.exists=false`'
+          required: false
+          schema:
+            type: string
+        - name: filter.accountMetadata.transactionId
+          in: query
+          description: 'Array of accountMetadata.transactionId to filter the documents. Must satisfy the pattern /^[a-zA-Z0-9]+$/
+            <br/>Example: <code>filter.accountMetadata.transactionId=''TX00001''&filter.accountMetadata.transactionId=''TX00002''</code>'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
         - name: filter.amountDue
           in: query
           description: 'Array of amountDue to filter the documents. The value considered is afterTax.
-            <br/>Example: <code>filter.amountDue=1000.55&filter.amountDue=1010.90</code>'
+            <br/>Example: `filter.amountDue=1000.55&filter.amountDue=1010.90`'
           required: false
           schema:
             type: array
@@ -264,8 +290,8 @@ paths:
           in: query
           description: 'This is a filter condition `greater than or equal` on the amountDue value to filter the documents. The value considered is afterTax.
             All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: <code>filter.amountDue.gte=1000.55</code>
-            <br/>Example with operators (behave like AND): <code>filter.amountDue.gte=1000.55&filter.amountDue.lte=1010.90</code>'
+            <br/>Example with single operator: `filter.amountDue.gte=1000.55`
+            <br/>Example with operators (behave like AND): `filter.amountDue.gte=1000.55&filter.amountDue.lte=1010.90`'
           required: false
           schema:
             type: number
@@ -273,8 +299,8 @@ paths:
           in: query
           description: 'This is a filter condition `less than or equal` on the amountDue value to filter the documents. The value considered is afterTax.
             All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: <code>filter.amountDue.lte=1000.55</code>
-            <br/>Example with operators (behave like AND): <code>filter.amountDue.gte=1000.55&filter.amountDue.lte=1010.90</code>'
+            <br/>Example with single operator: `filter.amountDue.lte=1000.55`
+            <br/>Example with operators (behave like AND): `filter.amountDue.gte=1000.55&filter.amountDue.lte=1010.90`'
           required: false
           schema:
             type: number
@@ -283,10 +309,10 @@ paths:
           description: 'This is a filter condition `greater than or equal` on the arrivalDateTime to filter the documents.
             All filter conditions will compose a logical `AND` chain in the query. ArrivalDateTime field does not accept exact match and is considered to be UTC.
             Date time formats allowed are: ''YYYY-MM-DDTHH:mm:ss.SSS'' or ''YYYY-MM-DD HH:mm:ss.SSS''. Time fields can be suppressed from the end to the beginning i.e. ''YYYY-MM-DD HH:mm'' is acceptable.
-            <br/>Example with just date: <code>filter.arrivalDateTime.gte=''2012-12-28''</code>
-            <br/>Example with date and time: <code>filter.arrivalDateTime.gte=''2012-12-28T21:27''</code>
-            <br/>Example with date and time: <code>filter.arrivalDateTime.gte=''2012-12-28 21:27:55.827''</code>
-            <br/>Example with operators (behave like AND): <code>filter.arrivalDateTime.gte=''2012-12-28T21:27''&filter.arrivalDateTime.lte=''2012-12-28T21:27:59''</code>'
+            <br/>Example with just date: `filter.arrivalDateTime.gte=''2012-12-28''`
+            <br/>Example with date and time: `filter.arrivalDateTime.gte=''2012-12-28T21:27''`
+            <br/>Example with date and time: `filter.arrivalDateTime.gte=''2012-12-28 21:27:55.827''`
+            <br/>Example with operators (behave like AND): `filter.arrivalDateTime.gte=''2012-12-28T21:27''&filter.arrivalDateTime.lte=''2012-12-28T21:27:59''`'
           required: false
           schema:
             type: string
@@ -295,17 +321,17 @@ paths:
           description: 'This is a filter condition `less than or equal` on the arrivalDateTime to filter the documents.
             All filter conditions will compose a logical `AND` chain in the query.  ArrivalDateTime field does not accept exact match.
             Date time formats allowed are: ''YYYY-MM-DDTHH:mm:ss.SSS'' or ''YYYY-MM-DD HH:mm:ss.SSS''. Time fields can be suppressed from the end to the beginning i.e. ''YYYY-MM-DD HH:mm'' is acceptable.
-            <br/>Example with just date: <code>filter.arrivalDateTime.lte=''2012-12-28''</code>
-            <br/>Example with date and time: <code>filter.arrivalDateTime.lte=''2012-12-28T21:27''</code>
-            <br/>Example with date and time: <code>filter.arrivalDateTime.lte=''2012-12-28 21:27:55.827''</code>
-            <br/>Example with operators (behave like AND): <code>filter.arrivalDateTime.gte=''2012-12-28T21:27''&filter.arrivalDateTime.lte=''2012-12-28T21:27:59''</code>'
+            <br/>Example with just date: `filter.arrivalDateTime.lte=''2012-12-28''`
+            <br/>Example with date and time: `filter.arrivalDateTime.lte=''2012-12-28T21:27''`
+            <br/>Example with date and time: `filter.arrivalDateTime.lte=''2012-12-28 21:27:55.827''`
+            <br/>Example with operators (behave like AND): `filter.arrivalDateTime.gte=''2012-12-28T21:27''&filter.arrivalDateTime.lte=''2012-12-28T21:27:59''`'
           required: false
           schema:
             type: string
         - name: filter.categoryCode
           in: query
           description: 'Array of categoryCode to filter the documents.
-            <br/>Example: <code>filter.categoryCode=''shopping''&filter.categoryCode=''business''</code>'
+            <br/>Example: `filter.categoryCode=''shopping''&filter.categoryCode=''business''`'
           required: false
           schema:
             type: array
@@ -314,7 +340,17 @@ paths:
         - name: filter.currencyCode
           in: query
           description: 'Array of currencyCode to filter the documents.
-            <br/>Example: <code>filter.currencyCode=''CAD''&filter.currencyCode=''USD''</code>'
+            <br/>Example: `filter.currencyCode=''CAD''&filter.currencyCode=''USD''`'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: filter.description
+          in: query
+          description: 'Array of description values to filter the documents. The filter is case insentive and matches any document where the
+            description contains the given value. Must satisfy the pattern /^[a-zA-Z0-9 ]+$/
+            <br/>Example: <code>filter.description=''Dinner with friends''&filter.description=''Children winter gear''&filter.description=''My very specific description''</code>'
           required: false
           schema:
             type: array
@@ -323,7 +359,7 @@ paths:
         - name: filter.documentDate
           in: query
           description: 'Array of documentDate to filter the documents.
-            <br/>Example: <code>filter.documentDate=''2021-04-04''&filter.documentDate=''2021-12-08''&filter.documentDate=''2021-12-28''</code>'
+            <br/>Example: `filter.documentDate=''2021-04-04''&filter.documentDate=''2021-12-08''&filter.documentDate=''2021-12-28''`'
           required: false
           schema:
             type: array
@@ -333,8 +369,8 @@ paths:
           in: query
           description: 'This is a filter condition `greater than or equal` on the documentDate to filter the documents.
             All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: <code>filter.documentDate.gte=''2012-12-28''</code>
-            <br/>Example with operators (behave like AND): <code>filter.documentDate.gte=''2012-12-28''&filter.documentDate.lte=''2023-12-28''</code>'
+            <br/>Example with single operator: `filter.documentDate.gte=''2012-12-28''`
+            <br/>Example with operators (behave like AND): `filter.documentDate.gte=''2012-12-28''&filter.documentDate.lte=''2023-12-28''`'
           required: false
           schema:
             type: string
@@ -342,15 +378,15 @@ paths:
           in: query
           description: 'This is a filter condition `less than or equal` on the documentDate to filter the documents.
             All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: <code>filter.documentDate.lte=''2023-12-28''</code>
-            <br/>Example with operators (behave like AND): <code>filter.documentDate.gte=''2012-12-28''&filter.documentDate.lte=''2023-12-28''</code>'
+            <br/>Example with single operator: `filter.documentDate.lte=''2023-12-28''`
+            <br/>Example with operators (behave like AND): `filter.documentDate.gte=''2012-12-28''&filter.documentDate.lte=''2023-12-28''`'
           required: false
           schema:
             type: string
         - name: filter.documentNumber
           in: query
           description: 'Array of documentNumber to filter the documents.
-            <br/>Example: <code>filter.documentNumber=''112233''&filter.documentNumber=''445566''</code>'
+            <br/>Example: `filter.documentNumber=''112233''&filter.documentNumber=''445566''`'
           required: false
           schema:
             type: array
@@ -359,7 +395,7 @@ paths:
         - name: filter.documentTime
           in: query
           description: 'Array of documentTime to filter the documents.
-            <br/>Example: <code>filter.documentTime=''21:12''&filter.documentTime=''22:13''&filter.documentTime=''23:14''</code>'
+            <br/>Example: `filter.documentTime=''21:12''&filter.documentTime=''22:13''&filter.documentTime=''23:14''`'
           required: false
           schema:
             type: array
@@ -369,8 +405,8 @@ paths:
           in: query
           description: 'This is a filter condition `greater than or equal` on the documentTime to filter the documents.
             All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: <code>filter.documentTime.gte=''10:00''</code>
-            <br/>Example with operators (behave like AND): <code>filter.documentTime.gte=''10:00''&filter.documentTime.lte=''14:00''</code>'
+            <br/>Example with single operator: `filter.documentTime.gte=''10:00''`
+            <br/>Example with operators (behave like AND): `filter.documentTime.gte=''10:00''&filter.documentTime.lte=''14:00''`'
           required: false
           schema:
             type: string
@@ -378,15 +414,15 @@ paths:
           in: query
           description: 'This is a filter condition `less than or equal` on the documentTime to filter the documents.
             All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: <code>filter.documentTime.gte=''10:00''</code>
-            <br/>Example with operators (behave like AND): <code>filter.documentTime.gte=''10:00''&filter.documentTime.lte=''14:00''</code>'
+            <br/>Example with single operator: `filter.documentTime.gte=''10:00''`
+            <br/>Example with operators (behave like AND): `filter.documentTime.gte=''10:00''&filter.documentTime.lte=''14:00''`'
           required: false
           schema:
             type: string
         - name: filter.documentType
           in: query
           description: 'Array of documentType to filter the documents. Currently valid values are [invoice, receipt].
-            <br/>Example: <code>filter.documentType=''invoice''</code>'
+            <br/>Example: `filter.documentType=''invoice''`'
           required: false
           schema:
             type: array
@@ -395,7 +431,7 @@ paths:
         - name: filter.foreignId
           in: query
           description: 'Array of foreignId to filter the documents.
-            <br/>Example: <code>filter.foreignId=''20210930_001''</code>'
+            <br/>Example: `filter.foreignId=''20210930_001''`'
           required: false
           schema:
             type: array
@@ -404,7 +440,7 @@ paths:
         - name: filter.id
           in: query
           description: 'Array of ids to filter the documents.
-            <br/>Example: <code>filter.id=''mE0wyhAwJoPMUWlzrbVY''</code>'
+            <br/>Example: `filter.id=''mE0wyhAwJoPMUWlzrbVY''`'
           required: false
           schema:
             type: array
@@ -415,10 +451,10 @@ paths:
           description: 'This is a filter condition `greater than or equal` on the lastUpdateDateTime to filter the documents.
             All filter conditions will compose a logical `AND` chain in the query. ArrivalDateTime field does not accept exact match and is considered to be UTC.
             Date time formats allowed are: ''YYYY-MM-DDTHH:mm:ss.SSS'' or ''YYYY-MM-DD HH:mm:ss.SSS''. Time fields can be suppressed from the end to the beginning i.e. ''YYYY-MM-DD HH:mm'' is acceptable.
-            <br/>Example with just date: <code>filter.lastUpdateDateTime.gte=''2012-12-28''</code>
-            <br/>Example with date and time: <code>filter.lastUpdateDateTime.gte=''2012-12-28T21:27''</code>
-            <br/>Example with date and time: <code>filter.lastUpdateDateTime.gte=''2012-12-28 21:27:55.827''</code>
-            <br/>Example with operators (behave like AND): <code>filter.lastUpdateDateTime.gte=''2012-12-28T21:27''&filter.lastUpdateDateTime.lte=''2012-12-28T21:27:59''</code>'
+            <br/>Example with just date: `filter.lastUpdateDateTime.gte=''2012-12-28''`
+            <br/>Example with date and time: `filter.lastUpdateDateTime.gte=''2012-12-28T21:27''`
+            <br/>Example with date and time: `filter.lastUpdateDateTime.gte=''2012-12-28 21:27:55.827''`
+            <br/>Example with operators (behave like AND): `filter.lastUpdateDateTime.gte=''2012-12-28T21:27''&filter.lastUpdateDateTime.lte=''2012-12-28T21:27:59''`'
           required: false
           schema:
             type: string
@@ -427,17 +463,17 @@ paths:
           description: 'This is a filter condition `less than or equal` on the lastUpdateDateTime to filter the documents.
             All filter conditions will compose a logical `AND` chain in the query.  ArrivalDateTime field does not accept exact match.
             Date time formats allowed are: ''YYYY-MM-DDTHH:mm:ss.SSS'' or ''YYYY-MM-DD HH:mm:ss.SSS''. Time fields can be suppressed from the end to the beginning i.e. ''YYYY-MM-DD HH:mm'' is acceptable.
-            <br/>Example with just date: <code>filter.lastUpdateDateTime.lte=''2012-12-28''</code>
-            <br/>Example with date and time: <code>filter.lastUpdateDateTime.lte=''2012-12-28T21:27''</code>
-            <br/>Example with date and time: <code>filter.lastUpdateDateTime.lte=''2012-12-28 21:27:55.827''</code>
-            <br/>Example with operators (behave like AND): <code>filter.lastUpdateDateTime.gte=''2012-12-28T21:27''&filter.lastUpdateDateTime.lte=''2012-12-28T21:27:59''</code>'
+            <br/>Example with just date: `filter.lastUpdateDateTime.lte=''2012-12-28''`
+            <br/>Example with date and time: `filter.lastUpdateDateTime.lte=''2012-12-28T21:27''`
+            <br/>Example with date and time: `filter.lastUpdateDateTime.lte=''2012-12-28 21:27:55.827''`
+            <br/>Example with operators (behave like AND): `filter.lastUpdateDateTime.gte=''2012-12-28T21:27''&filter.lastUpdateDateTime.lte=''2012-12-28T21:27:59''`'
           required: false
           schema:
             type: string
         - name: filter.merchantName
           in: query
           description: 'Array of merchantName to filter the documents.
-            <br/>Example: <code>filter.merchantName=''Home Sense''&filter.merchantName=''IKAE''</code>'
+            <br/>Example: `filter.merchantName=''Home Sense''&filter.merchantName=''IKAE''`'
           required: false
           schema:
             type: array
@@ -446,7 +482,7 @@ paths:
         - name: filter.merchantTaxIdNumber
           in: query
           description: 'Array of merchantTaxIdNumber to filter the documents.
-            <br/>Example: <code>filter.merchantTaxIdNumber=''1111 RT0001''&filter.merchantTaxIdNumber=''2222 RT0002''</code>'
+            <br/>Example: `filter.merchantTaxIdNumber=''1111 RT0001''&filter.merchantTaxIdNumber=''2222 RT0002''`'
           required: false
           schema:
             type: array
@@ -456,7 +492,7 @@ paths:
           in: query
           description: 'Array of paymentTender to filter the documents.
             Valid values: ''Amex'' | ''Cash'' | ''Check'' | ''Coupon'' | ''Credit'' | ''CreditDebit'' | ''CustomerAccount'' | ''Debit'' | ''DinersClub'' | ''Fleet'' | ''GiftCard'' | ''GiftCertificate'' | ''HouseAccount'' | ''Interac'' | ''InternationalMaestro'' | ''Loyalty'' | ''MasterCard'' | ''Paypal'' | ''Prepaid'' | ''StoreCard'' | ''StoredValue'' | ''TravelersCheck'' | ''UKMaestro'' | ''VisaCredit'' | ''VisaDebit'' | ''Visa'' | ''Voucher''
-            <br/>Example: <code>filter.paymentTender=''Amex''&filter.paymentTender=''Cash''</code>'
+            <br/>Example: `filter.paymentTender=''Amex''&filter.paymentTender=''Cash''`'
           required: false
           schema:
             type: array
@@ -467,7 +503,7 @@ paths:
           description: 'Array of total to filter the documents. The value considered is afterTax.
             When an array of filter.total is provided,
             they will compose a logial `OR` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example (behave like OR): <code>filter.total=1000.55&filter.total=1010.90</code>'
+            <br/>Example (behave like OR): `filter.total=1000.55&filter.total=1010.90`'
           required: false
           schema:
             type: array
@@ -477,8 +513,8 @@ paths:
           in: query
           description: 'This is a filter condition `greater than or equal` on the total value to filter the documents. The value considered is afterTax.
             All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: <code>filter.total.gte=1000.55</code>
-            <br/>Example with operators (behave like AND): <code>filter.total.gte=1000.55&filter.total.lte=1010.90</code>'
+            <br/>Example with single operator: `filter.total.gte=1000.55`
+            <br/>Example with operators (behave like AND): `filter.total.gte=1000.55&filter.total.lte=1010.90`'
           required: false
           schema:
             type: number
@@ -486,15 +522,15 @@ paths:
           in: query
           description: 'This is a filter condition `less than or equal` on the total value to filter the documents. The value considered is afterTax.
             All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported.
-            <br/>Example with single operator: <code>filter.total.lte=1000.55</code>
-            <br/>Example with operators (behave like AND): <code>filter.total.gte=1000.55&filter.total.lte=1010.90</code>'
+            <br/>Example with single operator: `filter.total.lte=1000.55`
+            <br/>Example with operators (behave like AND): `filter.total.gte=1000.55&filter.total.lte=1010.90`'
           required: false
           schema:
             type: number
         - name: filter.status
           in: query
           description: 'Array of status to filter the documents. Valid values: [''InProcessing'', ''CompletedFailed'', ''CompletedSuccess'']
-            <br/>Example: <code>filter.status=''InProcessing''&filter.status=''CompletedSuccess''</code>'
+            <br/>Example: `filter.status=''InProcessing''&filter.status=''CompletedSuccess''`'
           required: false
           schema:
             type: array
@@ -503,7 +539,7 @@ paths:
         - name: filter.sourceFormat
           in: query
           description: 'Array of sourceFormat to filter the documents. Currently accepted values are: ''image'' and ''pdf''.
-            <br/>Example: <code>filter.sourceFormat=''image''&filter.sourceFormat=''pdf''</code>'
+            <br/>Example: `filter.sourceFormat=''image''&filter.sourceFormat=''pdf''`'
           required: false
           schema:
             type: array
@@ -511,19 +547,19 @@ paths:
               type: string
         
       responses:
-        200:
+        '200':
           description: Success. The list of documents was successfully retrieved.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetDocumentListResponseDto'
-        400:
+        '400':
           description: Bad Request. This will occur if you omit a required parameter, send an invalid parameter or if you provide an invalid value for a parameter.
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        403: 
+        '403': 
           description: Forbidden. This will occur if you try to use this endpoint without being setup for documents. 
-        500:
+        '500':
           description: Internal Server Error.
     post:
       tags:
@@ -535,19 +571,19 @@ paths:
         $ref: '#/components/requestBodies/DocumentCreateRequest'
 
       responses:
-        200:
+        '200':
           description: Success. The new document was successfully submitted and its ID returned.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DocumentCreationResponseDto'
-        400:
+        '400':
           description: Bad Request. This will occur if you provide an invalid value for a request parameter, an invalid parameter or invalid body.
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        403: 
+        '403': 
           description: Forbidden. This will occur if you try to use this endpoint without being setup for documents. 
-        500:
+        '500':
           description: Internal Server Error.
     delete:
       tags:
@@ -561,21 +597,21 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/DocumentDeleteRequest'
       responses:
-        200:
+        '200':
           description: Success. The documents were deleted from the system and the array of deleted document ids are passed back.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DocumentDeleteResponseDto'
-        400:
+        '400':
           description: 'Bad Request. This will occur if you provide an invalid value for a request parameter, an invalid parameter or invalid body.
             This can also happen if there is a problem deleting one or more of the documents in the request
             The response will have the document id that caused the problem and the error message'
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        403:
+        '403':
           description: Forbidden. This will occur if you try to use this endpoint without being setup for documents.
-        500:
+        '500':
           description: Internal Server Error.
 
   /documents/{id}:
@@ -588,21 +624,21 @@ paths:
       parameters:
         - $ref: '#/components/parameters/DocumentIdParameter'
       responses:
-        200:
+        '200':
           description: Success. The document was successfully retrieved.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetDocumentResponseDto'
-        400:
+        '400':
           description: Bad Request. This will occur if you provide an invalid value for a request parameter.
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        403: 
+        '403': 
           description: Forbidden. This will occur if you try to use this endpoint without being setup for documents. 
-        404:
+        '404':
           description: Not Found. The document ID you have provided is not one of this user's documents.
-        500:
+        '500':
           description: Internal Server Error.
     patch:
       tags:
@@ -626,21 +662,21 @@ paths:
             schema:
               $ref: '#/components/schemas/EditDocumentRequestDto'
       responses:
-        200:
+        '200':
           description: Successful response - returns the Id of the updated document
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EditDocumentResponseDto'
-        400:
+        '400':
           description: Bad Request. This will occur if you provide an invalid value for a request parameter.
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        403:
+        '403':
           description: Forbidden. This will occur if you try to use this endpoint without being setup for documents.
-        404:
+        '404':
           description: Not Found. The document ID you have provided is not one of this user's documents.
-        500:
+        '500':
           description: Internal Server Error.
 
   /documents/status:
@@ -664,29 +700,30 @@ paths:
               example: id=12345&id=29473&id=56384
           - name: timeout
             in: query
-            description: 'The most amount of time (in seconds) the client wants to wait for a response from the server.
-              A response is immediately returned if timeout is ommited, but its value cannot be more than 28 seconds if provided.'
+            description: |
+              The most amount of time (in seconds) that the client wants to wait for a response from the server. \
+              A response is immediately returned if **timeout is omitted**, but its value cannot be more than 25 seconds (max timeout) if provided.
             required: false
             schema:
               type: integer
-              maximum: 28
+              maximum: 25
               minimum: 1
               example: 20
         
         responses:
-          200:
+          '200':
             description: Success. The list of document statuses was successfully retrieved.
             content:
               application/json:
                 schema:
                   $ref: '#/components/schemas/DocumentsStatusResponseDto'
-          400:
+          '400':
             description: Bad Request. This will occur if you omit a required parameter, send an invalid parameter or if you provide an invalid value for a parameter.
-          401:
+          '401':
             description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-          403: 
+          '403': 
             description: Forbidden. This will occur if you try to use this endpoint without being setup for documents. 
-          500:
+          '500':
             description: Internal Server Error.
             
   # Export endpoints #######################
@@ -701,17 +738,17 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/ExportCreateRequest'
       responses:
-        200:
+        '200':
           description: Success. The export request was received sucessfully.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExportCreateResponseDto'
-        400:
+        '400':
           description: Bad Request. This will occur if you omit a required parameter, if you provide an invalid value for a required parameter, or if you exceed the limit of 500 receipts in an export.
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        403:
+        '403':
           description: Forbidden. This will occur if you attempt to use a client token with this endpoint. This endpoint must be used with a user-token.
     get:
       operationId: getExports
@@ -721,17 +758,17 @@ paths:
       description: This endpoint provides the ability to retrieve the list of exports for a
         user. A user-token is required to access this endpoint.
       responses:
-        200:
+        '200':
           description: Success. The list of exports is successfully returned.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExportsStatusDto'
-        400:
+        '400':
           description: Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        403:
+        '403':
           description: Forbidden. This will occur if you attempt to use a client token with this endpoint. This endpoint must be used with a user-token.
 
   /exports/{id}:
@@ -746,19 +783,19 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ExportIdParameter'
       responses:
-        200:
+        '200':
           description: Success. The status of the export is returned.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExportStatusDto'
-        400:
+        '400':
           description: Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        403:
+        '403':
           description: Forbidden. This will occur if you attempt to use a client token with this endpoint. This endpoint must be used with a user-token.
-        404:
+        '404':
           description: Not Found. The export ID you have provided is not one of this user's exports.
 
   # Lookups endpoints #######################
@@ -774,13 +811,13 @@ paths:
       parameters:
         - $ref: '#/components/parameters/LocaleParameter'
       responses:
-        200:
+        '200':
           description: Success
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LookupCurrenciesResponse'
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
 
   /lookups/locales:
@@ -792,13 +829,13 @@ paths:
       description: This API call allows you to retrieve the list of locales that we currently support in our system. To call
         this endpoint, you can use either a client-token or a user-token.
       responses:
-        200:
+        '200':
           description: Success
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LookupLocalesResponse'
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
   
   # Merchants endpoints #######################
@@ -813,13 +850,13 @@ paths:
       parameters:
         - $ref: '#/components/parameters/MerchantsNameParameter'
       responses:
-        200:
+        '200':
           description: Success. The list of merchants was retrieved and returned.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/MerchantsDto'
-        500:
+        '500':
           description: Internal server error.
 
   # User Endpoints #######################
@@ -937,17 +974,17 @@ paths:
         - $ref: '#/components/parameters/DeleteUserExportParameter'
         - $ref: '#/components/parameters/DeleteUserExportEmailParameter'
       responses:
-        200:
+        '200':
           description: Success. The user was successfully queued for destruction.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyObjectResponseDto'
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        403:
+        '403':
           description: Forbidden. This will occur if the access-token you have provided is not authorized to retrieve the information for the user you have requested. This can also occur if you attempt to use a client token with this endpoint.
-        404:
+        '404':
           description: Not Found. The userID you have provided is invalid. It should be either "me" or a valid userID.
 
     put:
@@ -971,19 +1008,19 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/UserUpdateRequest'
       responses:
-        200:
+        '200':
           description: Success. The information for the user account was updated.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyObjectResponseDto'
-        400:
+        '400':
           description: Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        403:
+        '403':
           description: Forbidden. This will occur if the access-token you have provided is not authorized to update the information for this user. This can also occur if you attempt to use a client token with this endpoint.
-        404:
+        '404':
           description: Not Found. The userID you have provided is invalid. It should be either "me" or a valid userID.
 
   /users/emailAvailability:
@@ -1002,9 +1039,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmailAvailabilityResponseDto'
-        400:
+        '400':
           description: Bad Request. This will occur if you omit the email address, or the email address provided is not well formed.
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
 
   /users/usernameAvailability:
@@ -1029,9 +1066,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UsernameAvailabilityResponseDto'
-        400:
+        '400':
           description: Bad Request. This will occur if you omit the username.
-        401:
+        '401':
           description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
 
 components:
@@ -1691,7 +1728,7 @@ components:
         emailScanningScanAfter:
           type: string
           format: date
-          example: '2015-11-12T23:20:50.52Z'
+          example: '2015-11-12'
           description: If set only email from after the given date will be imported. See RFC
             3339 Section 5.6 for format.
 
@@ -1741,8 +1778,8 @@ components:
                 example: "#ABCDEF"
               id:
                 type: string
-          description: Every element of the array should be an object with the folder's <code>name</code>,
-            <code>color</code> (as six hex digits) and <code>id</code>.
+          description: Every element of the array should be an object with the folder's `name`,
+            `color` (as six hex digits) and `id`.
         createTestReceipts:
           default: 'false'
           type: boolean
@@ -1751,19 +1788,6 @@ components:
             for the accounts they create.
 
     DocumentTaxDto:
-      type: object
-      properties:
-        amount:
-          type: number
-          example: 123.2
-        percent:
-          type: number
-          example: 1.2
-        type:
-          type: string
-          example: GST
-
-    TaxDto:
       type: object
       properties:
         amount:
@@ -1849,96 +1873,41 @@ components:
               'THB',
               'TRY' ]
 
-    ValidationStatusEnum:
-      type: string
-      description: "The status associated with the validation of the document."
-      enum: [ 'ok',
-              'failed' ]
-
-    MerchantStatusEnum:
-      type: string
-      description: "The status associated with the merchant."
-      enum: [ 'active',
-              'review',
-              'deactivated' ]
-
-    ExpenseTypesEnum:
-      type: string
-      description: "The expense type associated with the receipt. Can be either 'business' or 'personal'."
-      enum: [ 'personal',
-              'business' ]
-
-    MatchedAccountTransactionDto:
-      properties:
-        amount:
-          type: number
-          example: 23.53
-        currencyCode:
-          $ref: '#/components/schemas/CurrencyCode'
-        id:
-          type: string
-          description: "The ID of the transaction from the financial institution."
-          example: 'EsmtpT9xa2S4gXym9GHBJrLkigfjH'
-        maskedAccountNumber:
-          type: string
-          description: "The masked account number of the transaction from the financial institution."
-          example: '**** **** **** 9900'
-        merchantName:
-          type: string
-          description: "The name of the merchant the transaction from the financial institution was with."
-          example: 'Apple'
-        postedDate:
-          type: string
-          format: date-time
-          description: "The post date of the transaction from the financial institution. The date is in the ISO-8601 format"
-        summary:
-          type: string
-          description: "The summary text associated with the transaction from the financial institution."
-        transactionDate:
-          type: string
-          format: date-time
-          description: "The date of the transaction from the financial institution. The date is in the ISO-8601 format."
-
-    DocumentListUserMetadataDto:
-      properties:
-        expenseType:
-          $ref: '#/components/schemas/ExpenseTypesEnum'
-        folders:
-          type: array
-          items:
-            type: string
-          description: ""
-        isNew:
-          type: boolean
-        notes:
-          type: string
-          description: ""
-
     DocumentCreateDto:
       type: object
+      additionalProperties: false
       required:
         - sourceFile
         - documentType
       properties:
+        description:
+          type: string
+          description: 'A user specified name / description for this document'
+          pattern: ^[a-zA-Z0-9 ]+$
+          maxLength: 100
         sourceFile:
-          default: ''
           type: string
           format: binary
-          description: "The binary data to be attached within a multi-part form. The file type can be either JPG, GIF, PNG or PDF and the maximum file size for the file is 5 MB."
-        foreignId:
-          type: string
-          description: "An integrator supplied identifier that must be unique. In case of upload failure or loss of document Id this 
-            Id can be used on a new request with the source file to receive the original document id without our system reprocessing the source file."
-          example: 'doc-123-sub'
+          description: |
+            The binary data to be attached within a multi-part form.
+            The file type can be either JPG, GIF, PNG or PDF and the maximum file size for the file is 5 MB.
         documentType:
           type: string
-          description:  |
+          description: |
             The type of the document being submitted. Supported types include :
-            - invoice
-            - receipt
+            * invoice
+            * receipt
           enum:
             - invoice
             - receipt
+        foreignId:
+          type: string
+          description: |
+            An integrator supplied identifier that must be unique. In case of upload failure or loss of document Id this 
+            foreignId can be used on a new request with the source file to receive the original document id without our system reprocessing the source file.
+          example: 'doc-123-sub'
+        accountMetadata:
+          $ref: '#/components/schemas/DocumentAccountMetadataDto'
 
     DocumentDeleteDto:
       type: object
@@ -2066,7 +2035,7 @@ components:
               example: myOutlookID123
         accessTokenExpiry:
           type: string
-          format: date
+          format: date-time
           description: When called with a client access token, the date and time that the
             token will expire.
           example: "2017-05-23T17:42:34.407Z"
@@ -2214,11 +2183,11 @@ components:
                   example: false
         accessTokenExpiry:
           type: string
-          format: date
+          format: date-time
           example: '2017-05-23T17:42:34.407Z'
         refreshTokenExpiry:
           type: string
-          format: date
+          format: date-time
           example: '2017-05-30T17:42:34.407Z'
 
     SimplifiedFolderDto:
@@ -2239,11 +2208,11 @@ components:
           description: Six hex digits representing the color of this folder.
         updatedAt:
           type: string
-          format: date
+          format: date-time
           example: '2015-09-30T17:56:45.236Z'
         createdAt:
           type: string
-          format: date
+          format: date-time
           example: '2015-11-30T17:56:45.236Z'
 
     AlertDto:
@@ -2272,11 +2241,11 @@ components:
           example: receipt
         receiptDate:
           type: string
-          format: date
+          format: date-time
           example: '2015-08-30T00:00:00.000Z'
         listingSortDate:
           type: string
-          format: date
+          format: date-time
           example: '2015-08-30T00:00:00.000Z'
         merchantName:
           type: string
@@ -2320,127 +2289,8 @@ components:
       properties:
         available:
           type: boolean
-          example: 'true'
+          example: true
           description: This is a flag that states if the username is available or not.
-
-    EmailListDto:
-      type: array
-      items:
-        type: object
-        properties:
-          id:
-            type: string
-            example: OXH5daRNKTksAAZcmyjR
-            description: The ID of the email.
-      description: Contains info for each email associated with the transaction.
-
-    AccountTransactionDataDto:
-      description: The account transaction data associated with the receipt.
-      type: object
-      properties:
-        id:
-          type: string
-          example: ABC123
-          description: ID of account transaction.
-        transactionDate:
-          type: string
-          format: date
-          example: '2017-09-08T12:00:00.000Z'
-          description: Date of account transaction.
-        postedDate:
-          type: string
-          format: date
-          example: '2017-09-08T12:00:00.000Z'
-          description: Posted date of account transaction.
-        merchantName:
-          type: string
-          example: target
-          description: Merchant name of account transaction.
-        summary:
-          type: string
-          example: 'target store #1101'
-          description: Summary of account transaction.
-        amount:
-          type: number
-          example: 88.90
-          description: Amount of account transaction.
-        maskedAccountNumber:
-          type: string
-          example: xxxxx0899
-          description: Masked account number of account transaction.
-        currencyCode:
-          type: string
-          example: CAD
-          description: Currency code of account transaction.
-
-    SharedMetaDataDto:
-      type: object
-      properties:
-        receiptCategory:
-          type: string
-          example: shopping
-          description: The category of the receipt. Use the /lookups/receiptcategories endpoint for a list of valid categories.
-        note:
-          type: string
-          default: ""
-        expenseType:
-          type: string
-          enum:
-            - personal
-            - business
-        tags:
-          type: array
-          items:
-            type: string
-        folders:
-          type: array
-          items:
-            type: string
-        favorite:
-          type: boolean
-
-    ErrorResponse:
-      type: object
-      required:
-        - name
-        - correlationID
-      properties:
-        name:
-          type: string
-          description: The type of error raised (See error types below).
-          example: 'AuthorizationError'
-          enum:
-            - AccessError
-            - AuthorizationError
-            - BadRequestError
-            - FileStorageBackendError
-            - DatabaseError
-            - GenericInternalError
-            - InvalidCredentialError
-            - InvalidParameterError
-            - InvalidParametersError
-            - MissingCredentialsError
-            - MissingParameterError
-            - MissingRequestBodyError
-            - ObjectNotFoundError
-            - ParameterNotAllowedError
-            - ValidationFailedError
-        correlationID:
-          type: string
-          description: A unique identifier value that is attached to responses that allow us to reference a particular transaction or event chain.
-          example: "4692-1557955193.458-10.3.123.11-468"
-        message:
-          type: string
-          description: Specific human-readable information pertaining to why this error was raised.
-          example: 'Your client is not authorized to log in users of the credential type: BAD_DATA You are only authorized to log in users from these credential types: YOUR_CREDENTIAL_TYPE'
-        extras:
-          type: object
-          description: Additional information
-          properties:
-            code:
-              type: string
-              description: A short string reporting the specific error raised. (For example, AuthorizationError has multiple causes).
-              example: "cannot_authenticate"
 
     #Exports
 
@@ -2469,8 +2319,33 @@ components:
 
     FlatCriteriaDto:
       type: object
-      description: The export criteria are the same used in the GET documents endpoint filters.
+      description: |
+        The search criteria used to find the documents to be exported. \
+        This will be identical to the filters used in the GET documents endpoint.
       properties:
+        accountMetadata.account:
+          type: array
+          items:
+              type: string
+          description: |
+            Array of accountMetadata.account to filter the documents. Must satisfy the pattern /^[a-zA-Z0-9]+$/
+            Example: `['ACC102030','405060']`
+          example: ['ACC102030','405060']
+        accountMetadata.account.exists:
+          type: string
+          description: |
+            This is a filter condition `exists` on the accountMetadata.account value to filter the documents. Accepted values are [true, false].
+            A mix of operators with basic values is not supported. If account.exists is provided together with plain account values, this operator is ignored.
+            Example to filter all documents with accountMetadata.account not set: `filter.accountMetadata.account.exists=false`
+          example: 'false'
+        accountMetadata.transactionId:
+          type: array
+          items:
+            type: string
+          description: |
+            Array of accountMetadata.transactionId to filter the documents. Must satisfy the pattern /^[a-zA-Z0-9]+$/
+            Example: `['TX00001','TX00002']`
+          example: ['TX00001','TX00002']
         amountDue:
           type: array
           items:
@@ -2486,7 +2361,7 @@ components:
             Example: `amountDue.gte=1000.55`
           example: '1000.55'
         amountDue.lte:
-          type: number
+          type: string
           description: |
             This is a filter condition *less than or equal* on the amountDue value to filter the documents. The value considered is afterTax.
             Example: `amountDue.lte=1000.55`
@@ -2529,6 +2404,15 @@ components:
             Array of currencyCode to filter the documents.
             Example: `currencyCode=['CAD', 'USD']`
           example: ['CAD', 'USD']
+        description:
+          type: array
+          items:
+            type: string
+          description: |
+            Array of description values to filter the documents. The filter is case insentive and matches any document where the
+            description contains the given value. Must satisfy the pattern /^[a-zA-Z0-9 ]+$/
+            Example: `description=['Dinner with friends','Children winter gear','My very specific description']`
+          example: ['Dinner with friends','Children winter gear','My very specific description']
         documentDate:
           type: array
           items:
@@ -2677,9 +2561,6 @@ components:
           example: '2020-12-18T21:58:15.875Z'
         criteria:
           $ref: '#/components/schemas/FlatCriteriaDto'
-          description: The search criteria used to find the receipts to be exported. This
-            will be identical to the fieldsset in the 'POST /exports' request for creating
-            the export in question.
         outputFormats:
           type: array
           items:
@@ -2741,9 +2622,6 @@ components:
           description: The URL that can be used to download the contents of the export.
         criteria:
           $ref: '#/components/schemas/FlatCriteriaDto'
-          description: The search criteria used to find the documents to be exported. This
-            will be identical to the fieldsset in the 'POST /exports' endpoint for creating
-            the export in question.
         outputFormats:
           type: array
           items:
@@ -2852,67 +2730,6 @@ components:
                 type: string
                 example: General Retail
 
-    UserSubmittedDataResponseDto:
-      type: object
-      properties:
-        currencyCode:
-          $ref: '#/components/schemas/CurrencyCode'
-        grandTotal:
-          type: number
-          example: 12.43
-          description: The grand total amount of the receipt.
-        merchantName:
-          type: string
-          example: Future Shop
-          description: The full human-friendly name of the merchant
-        receiptDate:
-          type: string
-          format: date
-          example: '2019-06-23T13:09:37.000Z'
-          description: The date and time on the receipt.
-
-    PrivateMetaDataDto:
-      type: object
-      description: Custom private data that clients can add to the receipt for
-        later search and retrieval. Other clients can not view or search on this data.
-        The data is limited to 5 KB.
-
-    TransactionListDto:
-      type: object
-      properties:
-        transactions:
-          type: array
-          items:
-            $ref: '#/components/schemas/TransactionDto'
-      required:
-        - transactions
-
-    TransactionDto:
-      type: object
-      properties:
-        id:
-          type: string
-        status:
-          $ref: '#/components/schemas/TransactionStatusEnum'
-        createdAt:
-          type: string
-          format: date-time
-      required:
-        - id
-        - status
-        - createdAt
-
-    TransactionStatusEnum:
-      type: string
-      enum:
-        - initializing
-        - queued
-        - processing
-        - incomplete
-        - completed
-        - failed
-        - stopped
-
     CountryCode:
       type: string
       description: "2 character country code (lower case)"
@@ -2923,76 +2740,6 @@ components:
               'es',
               'nl' ]
 
-    CustomerDto:
-      description: "Information about the customer as presented on the receipt."
-      type: object
-      properties:
-        customerID:
-          type: string
-          description: "An ID assigned to the customer by the merchant."
-          example: '9357630YHE'
-        billingAddressLines:
-          description: "The billing address the customer has provided defined as an array of address lines."
-          type: array
-          items:
-            type: string
-            example: "['1 Finite Loop Cupertino', 'CA 95014']"
-        email:
-          type: string
-          example: john@example.com
-        name:
-          type: string
-          example: john doe
-        telephoneNumber:
-          type: string
-          example: 905-123-1232
-
-    BarcodeDto:
-      description: "Describes a barcode as read from a receipt."
-      type: object
-      properties:
-        text:
-          description: "Data contained in the barcode."
-          type: string
-        type:
-          description: "Original type of barcode, eg: UPC, EAN, QR"
-          type: string
-          example: "UPC"
-
-    DiscountDto:
-      description: "Contains info about one applied discount."
-      allOf:
-        - $ref: '#/components/schemas/TaxableAmountDto'
-      properties:
-        description:
-          description: "A user-presentable description of this discount."
-          type: string
-          example: "10.00%"
-        methodCode:
-          description: "A code used by the merchant to identify this discount"
-          type: string
-          example: Home Sense
-        percent:
-          description: "May be set if this discount is percent based, where a value of N represents an N% discount."
-          type: number
-          example: Home Sense
-        type:
-          $ref: '#/components/schemas/DiscountTypesEnum'
-
-    TaxableAmountDto:
-      type: object
-      properties:
-        taxes:
-          type: array
-          items:
-            $ref: '#/components/schemas/TaxDto'
-        beforeTax:
-          type: number
-          example: 12.20
-        afterTax:
-          type: number
-          example: 12.20
-    
     DocumentDiscountDto:
       description: "Contains info about one applied discount."
       allOf:
@@ -3139,7 +2886,7 @@ components:
           description: "The total number of points awarded for a given receipt or line item."
           example: 500
         programName:
-          type: number
+          type: string
           description: "Loyalty rewards program name."
           example: 'PC Optimum'
 
@@ -3293,85 +3040,47 @@ components:
               'delivery',
               'shipping' ]
 
-    UserMetadataDto:
+    DocumentAccountMetadataDto:
+      type: object
+      additionalProperties: false
       properties:
-        expenseType:
-          $ref: '#/components/schemas/ExpenseTypesEnum'
-        folders:
-          type: array
-          items:
-            type: string
-          description: ""
-        isNew:
-          type: boolean
-          description: ""
-        notes:
+        account:
           type: string
-          description: ""
-        warrantyPeriod:
-          type: object
-          description: "The details about the warranty period for the receipt."
-          properties:
-            unit:
-              type: string
-              description: "Date period time unit which can be any of these values- day, week, month, year.
-                  This parameter should be used together with the 'duration' parameter.
-                  Also in order to use it the receipt must have the 'receiptDate' set or
-                  it should be supplied as another edit parameter within the same request."
-            duration:
-              type: integer
-              description: "Number of date period time units which defines the duration of the date period in question.
-                  This parameter should be used together with the 'unit' parameter.
-                  Also in order to use it the receipt must have the 'receiptDate' set or
-                  it should be supplied as another edit parameter within the same request."
-            calculatedDate:
-              type: string
-              description: "The calculated date based on the receipt date and the duration of the warranty."
-        returnPeriod:
-          type: object
-          description: "The details about the return period for the receipt."
-          properties:
-            unit:
-              type: string
-              description: "Date period time unit which can be any of these values- day, week, month, year.
-                  This parameter should be used together with the 'duration' parameter.
-                  Also in order to use it the receipt must have the 'receiptDate' set or
-                  it should be supplied as another edit parameter within the same request."
-            duration:
-              type: integer
-              description: "Number of date period time units which defines the duration of the date period in question.
-                  This parameter should be used together with the 'unit' parameter.
-                  Also in order to use it the receipt must have the 'receiptDate' set or
-                  it should be supplied as another edit parameter within the same request."
-            calculatedDate:
-              type: string
-              description: "The calculated date based on the receipt date and the duration of the return."
-
-    DocumentUserMetadataDto:
-      properties:
-        expenseType:
-          $ref: '#/components/schemas/ExpenseTypesEnum'
-        folders:
-          type: array
-          items:
-            type: string
-          description: ""
-        isNew:
-          type: boolean
-          description: ""
-        notes:
+          pattern: ^[a-zA-Z0-9-_:.]+$
+          description: 'An optional identifier representing the bank account from the financial institution to associate this document with'
+          maxLength: 75
+          example: 'EsmtpT9xa2S4gXym9GHBJrLkigfjH'
+        transactionId:
           type: string
-          description: ""
+          pattern: ^[a-zA-Z0-9-_:.]+$
+          description: 'An optional ID representing the transaction from the financial institution to associate this document with'
+          maxLength: 75
+          example: 'EsmtpT9xa2S4gXym9GHBJrLkigfjH'
 
-    AccountMetadataDto:
+    NullableDocumentAccountMetadataDto:
+      type: object
+      additionalProperties: false
       properties:
-        transaction:
-          $ref: '#/components/schemas/MatchedAccountTransactionDto'
+        account:
+          type: string
+          nullable: true
+          pattern: ^[a-zA-Z0-9-_:.]+$
+          description: |
+            An optional identifier representing the bank account from the financial institution to associate this document with.
+            Should be set to `""` (an empty zero-length string) to unset the `account` previosuly set for the document.
+          maxLength: 75
+          example: 'EsmtpT9xa2S4gXym9GHBJrLkigfjH'
+        transactionId:
+          type: string
+          pattern: ^[a-zA-Z0-9-_:.]+$
+          description: 'An optional ID representing the transaction from the financial institution to associate this document with'
+          maxLength: 75
+          example: 'EsmtpT9xa2S4gXym9GHBJrLkigfjH'
+          
 
     SourceDocumentDto:
       properties:
         format:
-          description: "The format type of document."
           $ref: '#/components/schemas/SourceDocumentFormatsEnum'
         url:
           type: string
@@ -3425,7 +3134,6 @@ components:
           type: string
           maxLength: 20
           minLength: 20
-          pattern: ^[a-zA-Z0-9]*$
           example: z6uuM0iqnvf8sCDBRYLJ
           description: "This is a unique identifier which is used to identify the document in the Sensibill system."
         foreignId:
@@ -3433,7 +3141,6 @@ components:
           type: string
           maxLength: 20
           minLength: 20
-          pattern: ^[a-zA-Z0-9]*$
           example: z6uuM0iqnvf8sCDBRYLJ
         arrivalDateTime:
           description: "The date and time that the document was submitted to our system. With no explicit timezone information."
@@ -3490,18 +3197,24 @@ components:
         arrivalDateTime:
           description: "The date and time that the document was submitted to our system. With no explicit timezone information."
           type: string
-          format: date
+          format: date-time
           example: 2017-10-26T16:01:13.836Z
         lastUpdateDateTime:
           type: string
           description: "The date and time that the document was last updated in our system. This will typically be when a user has last changed data on the document. With no explicit timezone information."
-          format: date
+          format: date-time
           example: 2017-10-26T16:01:13.836Z
         documentType:
           description: "The structural type of the document"
           type: string
           enum:
             - invoice
+        description:
+          description: 'A user specified name / description for this document'
+          pattern: ^[a-zA-Z0-9 ]+$
+          maxLength: 100
+          type: string
+          example: "My document description"
         status:
           description: "The current status of the document"
           type: string
@@ -3577,18 +3290,23 @@ components:
         arrivalDateTime:
           type: string
           description: "The date and time that the document was submitted to our system. With no explicit timezone information."
-          format: date
+          format: date-time
           example: 2017-10-26T16:01:13.836Z
         lastUpdateDateTime:
           type: string
           description: "The date and time that the document was last updated in our system. This will typically be when a user has last changed data on the document. With no explicit timezone information."
-          format: date
+          format: date-time
           example: 2017-10-26T16:01:13.836Z
         documentType:
           description: "The structural type of the document"
           type: string
           enum:
             - invoice
+        description:
+          description: "The document description. Might be also used as the document name or note."
+          type: string
+          pattern: ^[a-zA-Z0-9 ]+$
+          example: "My document description"
         status:
           description: "The current status of the document"
           type: string
@@ -3792,11 +3510,22 @@ components:
           example: shopping
 
     EditDocumentRequestDto:
-      description: "Object that contains the field that will be updated in a Document"
       type: object
+      additionalProperties: false
+      description: "Object that contains the field that will be updated in a Document"
       properties:
+        description:
+          type: string
+          description: |
+            A user specified name / description for this document. \
+            Should be set to `""` (an empty zero-length string) to unset the `description` previosuly set for the document.'
+          pattern: ^[a-zA-Z0-9 ]+$
+          maxLength: 100
+        accountMetadata:
+          $ref: '#/components/schemas/NullableDocumentAccountMetadataDto'
         content:
           type: object
+          additionalProperties: false
           properties:
             merchant:
               $ref: '#/components/schemas/EditDocumentMerchantDto'
@@ -3875,7 +3604,7 @@ components:
         handling authentication themselves (such as SSO) will likely ignore the redirect_uri
         and may even have to intercept the redirect in a user-agent. Note that while
         some clients may not need a redirection, all clients must provide a redirect
-        uri in accordance with the OAuth2 standard. This is true even if you set <code>redirect=false</code>
+        uri in accordance with the OAuth2 standard. This is true even if you set `redirect=false`
         below. _You must always have a redirect_uri,  even if you don't use redirects. Always._
 
     CredentialTypeParameter:
@@ -3937,7 +3666,7 @@ components:
       description: If the client is swapping an authorization code for an access token,
         then this argument is required. If you are just obtaining a client token directly,
         you do not need to provide a code. This parameter is the authorization_code which
-        you obtained when you used the <code>/authorizationGrant</code> endpoint.
+        you obtained when you used the `/authorizationGrant` endpoint.
 
     RefreshTokenParameter:
       name: refresh_token
@@ -3947,7 +3676,7 @@ components:
       required: true
       description: If the client is swapping a refresh_token for an access token, then
         this argument is required. Otherwise, this parameter should be omitted. This parameter
-        is the refresh_token which you obtained when you last used the <code>/accessToken</code> endpoint.
+        is the refresh_token which you obtained when you last used the `/accessToken` endpoint.
 
     #Users
 
@@ -3968,37 +3697,6 @@ components:
       description: With this flag set to true, the alerts for the user are omitted. You
         can retrieve the counts and objects for alerts using the /users/:userID/counts
         endpoint.
-
-    UserCountFiltersParameter:
-      name: filters
-      in: query
-      required: true
-      schema:
-        type: string
-        enum:
-          - attentionRequired
-          - tenderCategoryCash
-          - tenderCategoryCredit
-          - tenderCategoryDebit
-          - tenderCategoryGiftCard
-          - validationRequired
-          - recentlyAdded
-          - nonReceiptEmails
-          - triggeredReminders
-          - failedInboxSyncs
-      description: 'Comma separated list of filters you would like to get resource count
-        for. If not provided, it will return the count for all supported filters and resources associated with them.
-        <br/><br/>NOTE: If the "triggeredReminders" filter is used then you have to provide the "today" parameter too.'
-
-    UserCountTodayParameter:
-      name: today
-      in: query
-      required: true
-      schema:
-        type: string
-      description: This is a date string (YYYY-MM-DD) that represents today's date on
-        the user's device. This parameter is required if "triggeredReminders" filter is
-        used because the server needs to know current date in user's timezone.
 
     DeleteUserExportParameter:
         name: export
@@ -4025,7 +3723,7 @@ components:
       schema:
         type: string
       example: en-CA
-      description: Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to <code>/lookups/locales</code>. It defaults to the user's locale.
+      description: Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to `/lookups/locales`. It defaults to the user's locale.
 
     EmailParameter:
       name: email
@@ -4054,25 +3752,6 @@ components:
         type: string
       description: The credential type for your client's users that you wish to check.
         If your client only has one credential type, this parameter may be omitted.
-
-    # Transaction Parameters
-
-    TransactionIdParameter:
-      name: id
-      in: path
-      description: A unique ID that identifies this transaction in the Sensibill system.
-      required: true
-      schema:
-        type: string
-
-    TransactionTimeoutParameter:
-      name: timeout
-      in: query
-      description: Number of milliseconds to wait for a response. The default is 5 minutes.
-      required: false
-      schema:
-        type: integer
-        default: 300000
 
     #Exports
 
