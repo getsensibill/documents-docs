@@ -2776,7 +2776,7 @@ components:
           example: '2020-12-18T21:58:18.780Z'
         fileURL:
           type: string
-          example: "https://receipts-sandbox.sensibill.io/api/v1/exports/IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA/contents"
+          example: "https://receipts-sandbox.sensibill.io/api/v2/exports/IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA/contents"
           description: The URL that can be used to download the contents of the export.
         criteria:
           $ref: '#/components/schemas/FlatCriteriaDto'
