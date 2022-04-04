@@ -7,6 +7,23 @@
     },
     {
       "type": "group",
+      "title": "Release Notes",
+      "uri": "docs/Release-Notes.md",
+      "items": [
+        {
+          "type": "item",
+          "title": "March 30, 2022 Release",
+          "uri": "docs/2022.03.30.md"
+        },
+        {
+          "type": "item",
+          "title": "March 15, 2022 Release",
+          "uri": "docs/2022.03.15.md"
+        }
+      ]
+    },
+    {
+      "type": "group",
       "title": "Authentication",
       "uri": "docs/Authentication.md",
       "items": [
