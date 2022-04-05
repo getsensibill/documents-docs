@@ -3334,6 +3334,8 @@ components:
           description: "A unique identifier that was passed on upload to ensure that retries can happen without overriding data."
           type: string
           example: "123456"
+        accountMetadata:
+          $ref: '#/components/schemas/DocumentAccountMetadataDto'
         arrivalDateTime:
           description: "The date and time that the document was submitted to our system. With no explicit timezone information."
           type: string
@@ -3417,6 +3419,8 @@ components:
           type: string
           description: "A unique identifier that was passed on upload to ensure that retries can happen without overriding data."
           example: 123-receipt-clientId
+        accountMetadata:
+          $ref: '#/components/schemas/DocumentAccountMetadataDto'
         arrivalDateTime:
           type: string
           description: "The date and time that the document was submitted to our system. With no explicit timezone information."
