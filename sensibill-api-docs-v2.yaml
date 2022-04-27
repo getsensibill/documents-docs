@@ -1,18 +1,18 @@
----
 openapi: 3.0.3
 info:
   title: Sensibill API
   description: The Sensibill Platform API
-  version: 2.0.0
+  version: 2.2022.3.30
   contact:
-    url: https://getsensibill.com/contact
-
+    url: 'https://getsensibill.com'
+    email: prodsupport@getsensibill.com
+    name: Sensibill
+  termsOfService: 'https://getsensibill.com/terms-of-service'
 x-json-schema-faker:
   locale: en
   min-items: 1
   max-items: 3
   resolve-json-path: true
-
 tags:
   - name: Home
     description: Home
@@ -28,25 +28,22 @@ tags:
     description: Merchants
   - name: Users
     description: Users
-
 servers:
-  - url: https://{environment}.sensibill.io/api/v2
+  - url: 'https://{environment}.sensibill.io/api/v2'
     variables:
       environment:
         default: receipts-sandbox
         enum:
           - receipts-sandbox
-
 paths:
-  # Home endpoints ########################
   /:
     get:
-      operationId: 'getApiInfo'
+      operationId: getApiInfo
       tags:
         - Home
       security: []
       summary: API Home Endpoint
-      description: The API Home Endpoint returns general information about the Sensibill API. It should be the first point of contact for any system integrating with Sensibill, as it will provide clients with up-to-date URLs for other endpoints, as well as status information on the general Sensibill architecture.
+      description: 'The API Home Endpoint returns general information about the Sensibill API. It should be the first point of contact for any system integrating with Sensibill, as it will provide clients with up-to-date URLs for other endpoints, as well as status information on the general Sensibill architecture.'
       responses:
         '200':
           description: Success. This is the only valid status code from the home endpoint. Anything else indicates internal server problems.
@@ -54,40 +51,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiInfoDto'
-
-  # Auth endpoints #######################
-
   /jwtAuthenticate:
     post:
       operationId: authenticateWithJwt
       tags:
         - Authentication
       summary: Authentication using JWT
-      description: "Allows clients to authenticate and acquire an access token using a JSON Web Token.
-        <br/><br/>If successful, the response includes a user or client access token which can be used
-        as a session token for other authenticated endpoints in the Sensibill API.
-        <br/><br/>There are two types of access tokens - user tokens and client tokens. Passing in your
-        clientID in the 'sub' claim (or individual ID claim field) of your JWT will return
-        a client access token. Passing a user's access ID in your ID Claim field will return
-        a user access token instead.
-        <br/><br/>Your client account must be configured to allow JWT (please reach out to the Sensibill
-        Support Team). The API supports JWS and JWE as JWT implementations.
-        <br/><br/>JWS currently supports RSA and ECDSA signing algorithms (RS256, RS384, RS512, ES256,
-        ES384, ES512). Public keys for signature verification should be made available through
-        a publicly accessible URL. JWS header must have
-        'alg' and 'kid' parameters and the payload must have at least 'sub' and 'iat'
-        claims. The 'sub' claim is used to identify either a user or a client. If there
-        is a desire to use another claim for those purposes then it can be configured during
-        the client account setup. JWS implementation also
-        supports 'exp', 'aud', 'iss' and 'scp' claims. If there is a need to validate
-        those claims they should be configured as part of the client account setup.
-        <br/><br/>JWE currently supports RSAES OAEP using default parameters ('alg': RSA-OAEP) for encrypting
-        the Content Encryption Key (CEK) and AES GCM using 256-bit key ('enc': A256GCM)
-        for encrypting the content. Please reach out to the Sensibill Support Team to receive
-        Sensibill’s public key to be used for JWT encryption. JWE’s
-        content is expected to be a JWS conforming to the JWS requirements mentioned earlier.
-        <br/><br/>The response also returns a token_id. This can not be used for authenticating regular
-        requests, but is required for using our query parameter based signature method."
+      description: 'Allows clients to authenticate and acquire an access token using a JSON Web Token. <br/><br/>If successful, the response includes a user or client access token which can be used as a session token for other authenticated endpoints in the Sensibill API. <br/><br/>There are two types of access tokens - user tokens and client tokens. Passing in your clientID in the ''sub'' claim (or individual ID claim field) of your JWT will return a client access token. Passing a user''s access ID in your ID Claim field will return a user access token instead. <br/><br/>Your client account must be configured to allow JWT (please reach out to the Sensibill Support Team). The API supports JWS and JWE as JWT implementations. <br/><br/>JWS currently supports RSA and ECDSA signing algorithms (RS256, RS384, RS512, ES256, ES384, ES512). Public keys for signature verification should be made available through a publicly accessible URL. JWS header must have ''alg'' and ''kid'' parameters and the payload must have at least ''sub'' and ''iat'' claims. The ''sub'' claim is used to identify either a user or a client. If there is a desire to use another claim for those purposes then it can be configured during the client account setup. JWS implementation also supports ''exp'', ''aud'', ''iss'' and ''scp'' claims. If there is a need to validate those claims they should be configured as part of the client account setup. <br/><br/>JWE currently supports RSAES OAEP using default parameters (''alg'': RSA-OAEP) for encrypting the Content Encryption Key (CEK) and AES GCM using 256-bit key (''enc'': A256GCM) for encrypting the content. Please reach out to the Sensibill Support Team to receive Sensibill’s public key to be used for JWT encryption. JWE’s content is expected to be a JWS conforming to the JWS requirements mentioned earlier. <br/><br/>The response also returns a token_id. This can not be used for authenticating regular requests, but is required for using our query parameter based signature method.'
       requestBody:
         $ref: '#/components/requestBodies/JwtAuthenticateRequest'
       responses:
@@ -98,49 +68,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/JwtAuthenticateResponseDto'
         '400':
-          description: Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.
+          description: 'Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.'
         '401':
           description: Unauthorized. This will occur if the credentials you have provided are invalid.
-
   /invalidate:
     post:
       operationId: invalidateAccessToken
       tags:
         - Authentication
       summary: Invalidate access token
-      description: "This endpoint can be used to permanently invalidate an access token. Simply
-        POST to this endpoint using a normal authenticated
-        request, and whatever access token was used in the request will be invalid
-        for any further requests."
+      description: 'This endpoint can be used to permanently invalidate an access token. Simply POST to this endpoint using a normal authenticated request, and whatever access token was used in the request will be invalid for any further requests.'
       responses:
         '200':
           description: Success. The token was successfully invalidated.
         '401':
           description: Unauthorized. This will occur if the credentials you have provided are invalid.
-
   /logout:
     get:
       operationId: logout
       tags:
         - Authentication
       summary: Logout user
-      description: "Performs a user logout, clearing the session and invalidating the access
-        token. Works similarly to /invalidate, but simply as a GET call."
+      description: 'Performs a user logout, clearing the session and invalidating the access token. Works similarly to /invalidate, but simply as a GET call.'
       responses:
         '200':
-          description: Success. The user was logged out. This is the only valid status code
-            from the logout endpoint. Anything else indicates internal server problems.
-
+          description: Success. The user was logged out. This is the only valid status code from the logout endpoint. Anything else indicates internal server problems.
   /clientInfo:
     get:
       operationId: getClientInfo
       tags:
         - Authentication
       summary: Client information
-      description: "Allows a client to retrieve information about itself. You can use this endpoint
-        with the client's OAuth key and secret using Basic authentication, with a client
-        access token, or with a user access token. When using a client access token, the
-        response also includes the expiration time for the token used."
+      description: 'Allows a client to retrieve information about itself. You can use this endpoint with the client''s OAuth key and secret using Basic authentication, with a client access token, or with a user access token. When using a client access token, the response also includes the expiration time for the token used.'
       responses:
         '200':
           description: Success. The information for the client was retrieved and returned.
@@ -152,22 +111,13 @@ paths:
           description: Unauthorized. This will occur if the credentials provided are invalid.
         '403':
           description: Access Error. This will occur if the credentials provided are valid but not associated with a suitable client.
-
   /authorizationGrant:
     get:
       operationId: getAuthorizationGrant
       tags:
         - Authentication
       summary: Request an authorization grant
-      description: "Allows clients to request an authorization grant to begin the OAuth2 flow. As an OAuth2 endpoint, all of the parameters and result variables from this endpoint have names that use underscores, versus the rest of the API which is camel-cased.
-        <br/><br/>Clients must provide a username and password in the Authorization header of the request (or equivalent accessID, accessSecret and credentialType for SSO clients).
-        This can be accomplished by setting a 'basic' authentication header using the user's username and password in compliance with Section 2 of RFC 2617 like shown below:
-        <br/><br/>`Authorization: 'Basic base64(username:password)'`
-        <br/><br/><strong>Types of secrets</strong>
-        <br/><br/>Sensibill supports 2 modes of operation for client secrets:
-        <br/><br/>In the case where a client can guarantee a secret that is closely guarded, it allows for user administration support (e.g, deactivate, reactivate users, etc)
-        <br/>In the case where the secret may not be so secret ie. embedded in an application, the administrative actions are not allowed.
-        <br/><br/>For an example, please refer to <a href='./apiref/demo.html#step_five'>'Authentication Step Five' of the jQuery Demo</a>."
+      description: 'Allows clients to request an authorization grant to begin the OAuth2 flow. As an OAuth2 endpoint, all of the parameters and result variables from this endpoint have names that use underscores, versus the rest of the API which is camel-cased. <br/><br/>Clients must provide a username and password in the Authorization header of the request (or equivalent accessID, accessSecret and credentialType for SSO clients). This can be accomplished by setting a ''basic'' authentication header using the user''s username and password in compliance with Section 2 of RFC 2617 like shown below: <br/><br/>`Authorization: ''Basic base64(username:password)''` <br/><br/><strong>Types of secrets</strong> <br/><br/>Sensibill supports 2 modes of operation for client secrets: <br/><br/>In the case where a client can guarantee a secret that is closely guarded, it allows for user administration support (e.g, deactivate, reactivate users, etc) <br/>In the case where the secret may not be so secret ie. embedded in an application, the administrative actions are not allowed. <br/><br/>For an example, please refer to <a href=''./apiref/demo.html#step_five''>''Authentication Step Five'' of the jQuery Demo</a>.'
       parameters:
         - $ref: '#/components/parameters/ClientIDParameter'
         - $ref: '#/components/parameters/ResponseTypeParameter'
@@ -182,28 +132,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthorizationResponse'
         '400':
-          description: "Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter. It can also occur if you try to log in using a credentialType which your client is not authorized for."
+          description: 'Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter. It can also occur if you try to log in using a credentialType which your client is not authorized for.'
         '401':
-          description: "Unauthorized. This will occur if the credentials you have provided are invalid."
-
+          description: Unauthorized. This will occur if the credentials you have provided are invalid.
   /accessToken:
     post:
       operationId: createAccessToken
       tags:
         - Authentication
       summary: Obtain an Access Token
-      description: "Allows a client to use its credentials to obtain an access token, to swap an authorization grant for an access token, or to swap a refresh token for a new access token. There are two types of access tokens - user tokens and client tokens.
-        <br/><br/>A client token authenticates a specific client, e.g. your architecture and servers. client tokens can be used to access any resources owned by the client, such as general information on users your client has created. Client tokens are also required to register new users or make requests on their behalf such as the user posting a receipt.
-        <br/><br/>A user token authenticates a specific user to our system, e.g. Jane Doe of Winnipeg, Manitoba. A user token will be required if you want to access specific data about a user, such as the details of that user's receipts.
-        <br/><br/>Token expiry information is in the `expires_in` and `refresh_expires_in` fields.
-        <br/><br/>You can also retrieve the expiration times for user and client access tokens using the user GET endpoint, `/users/:userID`, and the clientInfo GET endpoint, `/clientInfo`, respectively.
-        <br/><br/>No matter which kind of access token is being requested, the client MUST include their Client Key and Client Secret as the username and password, respectively, in the HTTP Authorization header, on top of providing required parameters below.
-        <br/><br/>This can be accomplished by setting a 'basic' authentication header using the Client Key and Client Secret as username and password like shown below:
-        <br/><br/>`Authorization: 'Basic base64(ClientKey:ClientSecret)'`
-        <br/><br/>The access token is currently always a bearer token, which should be sent in the 'Authorization' header in the format 'Bearer accessToken'.
-        <br/><br/>In the future, other token types may also be used, so please check the `token_type` provided in the response.
-        <br/><br/>For an example, please refer to <a href='./apiref/demo.html#step_six'>'Authentication Step Six' of the jQuery Demo</a>.
-        <br/><br/>The response also returns a `token_id`. This can not be used for authenticating regular requests, but is required for using our query parameter based signature method."
+      description: 'Allows a client to use its credentials to obtain an access token, to swap an authorization grant for an access token, or to swap a refresh token for a new access token. There are two types of access tokens - user tokens and client tokens. <br/><br/>A client token authenticates a specific client, e.g. your architecture and servers. client tokens can be used to access any resources owned by the client, such as general information on users your client has created. Client tokens are also required to register new users or make requests on their behalf such as the user posting a receipt. <br/><br/>A user token authenticates a specific user to our system, e.g. Jane Doe of Winnipeg, Manitoba. A user token will be required if you want to access specific data about a user, such as the details of that user''s documents. <br/><br/>Token expiry information is in the `expires_in` and `refresh_expires_in` fields. <br/><br/>You can also retrieve the expiration times for user and client access tokens using the user GET endpoint, `/users/:userID`, and the clientInfo GET endpoint, `/clientInfo`, respectively. <br/><br/>No matter which kind of access token is being requested, the client MUST include their Client Key and Client Secret as the username and password, respectively, in the HTTP Authorization header, on top of providing required parameters below. <br/><br/>This can be accomplished by setting a ''basic'' authentication header using the Client Key and Client Secret as username and password like shown below: <br/><br/>`Authorization: ''Basic base64(ClientKey:ClientSecret)''` <br/><br/>The access token is currently always a bearer token, which should be sent in the ''Authorization'' header in the format ''Bearer accessToken''. <br/><br/>In the future, other token types may also be used, so please check the `token_type` provided in the response. <br/><br/>For an example, please refer to <a href=''./apiref/demo.html#step_six''>''Authentication Step Six'' of the jQuery Demo</a>. <br/><br/>The response also returns a `token_id`. This can not be used for authenticating regular requests, but is required for using our query parameter based signature method.'
       parameters:
         - $ref: '#/components/parameters/GrantTypeParameter'
         - $ref: '#/components/parameters/TokenRedirectURIParameter'
@@ -219,12 +157,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/AccessTokenResponseDto'
         '400':
-          description: Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter. It can also occur if you put in the wrong Redirect URI, for example, if you put one that doesn't match what you provided when you made the authorization grant request.
+          description: 'Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter. It can also occur if you put in the wrong Redirect URI, for example, if you put one that doesn''t match what you provided when you made the authorization grant request.'
         '401':
           description: Unauthorized. This will occur if the client key/secret you have provided is invalid.
-
-  # Documents endpoints #######################
-
   /documents:
     get:
       tags:
@@ -256,6 +191,23 @@ paths:
             minimum: 0
             maximum: 100
             default: 0
+        - name: sortBy
+          in: query
+          description: |
+            Document attribute to sort the response data. The default sort order is descending, but this can be specified using the `orderBy` filter. \
+            Current acceptable values are: `arrivalDateTime`, `documentDate`, or `documentTime`
+          required: false
+          schema:
+            $ref: '#/components/schemas/DocumentSortByEnum'
+        - name: orderBy
+          in: query
+          description: |
+            If sorting the returned documents with the `sortBy` filter, this orderBy filter allows you to specify a sort order. \
+            This will be handy if you want to sort in ascending order since the default sort order is descending. \
+            Current acceptable values (case insensitive) are: `ASC`, `DESC`
+          required: false
+          schema:
+            $ref: '#/components/schemas/DocumentOrderByEnum'
         - name: filter.accountMetadata.account
           in: query
           description: |
@@ -265,18 +217,19 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/GenericIdString"
+              $ref: '#/components/schemas/GenericIdString'
             maxItems: 20
         - name: filter.accountMetadata.account.exists
           in: query
           description: |
-            This is used to match and include documents where a value *exixts* for the `accountMetadata.account` property. \
-            Only `true` or `false` boolean values are accepted. A mix of operators with basic values are not supported. 
+            This is used to match and include documents where a value *exists* for the `accountMetadata.account` property. \
+            Only `true` or `false` boolean values are accepted. A mix of operators with basic values is not supported. 
             If `accountMetadata.account.exists` is provided together with plain values for account, this `exists` operator is ignored. \
             **Example:** To filter all documents with `accountMetadata.account` not set, use `filter.accountMetadata.account.exists=false`
           required: false
           schema:
-            $ref: "#/components/schemas/BooleanEnum"
+            type: boolean
+            format: boolean
         - name: filter.accountMetadata.transactionId
           in: query
           description: |
@@ -286,8 +239,19 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/GenericIdString"
+              $ref: '#/components/schemas/GenericIdString'
             maxItems: 20
+        - name: filter.accountMetadata.transactionId.exists
+          in: query
+          description: |
+            This is used to match and include documents where a value *exists* for the `accountMetadata.transactionId` property. \
+            Only `true` or `false` boolean values are accepted. A mix of operators with basic values is not supported. 
+            If `accountMetadata.account.exists` is provided together with plain values for account, this `exists` operator is ignored. \
+            **Example:** To filter all documents with `accountMetadata.transactionId` not set, use `filter.accountMetadata.transactionId.exists=false`
+          required: false
+          schema:
+            type: boolean
+            format: boolean
         - name: filter.amountDue
           in: query
           description: |
@@ -298,20 +262,20 @@ paths:
             type: array
             items:
               type: number
-              minimum: 0.0
+              minimum: 0
             maxItems: 20
         - name: filter.amountDue.gte
           in: query
           description: |
             This is a *greater than or equal to* filter on the `amountDue` value to filter the documents. `afterTax` is the document property considered for the match. \
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values are not supported. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
             **Examples:** \
             * with single operator: `filter.amountDue.gte=1000.55`
             * with other operators (behave like AND): `filter.amountDue.gte=1000.55&filter.amountDue.lte=1010.90`
           required: false
           schema:
             type: number
-            minimum: 0.0
+            minimum: 0
         - name: filter.amountDue.lte
           in: query
           description: |
@@ -319,11 +283,11 @@ paths:
             All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
             **Examples:** \
             * with single operator: `filter.amountDue.lte=1000.55`
-            * with other operators (behave like AND): `filter.amountDue.lte=1000.55&filter.amountDue.gte=1010.90`
+            * with other operators (behave like AND): `filter.amountDue.gte=1000.55&filter.amountDue.lte=1010.90`
           required: false
           schema:
             type: number
-            minimum: 0.0
+            minimum: 0
         - name: filter.arrivalDateTime.gte
           in: query
           description: |
@@ -349,7 +313,7 @@ paths:
             * with just date: `filter.arrivalDateTime.lte='2012-12-28'`
             * with date and time: `filter.arrivalDateTime.lte='2012-12-28T21:27'`
             * with date and time: `filter.arrivalDateTime.lte='2012-12-28 21:27:55.827'`
-            * with other operators (behave like AND): `filter.arrivalDateTime.lte='2012-12-28T21:27'&filter.arrivalDateTime.gte='2012-12-28T21:27:59'`
+            * with other operators (behave like AND): `filter.arrivalDateTime.gte='2012-12-28T21:27'&filter.arrivalDateTime.lte='2012-12-28T21:27:59'`
           required: false
           schema:
             type: string
@@ -364,7 +328,7 @@ paths:
             type: array
             items:
               type: string
-              format: /^[a-zA-Z0-9-_ ]+$/
+              format: '/^[a-zA-Z0-9-_ ]+$/'
               maxLength: 25
             maxItems: 20
         - name: filter.currencyCode
@@ -376,7 +340,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/CurrencyCodeDto"
+              $ref: '#/components/schemas/CurrencyCodeDto'
             maxItems: 20
         - name: filter.description
           in: query
@@ -390,7 +354,7 @@ paths:
             items:
               type: string
               maxLength: 75
-              pattern: ^[a-zA-Z0-9 ]+$
+              pattern: '^[a-zA-Z0-9 ]+$'
             maxItems: 20
         - name: filter.documentDate
           in: query
@@ -408,7 +372,7 @@ paths:
           in: query
           description: |
             This is a *greater than or equal to* filter on the `documentDate` to filter the documents. \
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values are not supported. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
             **Examples:** \
             * with single operator: `filter.documentDate.gte='2012-12-28'`
             * with other operators (behave like AND): `filter.documentDate.gte='2012-12-28'&filter.documentDate.lte='2023-12-28'`
@@ -420,10 +384,10 @@ paths:
           in: query
           description: |
             This is a *lesser than or equal to* filter on the `documentDate` to filter the documents. \
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values are not supported. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
             **Examples:** \
             * with single operator: `filter.documentDate.lte='2012-12-28'`
-            * with other operators (behave like AND): `filter.documentDate.lte='2012-12-28'&filter.documentDate.gte='2023-12-28'`
+            * with other operators (behave like AND): `filter.documentDate.gte='2012-12-28'&filter.documentDate.lte='2023-12-28'`
           required: false
           schema:
             type: string
@@ -437,7 +401,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/GenericIdString"
+              $ref: '#/components/schemas/GenericIdString'
             maxItems: 20
         - name: filter.documentTime
           in: query
@@ -448,7 +412,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/DocumentTimeDto"
+              $ref: '#/components/schemas/DocumentTimeDto'
             maxItems: 20
         - name: filter.documentTime.gte
           in: query
@@ -460,7 +424,7 @@ paths:
             * with other operators (behave like AND): `filter.documentTime.gte='10:00'&filter.documentTime.lte='14:00'`
           required: false
           schema:
-            $ref: "#/components/schemas/DocumentTimeDto"
+            $ref: '#/components/schemas/DocumentTimeDto'
         - name: filter.documentTime.lte
           in: query
           description: |
@@ -468,10 +432,10 @@ paths:
             All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
             **Example:** \
             * with single operator: `filter.documentTime.lte='10:00'`
-            * with other operators (behave like AND): `filter.documentTime.lte='10:00'&filter.documentTime.gte='14:00'`
+            * with other operators (behave like AND): `filter.documentTime.gte='10:00'&filter.documentTime.lte='14:00'`
           required: false
           schema:
-            $ref: "#/components/schemas/DocumentTimeDto"
+            $ref: '#/components/schemas/DocumentTimeDto'
         - name: filter.documentType
           in: query
           description: |
@@ -481,8 +445,18 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/DocumentTypeEnum"
+              $ref: '#/components/schemas/DocumentTypeEnum'
             maxItems: 2
+        - name: filter.expenseType
+          in: query
+          description: |
+            Array of `expenseType` to filter the documents. Currently supported values are [business, personal]. \
+            **Example:** `filter.expenseType='business'`
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ExpenseTypeEnum'
         - name: filter.foreignId
           in: query
           description: |
@@ -491,8 +465,14 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/GenericIdString"
+              $ref: '#/components/schemas/GenericIdString'
             maxItems: 20
+        - name: filter.fulltext
+          in: query
+          required: false
+          description: 'Will perform a case insensitive full text search on the following properties of a document: merchant name, total amount (after tax), item descriptions, document description. Total amount can match both the integer part or the amount with two decimals with the `.` as separator.'
+          schema:
+            type: string
         - name: filter.id
           in: query
           description: |
@@ -501,7 +481,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/GenericIdString"
+              $ref: '#/components/schemas/GenericIdString'
             maxItems: 20
         - name: filter.lastUpdateDateTime.gte
           in: query
@@ -528,7 +508,7 @@ paths:
             * with just date: `filter.lastUpdateDateTime.lte='2012-12-28'`
             * with date and time: `filter.lastUpdateDateTime.lte='2012-12-28T21:27'`
             * with date and time: `filter.lastUpdateDateTime.lte='2012-12-28 21:27:55.827'`
-            * with other operators (behave like AND): `filter.lastUpdateDateTime.lte='2012-12-28T21:27'&filter.lastUpdateDateTime.gte='2012-12-28T21:27:59'`
+            * with other operators (behave like AND): `filter.lastUpdateDateTime.gte='2012-12-28T21:27'&filter.lastUpdateDateTime.lte='2012-12-28T21:27:59'`
           required: false
           schema:
             type: string
@@ -542,7 +522,7 @@ paths:
             type: array
             items:
               type: string
-              format: /^[a-zA-Z0-9-_ ]+$/
+              format: '/^[a-zA-Z0-9-_ ]+$/'
             maxItems: 20
         - name: filter.merchantTaxIdNumber
           in: query
@@ -554,8 +534,19 @@ paths:
             type: array
             items:
               type: string
-              format: /^[a-zA-Z0-9-_:. ]+$/
+              format: '/^[a-zA-Z0-9-_:. ]+$/'
             maxItems: 20
+        - name: filter.notes
+          in: query
+          description: |
+            Array of `notes` values to filter the documents. The filter is case insentive and matches any document where the
+            notes contains the given value. \
+            **Example:** `filter.notes='Recurrent expense'&filter.description='Wedding cake insurance'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
         - name: filter.paymentTender
           in: query
           description: |
@@ -567,58 +558,147 @@ paths:
             items:
               $ref: '#/components/schemas/TenderTypesEnum'
             maxItems: 20
+        - name: filter.returnPeriodDuration
+          in: query
+          description: |
+            Array of `userMetadata.returnPeriod.duration` values to filter the documents. \
+            When an array of filter.returnPeriodDuration is provided, they will compose a logial `OR` chain in the query. A mix of operators with basic values is not supported. \
+            **Example:** (behave like OR): `filter.returnPeriodDuration=1&filter.returnPeriodDuration=10`
+          required: false
+          schema:
+            type: array
+            items:
+              type: number
+              minimum: 0
+        - name: filter.returnPeriodDuration.gte
+          in: query
+          description: |
+            This is a *greater than or equal to* filter on the `userMetadata.returnPeriod.duration` to filter the documents. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
+            **Examples:**
+            * with single operator: `filter.returnPeriodDuration.gte=1`
+            * with other operators (behave like AND): `filter.returnPeriodDuration.gte=1&filter.returnPeriodDuration.lte=10`
+          required: false
+          schema:
+            type: number
+            minimum: 0
+        - name: filter.returnPeriodDuration.lte
+          in: query
+          description: |
+            This is a *lesser than or equal to* filter on the `userMetadata.returnPeriod.duration` to filter the documents. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
+            **Examples:**
+            * with single operator: `filter.returnPeriodDuration.lte=10`
+            * with other operators (behave like AND): `filter.returnPeriodDuration.gte=1&filter.returnPeriodDuration.lte=10`
+          required: false
+          schema:
+            type: number
+            minimum: 0
+        - name: filter.returnPeriodUnit
+          in: query
+          description: |
+            Array of `userMetadata.returnPeriod.unit` values to filter the documents. Example: `filter.returnPeriodUnit='day'&filter.returnPeriodUnit='week'`
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PeriodUnitEnum'
         - name: filter.total
           in: query
           description: |
             Array of `total` values to filter the documents. `afterTax` is the document property considered for the match. \
-            When an array of filter.total is provided, they will compose a logial `OR` chain in the query. A mix of operators with basic values are not supported. \
+            When an array of filter.total is provided, they will compose a logial `OR` chain in the query. A mix of operators with basic values is not supported. \
             **Example:** (behave like OR): `filter.total=1000.55&filter.total=1010.90`
           required: false
           schema:
             type: array
             items:
               type: number
-              minimum: 0.0
+              minimum: 0
             maxItems: 20
         - name: filter.total.gte
           in: query
           description: |
             This is a *greater than or equal to* filter on the `total` to filter the documents. `afterTax` is the document property considered for the match. \
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values are not supported. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
             **Examples:**
             * with single operator: `filter.total.gte=1000.55`
             * with other operators (behave like AND): `filter.total.gte=1000.55&filter.total.lte=1010.90`
           required: false
           schema:
             type: number
-            minimum: 0.0
+            minimum: 0
         - name: filter.total.lte
           in: query
           description: |
             This is a *lesser than or equal to* filter on the `total` to filter the documents. `afterTax` is the document property considered for the match. \
-            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values are not supported. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
             **Examples:**
             * with single operator: `filter.total.lte=1000.55`
-            * with other operators (behave like AND): `filter.total.lte=1000.55&filter.total.gte=1010.90`
+            * with other operators (behave like AND): `filter.total.gte=1000.55&filter.total.lte=1010.90`
           required: false
           schema:
             type: number
-            minimum: 0.0
+            minimum: 0
         - name: filter.status
           in: query
           description: |
             Array of `status` values to filter the documents. Example: `filter.status='CompletedFailed'&filter.status='CompletedSuccess'`
           required: false
           schema:
-            $ref: "#/components/schemas/DocumentStatusTypesArray"
+            $ref: '#/components/schemas/DocumentStatusTypesArray'
         - name: filter.sourceFormat
           in: query
           required: false
           description: |
             Array of `sourceFormat` values to filter the documents. Example: `filter.sourceFormat='image'&filter.sourceFormat='pdf'`
           schema:
-            $ref: "#/components/schemas/DocumentSourceFormatsArray"
-        
+            $ref: '#/components/schemas/DocumentSourceFormatsArray'
+        - name: filter.warrantyPeriodDuration
+          in: query
+          description: |
+            Array of `userMetadata.warrantyPeriod.duration` values to filter the documents. \
+            When an array of filter.warrantyPeriodDuration is provided, they will compose a logial `OR` chain in the query. A mix of operators with basic values is not supported. \
+            **Example:** (behave like OR): `filter.warrantyPeriodDuration=1&filter.warrantyPeriodDuration=10`
+          required: false
+          schema:
+            type: array
+            items:
+              type: number
+              minimum: 0
+        - name: filter.warrantyPeriodDuration.gte
+          in: query
+          description: |
+            This is a *greater than or equal to* filter on the `userMetadata.warrantyPeriod.duration` to filter the documents. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
+            **Examples:**
+            * with single operator: `filter.warrantyPeriodDuration.gte=1`
+            * with other operators (behave like AND): `filter.warrantyPeriodDuration.gte=1&filter.warrantyPeriodDuration.lte=10`
+          required: false
+          schema:
+            type: number
+            minimum: 0
+        - name: filter.warrantyPeriodDuration.lte
+          in: query
+          description: |
+            This is a *lesser than or equal to* filter on the `userMetadata.warrantyPeriod.duration` to filter the documents. \
+            All filter conditions will compose a logical `AND` chain in the query. A mix of operators with basic values is not supported. \
+            **Examples:**
+            * with single operator: `filter.warrantyPeriodDuration.lte=10`
+            * with other operators (behave like AND): `filter.warrantyPeriodDuration.gte=1&filter.warrantyPeriodDuration.lte=10`
+          required: false
+          schema:
+            type: number
+            minimum: 0
+        - name: filter.warrantyPeriodUnit
+          in: query
+          description: |
+            Array of `userMetadata.warrantyPeriod.unit` values to filter the documents. Example: `filter.warrantyPeriodUnit='day'&filter.warrantyPeriodUnit='week'`
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PeriodUnitEnum'
       responses:
         '200':
           description: Success. The list of documents was successfully retrieved.
@@ -627,11 +707,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetDocumentListResponseDto'
         '400':
-          description: Bad Request. This will occur if you omit a required parameter, send an invalid parameter or if you provide an invalid value for a parameter.
+          description: 'Bad Request. This will occur if you omit a required parameter, send an invalid parameter or if you provide an invalid value for a parameter.'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        '403': 
-          description: Forbidden. This will occur if you try to use this endpoint without being setup for documents. 
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '403':
+          description: Forbidden. This will occur if you try to use this endpoint without being setup for documents.
         '500':
           description: Internal Server Error.
     post:
@@ -639,10 +719,9 @@ paths:
         - Documents
       operationId: postDocument
       summary: Create a new document
-      description: 'This allows clients to submit new documents to be processed by the system'
+      description: This allows clients to submit new documents to be processed by the system
       requestBody:
         $ref: '#/components/requestBodies/DocumentCreateRequest'
-
       responses:
         '200':
           description: Success. The new document was successfully submitted and its ID returned.
@@ -651,11 +730,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentCreationResponseDto'
         '400':
-          description: Bad Request. This will occur if you provide an invalid value for a request parameter, an invalid parameter or invalid body.
+          description: 'Bad Request. This will occur if you provide an invalid value for a request parameter, an invalid parameter or invalid body.'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        '403': 
-          description: Forbidden. This will occur if you try to use this endpoint without being setup for documents. 
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '403':
+          description: Forbidden. This will occur if you try to use this endpoint without being setup for documents.
         '500':
           description: Internal Server Error.
     delete:
@@ -677,17 +756,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentDeleteResponseDto'
         '400':
-          description: 'Bad Request. This will occur if you provide an invalid value for a request parameter, an invalid parameter or invalid body.
-            This can also happen if there is a problem deleting one or more of the documents in the request
-            The response will have the document id that caused the problem and the error message'
+          description: 'Bad Request. This will occur if you provide an invalid value for a request parameter, an invalid parameter or invalid body. This can also happen if there is a problem deleting one or more of the documents in the request The response will have the document id that caused the problem and the error message'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
         '403':
           description: Forbidden. This will occur if you try to use this endpoint without being setup for documents.
         '500':
           description: Internal Server Error.
-
-  /documents/{id}:
+  '/documents/{id}':
     get:
       tags:
         - Documents
@@ -706,9 +782,9 @@ paths:
         '400':
           description: Bad Request. This will occur if you provide an invalid value for a request parameter.
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-        '403': 
-          description: Forbidden. This will occur if you try to use this endpoint without being setup for documents. 
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '403':
+          description: Forbidden. This will occur if you try to use this endpoint without being setup for documents.
         '404':
           description: Not Found. The document ID you have provided is not one of this user's documents.
         '500':
@@ -720,14 +796,15 @@ paths:
       operationId: editDocument
       description: |
         This endpoint allows you to update a specific subset of data for a single document given its ID. \
-        The schema defined below outlines the fields which can be updated.
+        The schema defined below outlines the fields which can be updated. 
+        To unset a specific field you can pass empty string or null. Numeric or Enum fileds must be null to unset.
       parameters:
         - name: id
           in: path
           description: A unique ID that identifies this document in the Sensibill system.
           required: true
           schema:
-            $ref: "#/components/schemas/GenericIdString"
+            $ref: '#/components/schemas/GenericIdString'
       requestBody:
         description: An object composed of all the fields you want to edit for the given document.
         required: true
@@ -745,64 +822,119 @@ paths:
         '400':
           description: Bad Request. This will occur if you provide an invalid value for a request parameter.
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
         '403':
           description: Forbidden. This will occur if you try to use this endpoint without being setup for documents.
         '404':
           description: Not Found. The document ID you have provided is not one of this user's documents.
         '500':
           description: Internal Server Error.
-
+  '/documents/{id}/image':
+    get:
+      operationId: documentImage
+      tags:
+        - Documents
+      summary: Get an image version of the document.
+      description: 'This endpoint allows you to get an image (jpeg) for any type of document(image, pdf, html_email, etc..).  <br/>This will be the url that was returned in the imagePreview field in the GET documents details data format endpoint. <br/><br/><strong>Important</strong>: This may take up to 20 seconds to return for pdf or email documents when calling for the first time'
+      parameters:
+        - name: id
+          in: path
+          description: A unique ID that identifies this document in the Sensibill system.
+          required: true
+          schema:
+            $ref: '#/components/schemas/GenericIdString'
+      responses:
+        '200':
+          description: Success. Successfully returned the jpeg image of the document.
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: 'Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '403':
+          description: Forbidden. This will occur if you attempt to use a client token with this endpoint. This endpoint must be used with a user-token.
+        '404':
+          description: Not Found. The receiptID you have provided is not one of this user's documents.
+  '/documents/{id}/pdf':
+    get:
+      operationId: documentPdf
+      tags:
+        - Documents
+      summary: Get the orginal pdf of a pdf/pdf_email source format document.
+      description: 'This endpoint allows you to get the original pdf for any pdf source format document (pdf or pdf_email).  <br/>This will be the url that was returned in the url field in the GET document details data format endpoint for pdf documents. <br/><br/><strong>Important</strong>: This endpoint can only be called for pdf or pdf_email source format documents and will not work with other document source format types'
+      parameters:
+        - name: id
+          in: path
+          description: A unique ID that identifies this document in the Sensibill system.
+          required: true
+          schema:
+            $ref: '#/components/schemas/GenericIdString'
+      responses:
+        '200':
+          description: Success. Successfully returned the original document pdf.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: 'Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '403':
+          description: Forbidden. This will occur if you attempt to use a client token with this endpoint. This endpoint must be used with a user-token.
+        '404':
+          description: Not Found. The receiptID you have provided is not one of this user's documents.
   /documents/status:
     get:
-        tags:
-          - Documents
-        summary: 'Query documents for processing status updates'
-        description: 'Query a list of documents (using their id) for their processing status'
-        operationId: getDocumentsStatus
-        parameters:
-          - name: id
-            in: query
-            description: |
-              The unique identifier for the document in the Sensibill system. \
-              You can query up to ten Ids at once by appending each pair with the `&` character
-            required: true
-            schema:
-              type: array
-              minItems: 1
-              maxItems: 10
-              items:
-                $ref: "#/components/schemas/GenericIdString"
-          - name: timeout
-            in: query
-            description: |
-              The most amount of time (in seconds) that the client wants to wait for a response from the server. \
-              A response is immediately returned if **timeout is omitted**, but its value cannot be more than 25 seconds (max timeout) if provided.
-            required: false
-            schema:
-              type: integer
-              maximum: 25
-              minimum: 1
-              example: 20
-        
-        responses:
-          '200':
-            description: Success. The list of document statuses was successfully retrieved.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/DocumentsStatusResponseDto'
-          '400':
-            description: Bad Request. This will occur if you omit a required parameter, send an invalid parameter or if you provide an invalid value for a parameter.
-          '401':
-            description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-          '403': 
-            description: Forbidden. This will occur if you try to use this endpoint without being setup for documents. 
-          '500':
-            description: Internal Server Error.
-            
-  # Export endpoints #######################
-
+      tags:
+        - Documents
+      summary: Query documents for processing status updates
+      description: Query a list of documents (using their id) for their processing status
+      operationId: getDocumentsStatus
+      parameters:
+        - name: id
+          in: query
+          description: |
+            The unique identifier for the document in the Sensibill system. \
+            You can query up to ten Ids at once by appending each pair with the `&` character
+          required: true
+          schema:
+            type: array
+            minItems: 1
+            maxItems: 10
+            items:
+              $ref: '#/components/schemas/GenericIdString'
+        - name: timeout
+          in: query
+          description: |
+            The most amount of time (in seconds) that the client wants to wait for a response from the server. \
+            A response is immediately returned if **timeout is omitted**, but its value cannot be more than 25 seconds (max timeout) if provided.
+          required: false
+          schema:
+            type: integer
+            maximum: 25
+            minimum: 1
+            example: 20
+      responses:
+        '200':
+          description: Success. The list of document statuses was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsStatusResponseDto'
+        '400':
+          description: 'Bad Request. This will occur if you omit a required parameter, send an invalid parameter or if you provide an invalid value for a parameter.'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '403':
+          description: Forbidden. This will occur if you try to use this endpoint without being setup for documents.
+        '500':
+          description: Internal Server Error.
   /exports:
     post:
       operationId: createExport
@@ -822,9 +954,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ExportCreateResponseDto'
         '400':
-          description: Bad Request. This will occur if you omit a required parameter, if you provide an invalid value for a required parameter, or if you exceed the limit of 500 receipts in an export.
+          description: 'Bad Request. This will occur if you omit a required parameter, if you provide an invalid value for a required parameter, or if you exceed the limit of 500 documents in an export.'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
         '403':
           description: Forbidden. This will occur if you attempt to use a client token with this endpoint. This endpoint must be used with a user-token.
     get:
@@ -842,13 +974,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ExportsStatusDto'
         '400':
-          description: Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.
+          description: 'Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
         '403':
           description: Forbidden. This will occur if you attempt to use a client token with this endpoint. This endpoint must be used with a user-token.
-
-  /exports/{id}:
+  '/exports/{id}':
     get:
       operationId: getExportById
       tags:
@@ -868,24 +999,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/ExportsResponseDto'
         '400':
-          description: Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.
+          description: 'Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
         '403':
           description: Forbidden. This will occur if you attempt to use a client token with this endpoint. This endpoint must be used with a user-token.
         '404':
           description: Not Found. The export ID you have provided is not one of this user's exports.
-
-  # Lookups endpoints #######################
-
   /lookups/currencies:
     get:
       operationId: getCurrencies
       tags:
         - Lookups
       summary: Supported Currencies
-      description: This API call allows you to retrieve the list of currencies that we currently support in our system. To call
-        this endpoint, you can use either a client-token or a user-token.
+      description: 'This API call allows you to retrieve the list of currencies that we currently support in our system. To call this endpoint, you can use either a client-token or a user-token.'
       parameters:
         - $ref: '#/components/parameters/LocaleParameter'
       responses:
@@ -896,16 +1023,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/LookupCurrenciesResponse'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
   /lookups/locales:
     get:
       operationId: getLocales
       tags:
         - Lookups
       summary: Supported Locales
-      description: This API call allows you to retrieve the list of locales that we currently support in our system. To call
-        this endpoint, you can use either a client-token or a user-token.
+      description: 'This API call allows you to retrieve the list of locales that we currently support in our system. To call this endpoint, you can use either a client-token or a user-token.'
       responses:
         '200':
           description: Success
@@ -914,17 +1039,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/LookupLocalesResponse'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-  
-  # Merchants endpoints #######################
-  
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
   /merchants:
     get:
       operationId: getMerchants
       tags:
         - Merchants
       summary: Merchants list
-      description: "This endpoint allows you to retrieve a list of merchants with a name, optional merchantID, and optional receipt category that corresponds to the merchant category. Limited to 20 and in ascending alphabetical order. This endpoint requires authentication. Both a user token or a client token are accepted. Requests using a user token will match against merchants available for all users and also against merchant names the user has used on their receipts. Those merchants will only have a name, and no merchantID or category."
+      description: 'This endpoint allows you to retrieve a list of merchants with a name, optional merchantID, and optional receipt category that corresponds to the merchant category. Limited to 20 and in ascending alphabetical order. This endpoint requires authentication. Both a user token or a client token are accepted. Requests using a user token will match against merchants available for all users and also against merchant names the user has used on their documents. Those merchants will only have a name, and no merchantID or category.'
       parameters:
         - $ref: '#/components/parameters/MerchantsNameParameter'
       responses:
@@ -936,16 +1058,13 @@ paths:
                 $ref: '#/components/schemas/MerchantsDto'
         '500':
           description: Internal server error.
-
-  # User Endpoints #######################
-
   /users:
     post:
       operationId: createUser
       tags:
         - Users
       summary: Register a user
-      description: "This API call allows you to register a new user. To call this endpoint, you must use a client-token. You can not call this endpoint without it."
+      description: 'This API call allows you to register a new user. To call this endpoint, you must use a client-token. You can not call this endpoint without it.'
       requestBody:
         $ref: '#/components/requestBodies/UserRequest'
       responses:
@@ -956,34 +1075,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/RegisterUserResponseDto'
         '400':
-          description: Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.
+          description: 'Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
   /jwtRegister:
     post:
       operationId: registerWithJwt
       tags:
         - Users
       summary: Register a user using JWT
-      description: "This API call allows you to register a new user using a JSON Web Token.
-        <br/><br/>Your client account must be configured to allow JWT (please reach out to the
-        Sensibill Support Team). The API supports JWS and JWE as JWT implementations.
-        <br/><br/>JWS currently supports RSA and ECDSA signing algorithms (RS256, RS384, RS512, ES256,
-        ES384, ES512). Public keys for signature verification should be made available through
-        a publicly accessible URL. JWS header must have ''alg'' and ''kid'' parameters and
-        the payload must have at least ''sub'' and ''iat'' claims. The ''sub'' claim will
-        be used as a user access ID for the user being created. If there is a desire to
-        use another claim for those purposes then it can be configured during the client
-        account setup. JWS implementation also supports ''exp'', ''aud'', ''iss'' and ''scp''
-        claims. If there is a need to validate those claims they should be configured as
-        part of the client account setup.
-        <br/><br/>JWE currently supports RSAES OAEP using
-        default parameters (''alg'': RSA-OAEP) for encrypting the Content Encryption Key
-        (CEK) and AES GCM using 256-bit key (''enc'': ''A256GCM'') for encrypting the content.
-        Please reach out to the Sensibill Support Team to receive Sensibill’s public key
-        to be used for JWT encryption. JWE’s content is expected to be a JWS conforming
-        to the JWS requirements mentioned earlier."
+      description: 'This API call allows you to register a new user using a JSON Web Token. <br/><br/>Your client account must be configured to allow JWT (please reach out to the Sensibill Support Team). The API supports JWS and JWE as JWT implementations. <br/><br/>JWS currently supports RSA and ECDSA signing algorithms (RS256, RS384, RS512, ES256, ES384, ES512). Public keys for signature verification should be made available through a publicly accessible URL. JWS header must have ''''alg'''' and ''''kid'''' parameters and the payload must have at least ''''sub'''' and ''''iat'''' claims. The ''''sub'''' claim will be used as a user access ID for the user being created. If there is a desire to use another claim for those purposes then it can be configured during the client account setup. JWS implementation also supports ''''exp'''', ''''aud'''', ''''iss'''' and ''''scp'''' claims. If there is a need to validate those claims they should be configured as part of the client account setup. <br/><br/>JWE currently supports RSAES OAEP using default parameters (''''alg'''': RSA-OAEP) for encrypting the Content Encryption Key (CEK) and AES GCM using 256-bit key (''''enc'''': ''''A256GCM'''') for encrypting the content. Please reach out to the Sensibill Support Team to receive Sensibill’s public key to be used for JWT encryption. JWE’s content is expected to be a JWS conforming to the JWS requirements mentioned earlier.'
       requestBody:
         $ref: '#/components/requestBodies/JwtUserRequest'
       responses:
@@ -994,23 +1095,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/RegisterUserResponseDto'
         '400':
-          description: "Bad Request. This will occur if you omit a required parameter, if you provide an invalid value for a required parameter, or if the JSON Web Token is either incomplete or cannot be verified. This status code will also occur if you try to register the same user more than once. In that case, an InvalidParametersError response will be returned containing the error 'Access ID is already registered.'"
-
-  /users/{userID}:
+          description: 'Bad Request. This will occur if you omit a required parameter, if you provide an invalid value for a required parameter, or if the JSON Web Token is either incomplete or cannot be verified. This status code will also occur if you try to register the same user more than once. In that case, an InvalidParametersError response will be returned containing the error ''Access ID is already registered.'''
+  '/users/{userID}':
     get:
       operationId: getUserById
       tags:
         - Users
       summary: Retrieve account information
-      description: "This allows you to retrieve the account information for a user. The userID can be either the Sensibill specific userID or can be \"me\",
-        which will return the user object for the user who is authenticated with the access token.
-        <br/><br/>Accounts on the system can be in one of two states - registered or unregistered. For most normal purposes, you will deal only with registered accounts,
-        such as those you create using the registration endpoint. However, it is possible for an account to be on our system, but unregistered.
-        This can happen if we receive a receipt from a POS system for a user that is not yet on our system.
-        <br/><br/>This endpoint accepts both user tokens and client tokens.
-        <br/><br/>When using a user token, you are only allowed to retrieve the account information for the user associated with the access token you supply.
-        <br/><br/>You can only use a client token with this endpoint if that has been explicitly enabled on your account. Please contact the Sensibill team
-        in order to have this policy enabled on your account - it is disabled by default. When you request User information using a client token, only a limited number of fields will be returned."
+      description: 'This allows you to retrieve the account information for a user. The userID can be either the Sensibill specific userID or can be "me", which will return the user object for the user who is authenticated with the access token. <br/><br/>Accounts on the system can be in one of two states - registered or unregistered. For most normal purposes, you will deal only with registered accounts, such as those you create using the registration endpoint. However, it is possible for an account to be on our system, but unregistered. This can happen if we receive a document from a POS system for a user that is not yet on our system. <br/><br/>This endpoint accepts both user tokens and client tokens. <br/><br/>When using a user token, you are only allowed to retrieve the account information for the user associated with the access token you supply. <br/><br/>You can only use a client token with this endpoint if that has been explicitly enabled on your account. Please contact the Sensibill team in order to have this policy enabled on your account - it is disabled by default. When you request User information using a client token, only a limited number of fields will be returned.'
       parameters:
         - $ref: '#/components/parameters/UserIdParameter'
         - $ref: '#/components/parameters/ExcludeAlertsParameter'
@@ -1022,31 +1114,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserResponseDto'
         '400':
-          description: Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.
+          description: 'Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
         '403':
           description: Forbidden. This will occur if the access-token you have provided is not authorized to retrieve the information for the user you have requested. This can also occur if you attempt to use a client token with this endpoint.
         '404':
           description: Not Found. The userID you have provided is invalid. It should be either "me" or a valid userID.
-
     delete:
       operationId: deleteUser
       tags:
         - Users
       summary: Delete user account
-      description: "This allows you to delete a user account. The userID can be either the
-        Sensibill specific userID or \"me\", which
-        will delete the user object for the user who is authenticated with the access token.</br>This
-        endpoint can be used with either a client token or a user token.</br>When
-        using a user token, you are only allowed to delete the account information for the
-        user associated with the access token you
-        supply in.</br>The
-        optional export parameters may be passed as query parameters or in the request body.</br>In
-        order to use this endpoint with client tokens, you must have that feature explicitly
-        enabled on your account. It is disabled
-        by default. Please contact the Sensibill team in order to have this enabled.</br>
-        Deleting a user will also purge all receipts from Sensibill's system."
+      description: 'This allows you to delete a user account. The userID can be either the Sensibill specific userID or "me", which will delete the user object for the user who is authenticated with the access token.</br>This endpoint can be used with either a client token or a user token.</br>When using a user token, you are only allowed to delete the account information for the user associated with the access token you supply in.</br>The optional export parameters may be passed as query parameters or in the request body.</br>In order to use this endpoint with client tokens, you must have that feature explicitly enabled on your account. It is disabled by default. Please contact the Sensibill team in order to have this enabled.</br> Deleting a user will also purge all documents from Sensibill''s system.'
       parameters:
         - $ref: '#/components/parameters/UserIdParameter'
         - $ref: '#/components/parameters/DeleteUserExportParameter'
@@ -1059,28 +1139,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmptyObjectResponseDto'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
         '403':
           description: Forbidden. This will occur if the access-token you have provided is not authorized to retrieve the information for the user you have requested. This can also occur if you attempt to use a client token with this endpoint.
         '404':
           description: Not Found. The userID you have provided is invalid. It should be either "me" or a valid userID.
-
     put:
       operationId: upsertUser
       tags:
         - Users
       summary: Update account information
-      description: "This allows you to update the account information of a user.
-        <br/><br/>This endpoint can be used with either a user token or a client token.
-        <br/><br/>When using a user token, the userID can be either the Sensibill specific ID or \"me\",
-        which will point to the user object for the user who is authenticated with the access
-        token.
-        <br/><br/>In order to use this endpoint with a client token, you must have this policy explicitly enabled
-        on your account. It will be disabled by default. Please contact the Sensibill team if
-        you need to have this policy enabled on your account. When using a client token,  you
-        are only allowed to change the 'status' field on a user's account. This is provided
-        so that Clients can disable and re-enable
-        user accounts without requiring them to log in."
+      description: 'This allows you to update the account information of a user. <br/><br/>This endpoint can be used with either a user token or a client token. <br/><br/>When using a user token, the userID can be either the Sensibill specific ID or "me", which will point to the user object for the user who is authenticated with the access token. <br/><br/>In order to use this endpoint with a client token, you must have this policy explicitly enabled on your account. It will be disabled by default. Please contact the Sensibill team if you need to have this policy enabled on your account. When using a client token,  you are only allowed to change the ''status'' field on a user''s account. This is provided so that Clients can disable and re-enable user accounts without requiring them to log in.'
       parameters:
         - $ref: '#/components/parameters/UserIdParameter'
       requestBody:
@@ -1093,53 +1162,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmptyObjectResponseDto'
         '400':
-          description: Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.
+          description: 'Bad Request. This will occur if you omit a required parameter, or if you provide an invalid value for a required parameter.'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
         '403':
           description: Forbidden. This will occur if the access-token you have provided is not authorized to update the information for this user. This can also occur if you attempt to use a client token with this endpoint.
         '404':
           description: Not Found. The userID you have provided is invalid. It should be either "me" or a valid userID.
-
   /users/emailAvailability:
     get:
       operationId: getEmailAvailability
       tags:
         - Users
       summary: Check for the availability of an email address to register a new user.
-      description: "This endpoint allows you to check whether a particular email address to register a new account is available or not before you register a new user.<br/><br/>This endpoint can be used with either a client token or a user token."
+      description: This endpoint allows you to check whether a particular email address to register a new account is available or not before you register a new user.<br/><br/>This endpoint can be used with either a client token or a user token.
       parameters:
         - $ref: '#/components/parameters/EmailParameter'
       responses:
         '200':
-          description: Success. This status code will be issued both when the email address is available, and when it is not. You need to check the body of the response to see whether or not the email address is available.
+          description: 'Success. This status code will be issued both when the email address is available, and when it is not. You need to check the body of the response to see whether or not the email address is available.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmailAvailabilityResponseDto'
         '400':
-          description: Bad Request. This will occur if you omit the email address, or the email address provided is not well formed.
+          description: 'Bad Request. This will occur if you omit the email address, or the email address provided is not well formed.'
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
   /users/usernameAvailability:
     get:
       operationId: getUsernameAvailability
       tags:
         - Users
       summary: Check for the availability of a username.
-      description: "This endpoint allows you to check whether a particular username to register
-        a new account is available or not before you register a new user. If the given username is available, then this endpoint will return back a JSON object with the property
-        available set to true. If the username is taken, then this endpoint will return
-        back the property available set to false.
-        <br/><br/>This endpoint can be used with either a client token or a user token.
-        <br/><br/>In order to use this endpoint, you must have that policy explicitly enabled on your account. It is disabled by default. Please contact the Sensibill team in order to have this enabled."
+      description: 'This endpoint allows you to check whether a particular username to register a new account is available or not before you register a new user. If the given username is available, then this endpoint will return back a JSON object with the property available set to true. If the username is taken, then this endpoint will return back the property available set to false. <br/><br/>This endpoint can be used with either a client token or a user token. <br/><br/>In order to use this endpoint, you must have that policy explicitly enabled on your account. It is disabled by default. Please contact the Sensibill team in order to have this enabled.'
       parameters:
         - $ref: '#/components/parameters/UsernameParameter'
         - $ref: '#/components/parameters/UsernameAvailabilityCredentialTypeParameter'
       responses:
         '200':
-          description: Success. This status code will be issued both when the username is available, and when it is taken. You need to check the body of the response to see whether or not the username is available.
+          description: 'Success. This status code will be issued both when the username is available, and when it is taken. You need to check the body of the response to see whether or not the username is available.'
           content:
             application/json:
               schema:
@@ -1147,30 +1209,27 @@ paths:
         '400':
           description: Bad Request. This will occur if you omit the username.
         '401':
-          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
-
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
 components:
-
   schemas:
-
     ApiInfoDto:
       type: object
       properties:
         hostname:
           type: string
-          example: 'tor-some-name-api-04'
+          example: tor-some-name-api-04
         version:
           type: string
           example: '8124:8cd97163d91e'
         status:
           type: string
-          example: 'online'
+          example: online
         environment:
           type: string
-          example: 'receipts_sandbox'
+          example: receipts_sandbox
         name:
           type: string
-          example: 'Sensibill API Architecture - Receipts Sandbox'
+          example: Sensibill API Architecture - Receipts Sandbox
         booted_at:
           type: string
           format: date-time
@@ -1182,177 +1241,156 @@ components:
           properties:
             authorizationGrant:
               type: string
-              example: 'authorizationGrant'
+              example: authorizationGrant
             accessToken:
               type: string
-              example: 'accessToken'
+              example: accessToken
             logout:
               type: string
-              example: 'logout'
+              example: logout
             clientInfo:
               type: string
-              example: 'clientInfo'
+              example: clientInfo
             invalidateAccessToken:
               type: string
-              example: 'invalidate'
+              example: invalidate
             jwtAuthenticate:
               type: string
-              example: 'jwtAuthenticate'
+              example: jwtAuthenticate
             usernameAvailability:
               type: string
-              example: 'users/usernameAvailability'
+              example: users/usernameAvailability
             emailAvailability:
               type: string
-              example: 'users/emailAvailability'
+              example: users/emailAvailability
             registerUser:
               type: string
-              example: 'users'
+              example: users
             jwtRegister:
               type: string
-              example: 'jwtRegister'
+              example: jwtRegister
             users:
               type: string
-              example: 'users'
+              example: users
             userDetail:
               type: string
               example: 'users/:userId'
             deleteUser:
               type: string
-              example: 'users'
+              example: users
             updateUser:
               type: string
-              example: 'users'
+              example: users
             forgotpassword:
               type: string
-              example: 'users/forgotpassword'
+              example: users/forgotpassword
             resetpassword:
               type: string
-              example: 'users/resetpassword'
+              example: users/resetpassword
             exportDocuments:
               type: string
-              example: 'export'
+              example: export
             listExports:
               type: string
-              example: 'exports'
+              example: exports
             exportStatus:
               type: string
               example: 'export/:id'
             lookupSupportedCurrencies:
               type: string
-              example: 'lookups/currencies'
+              example: lookups/currencies
             lookupSupportedLocales:
               type: string
-              example: 'lookups/locales'
+              example: lookups/locales
             merchantsList:
               type: string
-              example: 'merchants'
+              example: merchants
             documentsList:
               type: string
-              example: 'documents'
+              example: documents
             documentsPost:
               type: string
-              example: 'documents'
+              example: documents
             documentsDelete:
               type: string
-              example: 'documents'
+              example: documents
             documentsPatch:
               type: string
               example: 'documents/:id'
             documentsDetail:
               type: string
               example: 'documents/:id'
-
     JwtAuthenticateRequestDto:
       type: object
       required:
-          - client
+        - client
       properties:
         client:
           type: string
           description: The clientID of the user's client.
-          example: 'first_canadian_bank'
-
+          example: first_canadian_bank
     AccessTokenRequestDto:
       type: object
       required:
-          - grant_type
-          - refresh_token
-          - redirect_uri
+        - grant_type
+        - refresh_token
+        - redirect_uri
       properties:
         grant_type:
           default: ''
           type: string
-          example: 'authorization_code'
-          description: "This is the type of authentication the client is presenting for its
-            access-token.</br> If the client is
-            looking for a client-token, then this should be set to 'client_credentials'.</br> If
-            the client is looking to swap an authorization grant for an access token, this
-            should be setto 'authorization_code'</br> If
-            the client is looking to swap a refresh_token for a new access token, this should
-            be setto 'refresh_token'"
+          example: authorization_code
+          description: 'This is the type of authentication the client is presenting for its access-token.</br> If the client is looking for a client-token, then this should be set to ''client_credentials''.</br> If the client is looking to swap an authorization grant for an access token, this should be setto ''authorization_code''</br> If the client is looking to swap a refresh_token for a new access token, this should be setto ''refresh_token'''
         redirect_uri:
           default: ''
           type: string
-          example: "https://testclient.com/redirect"
-          description: If the client is swapping an authorization code for an access token,
-            then this argument is required.If you are just obtaining a client token directly,
-            you do not need to provide a redirect_uri. This must be
-            the same redirect_uri that was provided to the authorizationGrant endpoint, and
-            must also match the redirect_uri which
-            was registered with your client when you received your client credentials.
+          example: 'https://testclient.com/redirect'
+          description: 'If the client is swapping an authorization code for an access token, then this argument is required.If you are just obtaining a client token directly, you do not need to provide a redirect_uri. This must be the same redirect_uri that was provided to the authorizationGrant endpoint, and must also match the redirect_uri which was registered with your client when you received your client credentials.'
         code:
           default: ''
           type: string
-          example: "DBhXEQiQiwqCV4hI61HX7NZfqCeGLpYt72ZCkAl-ZDQOjRKpKCVxBTLuhdc0-pX5xdM-4KfBdidwPJy05Oxs3w"
-          description: If the client is swapping an authorization code for an access token,
-            then this argument is required.If you are just obtaining a client token directly,
-            you do not need to provide a code. This parameteris the authorization_code which
-            you obtained when you used the authorizationGrant endpoint.
+          example: DBhXEQiQiwqCV4hI61HX7NZfqCeGLpYt72ZCkAl-ZDQOjRKpKCVxBTLuhdc0-pX5xdM-4KfBdidwPJy05Oxs3w
+          description: 'If the client is swapping an authorization code for an access token, then this argument is required.If you are just obtaining a client token directly, you do not need to provide a code. This parameteris the authorization_code which you obtained when you used the authorizationGrant endpoint.'
         refresh_token:
           default: ''
           type: string
-          description: If the client is swapping a refresh_token for an access token, then
-            this argument is required.Otherwise, this parameter should be omitted.This parameter
-            is the refresh_token which you obtained when you last used the access_token endpoint.
-
+          description: 'If the client is swapping a refresh_token for an access token, then this argument is required.Otherwise, this parameter should be omitted.This parameter is the refresh_token which you obtained when you last used the access_token endpoint.'
     JwtAuthenticateResponseDto:
       type: object
       properties:
         token_id:
           type: string
-          description: A random string that may be used to generate signed URLs for certain resources, in circumstances where it is not possible to pass an Authorization header. For example, when showing an embedded image in a web page.
-          example: 'FA0Ui__ecxisIrNowkytya8ff5vS9FNnxQHGE7EoT7Tl'
+          description: 'A random string that may be used to generate signed URLs for certain resources, in circumstances where it is not possible to pass an Authorization header. For example, when showing an embedded image in a web page.'
+          example: FA0Ui__ecxisIrNowkytya8ff5vS9FNnxQHGE7EoT7Tl
         access_token:
           type: string
           description: The access token which can be used as a bearer token for authenticated requests.
-          example: 'b9E3EbzmJLf2mGBVevKra8u8PjFKU4kUGIb2lLvoKHV4_bvbxHSi5K6uu32MvhGDvsJS9pdGn9aR-V4WVyTySg'
+          example: b9E3EbzmJLf2mGBVevKra8u8PjFKU4kUGIb2lLvoKHV4_bvbxHSi5K6uu32MvhGDvsJS9pdGn9aR-V4WVyTySg
         expires_in:
           type: integer
           description: The number of seconds until the token expires.
           example: 10800
-
     AccessTokenResponseDto:
       type: object
       properties:
         token_id:
           type: string
-          example: 'oRXBt_-3HsVLr1B_51U_bscYdp1-xrhqey0sBxJrEHD-'
+          example: oRXBt_-3HsVLr1B_51U_bscYdp1-xrhqey0sBxJrEHD-
         access_token:
           type: string
-          example: 'vVYGgu3HiktX4CgZVakDklQoL9uLw5qPibQdbMNt0dnH4L_oVTBHhXmDn-G99RJ6cimusHRhtERfZO7jtPkwDg'
+          example: vVYGgu3HiktX4CgZVakDklQoL9uLw5qPibQdbMNt0dnH4L_oVTBHhXmDn-G99RJ6cimusHRhtERfZO7jtPkwDg
         refresh_token:
           type: string
-          example: 'kLDmKsaak0vbiMiVn6p7V0HXaaI6rVkt6z5fNKpSLHE038fWG3wCwkL0QDDwdn3_z9k-9PKs7yaWx5qX52lnOA'
+          example: kLDmKsaak0vbiMiVn6p7V0HXaaI6rVkt6z5fNKpSLHE038fWG3wCwkL0QDDwdn3_z9k-9PKs7yaWx5qX52lnOA
         token_type:
           type: string
-          example: 'bearer'
+          example: bearer
         expires_in:
           type: integer
           example: 10800
         refresh_expires_in:
           type: integer
           example: 21600
-
     ClientPoliciesDto:
       type: object
       properties:
@@ -1470,8 +1508,8 @@ components:
               aliases:
                 type: array
                 items:
-                    type: string
-                    example: billpass.ca
+                  type: string
+                  example: billpass.ca
         featureOptions:
           type: object
           properties:
@@ -1715,47 +1753,32 @@ components:
                 showMerchantColors:
                   type: boolean
                   example: true
-
     userRequestProperties:
       type: object
       properties:
         credentialType:
           default: sensibill
           type: string
-          description: This is the type of credentials that will be used to identify the
-            newly created user uniquely to Sensibill. If a user is logging in with their
-            account on Sensibill, this parameter should be "sensibill". If you are implementing
-            a third-party single-sign-on based solution, this should be set to the credentialType
-            that you were issued with your client credentials.
+          description: 'This is the type of credentials that will be used to identify the newly created user uniquely to Sensibill. If a user is logging in with their account on Sensibill, this parameter should be "sensibill". If you are implementing a third-party single-sign-on based solution, this should be set to the credentialType that you were issued with your client credentials.'
         accessID:
           type: string
           example: test@test.com
-          description: If you are using third-party single-sign-on, then this parameter
-            is what is used to uniquely identify this user account to Sensibill systems.
-            It is equivalent to a username.
+          description: 'If you are using third-party single-sign-on, then this parameter is what is used to uniquely identify this user account to Sensibill systems. It is equivalent to a username.'
         accessSecret:
           type: string
-          description: If you are using third-party single-sign-on, then this parameter
-            is what is used to verify that you are the owner of this Sensibill account.
-            It is equivalent to a password.
+          description: 'If you are using third-party single-sign-on, then this parameter is what is used to verify that you are the owner of this Sensibill account. It is equivalent to a password.'
         email:
           type: string
           format: email
           example: test@test.com
-          description: The email address of the user. Typically only used by clients who
-            want to allow sending email notifications directly from Sensibill. May be required,
-            depending on your client configuration.
+          description: 'The email address of the user. Typically only used by clients who want to allow sending email notifications directly from Sensibill. May be required, depending on your client configuration.'
         password:
           type: string
-          description: The password for the user account. If you are creating a Sensibill
-            account, this parameter is required. If you are using third-party single-sign-on,
-            this parameter is optional
-
+          description: 'The password for the user account. If you are creating a Sensibill account, this parameter is required. If you are using third-party single-sign-on, this parameter is optional'
     UserRequestDto:
       allOf:
         - $ref: '#/components/schemas/commonRegistrationParameters'
         - $ref: '#/components/schemas/userRequestProperties'
-
     JwtUserRequestDtoProperties:
       type: object
       required:
@@ -1764,21 +1787,19 @@ components:
         client:
           type: string
           description: The clientID of the new user's client.
-
     JwtUserRequestDto:
       allOf:
         - $ref: '#/components/schemas/commonRegistrationParameters'
         - $ref: '#/components/schemas/JwtUserRequestDtoProperties'
-
     userUpdateDtoProperties:
       type: object
       properties:
         status:
           type: string
-          description: "The status of the user's account. Can be either 'registered' or 'disabled'. NOTE! If you set a user's account as 'disabled', no API calls will be able to be made for that user - their access tokens will no longer work, including the one you may be using to make this API call."
+          description: 'The status of the user''s account. Can be either ''registered'' or ''disabled''. NOTE! If you set a user''s account as ''disabled'', no API calls will be able to be made for that user - their access tokens will no longer work, including the one you may be using to make this API call.'
         receiptAccountEmail:
           type: string
-          description: "The email address to the user's receipt account. This must be unique across all users registered with Sensibill, including both Sensibill accounts and third-party single-sign-on accounts. This will always be converted to a lower case value. This can only be set after registration if you client has been setup to indicate this parameter is optional during registration. The email address must use a permitted domain for your client.  Note: the receiptAccountEmail can only be set once for a user."
+          description: 'The email address to the user''s receipt account. This must be unique across all users registered with Sensibill, including both Sensibill accounts and third-party single-sign-on accounts. This will always be converted to a lower case value. This can only be set after registration if you client has been setup to indicate this parameter is optional during registration. The email address must use a permitted domain for your client.  Note: the receiptAccountEmail can only be set once for a user.'
         firstName:
           type: string
           description: The first name of the user.
@@ -1787,52 +1808,42 @@ components:
           description: The last name of the user.
         defaultCurrency:
           type: string
-          description: Provides the default currency for the user. Must be an currency-code on the supported list of currencies, which can be obtained by going to /lookups/currencies
+          description: 'Provides the default currency for the user. Must be an currency-code on the supported list of currencies, which can be obtained by going to /lookups/currencies'
         locale:
           type: string
-          description: Provides the locale for the user. Must be a supported value from the list of locale-codes, which can be obtained by going to /lookups/locales
+          description: 'Provides the locale for the user. Must be a supported value from the list of locale-codes, which can be obtained by going to /lookups/locales'
         emailScanningEnabled:
           type: boolean
           description: Should email for the user be running
         emailScanningMode:
           type: string
-          description: How often emails should be scanned, one of 'onetime', 'weekly', 'daily', 'hourly'
+          description: 'How often emails should be scanned, one of ''onetime'', ''weekly'', ''daily'', ''hourly'''
         emailScanningScanAfter:
           type: string
           format: date
           example: '2015-11-12'
-          description: If set only email from after the given date will be imported. See RFC
-            3339 Section 5.6 for format.
-
+          description: If set only email from after the given date will be imported. See RFC 3339 Section 5.6 for format.
     UserUpdateDto:
       allOf:
         - $ref: '#/components/schemas/userUpdateDtoProperties'
-
     commonRegistrationParameters:
       type: object
       properties:
         receiptAccountEmail:
           example: test@billpass.ca
           type: string
-          description: The email address to the users receipt account. This must be unique
-            across all users registered with Sensibill, including both Sensibill accounts
-            and third - party single - sign - on accounts.This will always be converted to
-            a lower case value. Your client can be set up based on whether this parameter
-            is required during registration, or if it is optional so that it can be specified
-            later.The email address must use a permitted domain for your client.
+          description: 'The email address to the users receipt account. This must be unique across all users registered with Sensibill, including both Sensibill accounts and third - party single - sign - on accounts.This will always be converted to a lower case value. Your client can be set up based on whether this parameter is required during registration, or if it is optional so that it can be specified later.The email address must use a permitted domain for your client.'
         firstName:
           example: John
           type: string
-          description: The first name of the user. It is strongly encouraged that this be
-            set to provide a more personalized experience for users.
+          description: The first name of the user. It is strongly encouraged that this be set to provide a more personalized experience for users.
         lastName:
           example: Smith
           type: string
           description: The last name of the user.
         defaultCurrency:
           type: string
-          description: Provides the default currency for the user. Must be an currency-code
-            on the supported list of currencies, which can be obtained by going to /lookups/currencies
+          description: 'Provides the default currency for the user. Must be an currency-code on the supported list of currencies, which can be obtained by going to /lookups/currencies'
         folders:
           default: []
           type: array
@@ -1843,34 +1854,22 @@ components:
                 type: string
               color:
                 type: string
-                example: "#ABCDEF"
+                example: '#ABCDEF'
               id:
                 type: string
-          description: Every element of the array should be an object with the folder's `name`,
-            `color` (as six hex digits) and `id`.
+          description: 'Every element of the array should be an object with the folder''s `name`, `color` (as six hex digits) and `id`.'
         createTestReceipts:
           type: boolean
-          description: Can be either "true" or "false". This parameter can be used by early
-            integration partners during testing to create a number of ake testing receipts
-            for the accounts they create.
-
+          description: Can be either "true" or "false". This parameter can be used by early integration partners during testing to create a number of ake testing receipts for the accounts they create.
     GenericIdString:
       type: string
       maxLength: 75
-      pattern: ^[a-zA-Z0-9-_:.]{3,75}$
-    
-    BooleanEnum:
-      type: boolean
-      enum:
-        - true
-        - false
-
+      pattern: '^[a-zA-Z0-9-_:.]{3,75}$'
     CurrencyCodeDto:
       type: string
       maxLength: 3
       minLength: 3
-      pattern: ^[A-Z]{3}$
-      
+      pattern: '^[A-Z]{3}$'
     DocumentTaxDto:
       type: object
       properties:
@@ -1883,7 +1882,6 @@ components:
         type:
           type: string
           example: GST
-
     CurrencyCodeEnum:
       description: 3 character ISO-4217 currency code
       type: string
@@ -1920,7 +1918,6 @@ components:
         - TWD
         - THB
         - TRY
-
     EditableCurrencyCodeEnum:
       description: 3 character ISO-4217 currency code
       type: string
@@ -1958,30 +1955,36 @@ components:
         - TWD
         - THB
         - TRY
-        
     DocumentTimeDto:
       type: string
-      format: ^\d{2}:\d{2}$
-    
-    DocumentSourceFormatEnum:
+      format: '^\d{2}:\d{2}$'
+    DocumentSourceFormatsEnum:
       type: string
       enum:
         - pdf
         - image
-
     DocumentSourceFormatsArray:
       type: array
-      description: 'Array of sourceFormats for the operation.'
+      description: Array of sourceFormats for the operation.
       items:
-        $ref: "#/components/schemas/DocumentSourceFormatEnum"
+        $ref: '#/components/schemas/DocumentSourceFormatsEnum'
       maxItems: 2
-    
     DocumentTypeEnum:
       type: string
       enum:
         - invoice
         - receipt
-
+    DocumentSortByEnum:
+      type: string
+      enum:
+        - arrivalDateTime
+        - documentDate
+        - documentTime
+    DocumentOrderByEnum:
+      type: string
+      enum:
+        - ASC
+        - DESC
     DocumentStatusTypeEnum:
       type: string
       description: |
@@ -1993,14 +1996,12 @@ components:
         - CompletedSuccess
         - CompletedFailed
         - InProcessing
-
     DocumentStatusTypesArray:
       type: array
       description: Array of document status to use for the operation.
       items:
-        $ref: "#/components/schemas/DocumentStatusTypeEnum"
+        $ref: '#/components/schemas/DocumentStatusTypeEnum'
       maxItems: 3
-
     ExportItemStatusEnum:
       type: string
       description: |
@@ -2012,18 +2013,16 @@ components:
         - completed
         - processing
         - noDocumentsFound
-
     DocumentCreateDto:
       type: object
-      additionalProperties: false
       required:
         - sourceFile
         - documentType
       properties:
         description:
           type: string
-          description: 'A user specified name or description for this document'
-          pattern: ^[a-zA-Z0-9 ]+$
+          description: A user specified name or description for this document
+          pattern: '^[a-zA-Z0-9 ]+$'
           maxLength: 75
         sourceFile:
           type: string
@@ -2038,27 +2037,25 @@ components:
           description: |
             An integrator supplied identifier that must be unique. In case of upload failure or loss of document Id this 
             foreignId can be used on a new request with the source file to receive the original document id without our system reprocessing the source file.
-          example: 'doc-123-sub'
+          example: doc-123-sub
         accountMetadata:
           $ref: '#/components/schemas/DocumentAccountMetadataDto'
-
     DocumentDeleteDto:
       type: object
       required:
         - ids
       properties:
         ids:
-          description: "An array of documents ids that should be deleted from the system."
+          description: An array of documents ids that should be deleted from the system.
           type: array
           items:
             type: string
           example:
             - XuncoaVG7XMTY0iWHTCa
             - BuDcoaVG74MTY0iWIYKq
-    
     TenderTypesEnum:
       type: string
-      enum: 
+      enum:
         - Amex
         - Cash
         - Check
@@ -2086,16 +2083,12 @@ components:
         - VisaDebit
         - Visa
         - Voucher
-
-    #Responses:
-
     AuthorizationResponse:
       type: object
       properties:
         code:
           type: string
-          example: 'DBhXEQiQiwqCV4hI61HX7NZfqCeGLpYt72ZCkAl-ZDQOjRKpKCVxBTLuhdc0-pX5xdM-4KfBdidwPJy05Oxs3w'
-
+          example: DBhXEQiQiwqCV4hI61HX7NZfqCeGLpYt72ZCkAl-ZDQOjRKpKCVxBTLuhdc0-pX5xdM-4KfBdidwPJy05Oxs3w
     ClientInfoResponseDto:
       type: object
       properties:
@@ -2116,15 +2109,14 @@ components:
         key:
           type: string
           example: R14KjAShhJCRgYObBu-P8t9PuVdDsFpIYcxmhfHWOA5Q
-          description: For clients using OAuth, the OAuth client key.
+          description: 'For clients using OAuth, the OAuth client key.'
         redirectURI:
           type: string
-          example: https://testclient.com/redirect
-          description: For clients using OAuth, the expected redirectURI.
+          example: 'https://testclient.com/redirect'
+          description: 'For clients using OAuth, the expected redirectURI.'
         policies:
           type: array
-          description: An array of objects describing the available options and settings for
-            the client in detail.
+          description: An array of objects describing the available options and settings for the client in detail.
           items:
             $ref: '#/components/schemas/ClientPoliciesDto'
         authenticationSettings:
@@ -2170,10 +2162,8 @@ components:
         accessTokenExpiry:
           type: string
           format: date-time
-          description: When called with a client access token, the date and time that the
-            token will expire.
-          example: "2017-05-23T17:42:34.407Z"
-
+          description: 'When called with a client access token, the date and time that the token will expire.'
+          example: '2017-05-23T17:42:34.407Z'
     RegisterUserResponseDto:
       type: object
       properties:
@@ -2181,7 +2171,6 @@ components:
           type: string
           example: ZUZ3mDmSyCHlgwne7cNP
           description: 'A Sensibill-specific ID for the user. '
-
     UserResponseDto:
       type: object
       description: Get account info for current user
@@ -2323,7 +2312,6 @@ components:
           type: string
           format: date-time
           example: '2017-05-30T17:42:34.407Z'
-
     SimplifiedFolderDto:
       type: object
       properties:
@@ -2334,8 +2322,7 @@ components:
         name:
           type: string
           example: Renovations-2021-Jan
-          description: The name for this folder. A user may not have two folders with the
-            same name.
+          description: The name for this folder. A user may not have two folders with the same name.
         color:
           type: string
           example: cc0000
@@ -2348,7 +2335,6 @@ components:
           type: string
           format: date-time
           example: '2015-11-30T17:56:45.236Z'
-
     AlertDto:
       type: object
       properties:
@@ -2365,8 +2351,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserReceiptDto'
-
-    
     UserReceiptDto:
       type: object
       properties:
@@ -2387,7 +2371,7 @@ components:
           description: The name of the merchant. If no merchant is set this will contain the string 'Merchant?'
         renderURL:
           type: string
-          example: https://receipts-sandbox.sensibill.io/#/receipt/8eteXZALOgVRBz7jqQY_U1A7_pwO_jDW5yb-aSNkbaGgLSzVyEvN8VNSEfzIFw4koEc
+          example: 'https://receipts-sandbox.sensibill.io/#/receipt/8eteXZALOgVRBz7jqQY_U1A7_pwO_jDW5yb-aSNkbaGgLSzVyEvN8VNSEfzIFw4koEc'
         total:
           type: object
           properties:
@@ -2400,7 +2384,6 @@ components:
         id:
           type: string
           example: 8eteXZALOgVRBz7jqQY_U1A7_pwO_jDW5yb-aSNkbaGgLSzVyEvN8VNSEfzIFw4koEc
-    
     EmptyObjectResponseDto:
       description: An empty object.  The noProperties property is a placeholder to help API generation
       type: object
@@ -2408,16 +2391,13 @@ components:
         noProperties:
           description: This property will not actually be returned.
           type: string
-
     EmailAvailabilityResponseDto:
       type: object
       properties:
         available:
           type: boolean
           example: true
-          description: This is a flag that states if the email address is available or not
-            for a new user registration.
-
+          description: This is a flag that states if the email address is available or not for a new user registration.
     UsernameAvailabilityResponseDto:
       type: object
       properties:
@@ -2425,10 +2405,7 @@ components:
           type: boolean
           example: true
           description: This is a flag that states if the username is available or not.
-
-    #Exports
-
-    FlatCriteriaDto:
+    ListDocumentsCriteriaDto:
       type: object
       description: |
         The search criteria used to find the documents to be exported. \
@@ -2437,47 +2414,53 @@ components:
         accountMetadata.account:
           type: array
           items:
-            $ref: "#/components/schemas/GenericIdString"
+            $ref: '#/components/schemas/GenericIdString'
           maxItems: 20
           description: |
             Array of `accountMetadata.account` to filter the documents. Should ideally satisfy the `/^[a-zA-Z0-9-_:.]+$/` pattern \
             **Example:** `accountMetadata.account='ACC102030'&accountMetadata.account='405060'`
         accountMetadata.account.exists:
           type: boolean
-          enum:
-            - true
-            - false
+          format: boolean
           description: |
-            This is used to match and include documents where a value *exixts* for the `accountMetadata.account` property. \
-            Only `true` or `false` boolean values are accepted. A mix of operators with basic values are not supported. 
+            This is used to match and include documents where a value *exists* for the `accountMetadata.account` property. \
+            Only `true` or `false` boolean values are accepted. A mix of operators with basic values is not supported. 
             If `accountMetadata.account.exists` is provided together with plain values for account, this `exists` operator is ignored. \
             **Example:** To filter all documents with `accountMetadata.account` not set, use `accountMetadata.account.exists=false`
         accountMetadata.transactionId:
           type: array
           items:
-            $ref: "#/components/schemas/GenericIdString"
+            $ref: '#/components/schemas/GenericIdString'
           maxItems: 20
           description: |
             Array of `accountMetadata.transactionId` to filter the documents. Should ideally satisfy the `/^[a-zA-Z0-9-_:.]+$/` pattern. \
             **Example:** `accountMetadata.transactionId='TX00001'&accountMetadata.transactionId='TX00002'`
+        accountMetadata.transactionId.exists:
+          type: boolean
+          format: boolean
+          description: |
+            This is used to match and include documents where a value *exists* for the `accountMetadata.transactionId` property. \
+            Only `true` or `false` boolean values are accepted. A mix of operators with basic values is not supported. 
+            If `accountMetadata.transactionId.exists` is provided together with plain values for account, this `exists` operator is ignored. \
+            **Example:** To filter all documents with `accountMetadata.transactionId` not set, use `accountMetadata.account.transactionId=false`
         amountDue:
           type: array
           items:
             type: number
-            minimum: 0.0
+            minimum: 0
           maxItems: 20
           description: |
             Array of `amountDue` values to filter the documents. `afterTax` is the document property considered for the match. \
             **Example:** `filter.amountDue=1000.55&filter.amountDue=1010.90`
         amountDue.gte:
           type: number
-          minimum: 0.0
+          minimum: 0
           description: |
             This is a *greater than or equal to* filter on the `amountDue` value to filter the documents. `afterTax` is the document property considered for the match. \
             **Example:** `filter.amountDue.gte=1000.55`
         amountDue.lte:
           type: number
-          minimum: 0.0
+          minimum: 0
           description: |
             This is a *lesser than or equal to* filter on the `amountDue` value to filter the documents. `afterTax` is the document property considered for the match. \
             Example: `amountDue.lte=1000.55`
@@ -2489,7 +2472,7 @@ components:
             ArrivalDateTime value does not accept exact match and is expected to be UTC.
             Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`.
             Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
-            
+
             * Example with just date: `arrivalDateTime.gte='2012-12-28'`
             * Example with date and time: `arrivalDateTime.gte='2012-12-28T21:27'`
             * Example with date and time: `arrivalDateTime.gte='2012-12-28 21:27:55.827'`
@@ -2501,7 +2484,7 @@ components:
             ArrivalDateTime value does not accept exact match and is expected to be UTC.
             Date time formats allowed are: `YYYY-MM-DDTHH:mm:ss.SSS` or `YYYY-MM-DD HH:mm:ss.SSS`.
             Time fields can be suppressed from the end to the beginning i.e. `YYYY-MM-DD HH:mm` is acceptable.
-            
+
             * Example with just date: `arrivalDateTime.lte='2012-12-28'`
             * Example with date and time: `arrivalDateTime.lte='2012-12-28T21:27'`
             * Example with date and time: `arrivalDateTime.lte='2012-12-28 21:27:55.827'` 
@@ -2509,7 +2492,7 @@ components:
           type: array
           items:
             type: string
-            format: /^[a-zA-Z0-9-_ ]+$/
+            format: '/^[a-zA-Z0-9-_ ]+$/'
             maxLength: 25
           maxItems: 20
           description: |
@@ -2517,7 +2500,7 @@ components:
         currencyCode:
           type: array
           items:
-            $ref: "#/components/schemas/CurrencyCodeDto"
+            $ref: '#/components/schemas/CurrencyCodeDto'
           maxItems: 20
           description: |
             Array of currencyCode to filter the documents. Example: `currencyCode=['CAD', 'USD']`
@@ -2526,12 +2509,15 @@ components:
           items:
             type: string
             maxLength: 75
-            pattern: ^[a-zA-Z0-9 ]+$
+            pattern: '^[a-zA-Z0-9 ]+$'
           description: |
             Array of description values to filter the documents. The filter is case insentive and matches any document where the
             description contains the given value. Should ideally satisfy the pattern /^[a-zA-Z0-9 ]+$/
             Example: `description=['Dinner with friends','Children winter gear','My very specific description']`
-          example: ['Dinner with friends','Children winter gear','My very specific description']
+          example:
+            - Dinner with friends
+            - Children winter gear
+            - My very specific description
         documentDate:
           type: array
           items:
@@ -2539,7 +2525,8 @@ components:
             format: date
           description: |
             Array of documentDate to filter the documents. Example: `documentDate=['2021-04-04']`
-          example: ['2021-04-04']
+          example:
+            - '2021-04-04'
         documentDate.gte:
           type: string
           format: date
@@ -2557,49 +2544,53 @@ components:
         documentNumber:
           type: array
           items:
-            $ref: "#/components/schemas/GenericIdString"
+            $ref: '#/components/schemas/GenericIdString'
           maxItems: 20
           description: |
             Array of documentNumber to filter the documents. Example: `documentNumber=['1122334455']`
-          example: ['1122334455']
+          example:
+            - '1122334455'
         documentTime:
           type: array
           items:
-            $ref: "#/components/schemas/DocumentTimeDto"
+            $ref: '#/components/schemas/DocumentTimeDto'
           maxItems: 20
           description: |
             Array of documentTime to filter the documents. Example: `documentTime=['21:12', '22:13', '23:14']`
-          example: ['21:12', '22:13', '23:14']
+          example:
+            - '21:12'
+            - '22:13'
+            - '23:14'
         documentTime.gte:
           type: string
-          format: ^\d{2}:\d{2}$
+          format: '^\d{2}:\d{2}$'
           description: |
             This is a filter condition `greater than or equal` on the documentTime to filter the documents.
             Example with single operator: `documentTime.gte='10:00'`
         documentTime.lte:
           type: string
-          format: ^\d{2}:\d{2}$
+          format: '^\d{2}:\d{2}$'
           description: |
             This is a filter condition `less than or equal` on the documentTime to filter the documents.
             Example with single operator: `filter.documentTime.gte='10:00'`
         documentType:
           type: array
-          description: Array of `documentType` to filter the documents. Currently supported values are [invoice, receipt].
+          description: 'Array of `documentType` to filter the documents. Currently supported values are [invoice, receipt].'
           items:
-            $ref: "#/components/schemas/DocumentTypeEnum"
+            $ref: '#/components/schemas/DocumentTypeEnum'
           maxItems: 20
         foreignId:
           type: array
           items:
-            $ref: "#/components/schemas/GenericIdString"
+            $ref: '#/components/schemas/GenericIdString'
           maxItems: 20
-          description: 'Array of foreignId to filter the documents.'
+          description: Array of foreignId to filter the documents.
         id:
           type: array
           items:
-            $ref: "#/components/schemas/GenericIdString"
+            $ref: '#/components/schemas/GenericIdString'
           maxItems: 20
-          description: 'Array of document id to filter the documents.'
+          description: Array of document id to filter the documents.
         lastUpdateDateTime.gte:
           type: string
           format: date-time
@@ -2625,20 +2616,20 @@ components:
             * Example with date and time: `lastUpdateDateTime.lte='2012-12-28T21:27'`
             * Example with date and time: `lastUpdateDateTime.lte='2012-12-28 21:27:55.827'`
         merchantName:
-          description: 'Array of merchantName to filter the documents.'
+          description: Array of merchantName to filter the documents.
           type: array
           items:
             type: string
-            format: ^[a-zA-Z0-9-_ ]+$
+            format: '^[a-zA-Z0-9-_ ]+$'
             maxLength: 25
         merchantTaxIdNumber:
-          description: 'Array of merchantTaxIdNumber to filter the documents.'
+          description: Array of merchantTaxIdNumber to filter the documents.
           type: array
           items:
-            $ref: "#/components/schemas/GenericIdString"
+            $ref: '#/components/schemas/GenericIdString'
           maxItems: 20
         paymentTender:
-          description: 'Payment Tender array to filter the documents.'
+          description: Payment Tender array to filter the documents.
           type: array
           items:
             $ref: '#/components/schemas/TenderTypesEnum'
@@ -2650,8 +2641,10 @@ components:
           type: array
           items:
             type: number
-            minimum: 0.0
-          example: [1000.55, 1010.90]
+            minimum: 0
+          example:
+            - 1000.55
+            - 1010.9
         total.gte:
           description: |
             This is a filter condition *greater than or equal* on the total value to filter the documents. The value considered is afterTax.
@@ -2659,7 +2652,7 @@ components:
 
             Example: `total.gte=1000.55`
           type: number
-          minimum: 0.0
+          minimum: 0
           example: 1000.55
         total.lte:
           description: |
@@ -2668,13 +2661,12 @@ components:
 
             Example: `total.lte=1000.55`
           type: number
-          minimum: 0.0
+          minimum: 0
           example: 1000.55
         status:
           $ref: '#/components/schemas/DocumentStatusTypesArray'
         sourceFormat:
-          $ref: "#/components/schemas/DocumentSourceFormatsArray"
-    
+          $ref: '#/components/schemas/DocumentSourceFormatsArray'
     ExportCreateDto:
       type: object
       required:
@@ -2689,21 +2681,19 @@ components:
               Indicates which formats should be generated. Valid values are:
               * 'csv' - indicates a comma separated file should be produced summarizing the exported data
               * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
-              * 'pdf' - indicates individual receipts should be exported to a PDF file
+              * 'pdf' - indicates individual documents should be exported to a PDF file
             example: csv
         criteria:
-          $ref: '#/components/schemas/FlatCriteriaDto'
+          $ref: '#/components/schemas/ListDocumentsCriteriaDto'
         locale:
           type: string
-          description: Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to /lookups/locales. It defaults to the user's locale.
+          description: 'Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to /lookups/locales. It defaults to the user''s locale.'
           example: en-CA
-    
     ExportResponseStatusEnum:
       type: string
       enum:
         - queued
         - noDocumentsFound
-    
     ExportCreateResponseDto:
       type: object
       properties:
@@ -2711,13 +2701,13 @@ components:
           type: string
           format: date-time
           example: '2021-01-01T21:58:15.880Z'
-          description: "The date and time of when this export object will be deleted from the system."
+          description: The date and time of when this export object will be deleted from the system.
         createdAt:
           type: string
           format: date-time
           example: '2020-12-18T21:58:15.875Z'
         criteria:
-          $ref: '#/components/schemas/FlatCriteriaDto'
+          $ref: '#/components/schemas/ListDocumentsCriteriaDto'
         outputFormats:
           type: array
           items:
@@ -2726,7 +2716,7 @@ components:
               Indicates which formats should be generated. Valid values are:
               * 'csv' - indicates a comma separated file should be produced summarizing the exported data
               * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
-              * 'pdf' - indicates individual receipts should be exported to a PDF file
+              * 'pdf' - indicates individual documents should be exported to a PDF file
             example: csv
         documentsCount:
           type: number
@@ -2734,23 +2724,18 @@ components:
           minimum: 0
           format: integer
           example: 5
-          description: "The number of documents that matches the given criteria. The final number of documents
-            in the export can be different from this one if documents are created or deleted between this POST
-            request and the time when the request is processed."
+          description: The number of documents that matches the given criteria. The final number of documents in the export can be different from this one if documents are created or deleted between this POST request and the time when the request is processed.
         status:
           $ref: '#/components/schemas/ExportResponseStatusEnum'
         id:
           type: string
           example: IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA
-          description: This is a unique identifier which is used to identify the export request
-            on Sensibill's system.
-
+          description: This is a unique identifier which is used to identify the export request on Sensibill's system.
     ExportsStatusDto:
       type: array
       maxItems: 500
       items:
         $ref: '#/components/schemas/ExportsResponseDto'
-
     ExportsResponseDto:
       type: object
       properties:
@@ -2777,10 +2762,10 @@ components:
           example: '2020-12-18T21:58:18.780Z'
         fileURL:
           type: string
-          example: "https://receipts-sandbox.sensibill.io/api/v2/exports/IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA/contents"
+          example: 'https://receipts-sandbox.sensibill.io/api/v2/exports/IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA/contents'
           description: The URL that can be used to download the contents of the export.
         criteria:
-          $ref: '#/components/schemas/FlatCriteriaDto'
+          $ref: '#/components/schemas/ListDocumentsCriteriaDto'
         outputFormats:
           type: array
           items:
@@ -2789,7 +2774,7 @@ components:
               Indicates which formats should be generated. Valid values are:
               * 'csv' - indicates a comma separated file should be produced summarizing the exported data
               * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
-              * 'pdf' - indicates individual receipts should be exported to a PDF file
+              * 'pdf' - indicates individual documents should be exported to a PDF file
             example: csv
         documents:
           type: array
@@ -2804,15 +2789,11 @@ components:
         id:
           type: string
           example: IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA
-          description: This is a unique identifier which is used to identify the export request
-            on Sensibill's system.
+          description: This is a unique identifier which is used to identify the export request on Sensibill's system.
         filesize:
           type: integer
           example: 11042
-          description: The size of the contents in bytes, when available.
-
-    # Lookups Schemas
-
+          description: 'The size of the contents in bytes, when available.'
     LookupCurrenciesResponse:
       type: object
       properties:
@@ -2820,7 +2801,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LookupCurrenciesDto'
-
     LookupCurrenciesDto:
       type: object
       properties:
@@ -2834,17 +2814,15 @@ components:
           description: The internationally recognized three-letter code for the currency.
         symbol:
           type: string
-          example: "$"
+          example: $
           description: The internationally recognized symbol representing the currency.
-
     LookupLocalesResponse:
       type: object
       properties:
-          locales:
-            type: array
-            items:
-              $ref: '#/components/schemas/LookupLocalesDto'
-
+        locales:
+          type: array
+          items:
+            $ref: '#/components/schemas/LookupLocalesDto'
     LookupLocalesDto:
       type: object
       properties:
@@ -2856,9 +2834,6 @@ components:
           type: string
           example: en-CA
           description: The short code of the locale.
-    
-    ###############
-
     MerchantsDto:
       type: object
       properties:
@@ -2876,76 +2851,79 @@ components:
               receiptCateogry:
                 type: string
                 example: General Retail
-
     CountryCode:
       type: string
-      description: "2 character country code (lower case)"
-      enum: [ 'ca',
-              'us',
-              'uk',
-              'ie',
-              'es',
-              'nl' ]
-
+      description: 2 character country code (lower case)
+      enum:
+        - ca
+        - us
+        - uk
+        - ie
+        - es
+        - nl
     DocumentDiscountDto:
-      description: "Contains info about one applied discount."
+      description: Contains info about one applied discount.
       allOf:
         - $ref: '#/components/schemas/DocumentTaxableAmountDto'
       properties:
         description:
-          description: "A user-presentable description of this discount."
+          description: A user-presentable description of this discount.
           type: string
-          example: "10.00%"
+          example: 10.00%
         methodCode:
-          description: "A code used by the merchant to identify this discount"
+          description: A code used by the merchant to identify this discount
           type: string
           example: Home Sense
         percent:
-          description: "May be set if this discount is percent based, where a value of N represents an N% discount."
+          description: 'May be set if this discount is percent based, where a value of N represents an N% discount.'
           type: number
         type:
           $ref: '#/components/schemas/DiscountTypesEnum'
-
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentTaxDto'
     DiscountTypesEnum:
-      description: "May be set to describe how this discount was obtained."
+      description: May be set to describe how this discount was obtained.
       type: string
       enum:
         - general
         - coupon
-
     DocumentFeeDto:
-      description: "Contains info about one applied fee."
+      description: Contains info about one applied fee.
       allOf:
         - $ref: '#/components/schemas/DocumentTaxableAmountDto'
       properties:
         description:
-          description: "A user-presentable description of this fee."
+          description: A user-presentable description of this fee.
           type: string
         type:
           $ref: '#/components/schemas/FeeTypesEnum'
-
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentTaxDto'
     FeeTypesEnum:
-      description: "May be set to give more details on the type of fee."
+      description: May be set to give more details on the type of fee.
       type: string
-      enum: 
+      enum:
         - donation
         - shipping
         - duties
         - general
-
     DocumentItemDto:
       properties:
         description:
-          description: "An additional description of an item."
+          description: An additional description of an item.
           type: string
-          example: 'Sony Big TV'
+          example: Sony Big TV
         brand:
           type: string
-          description: "The brand name of this item."
-          example: 'Sony'
+          description: The brand name of this item.
+          example: Sony
         buyLink:
           type: string
-          description: "A link to this item on the retailer's website."
+          description: A link to this item on the retailer's website.
           example: 'https://www.example.com/buy/123'
         discounts:
           type: array
@@ -2957,87 +2935,85 @@ components:
             $ref: '#/components/schemas/DocumentFeeDto'
         imageUrl:
           type: string
-          description: "A url to an image of this item."
+          description: A url to an image of this item.
           example: 'https://example.com/somepath/1.png'
         itemIds:
-          description: "A set of strings set by the merchant to identify this item. The meaning of these values vary by merchant, and are not guaranteed to be unique in any way."
+          description: 'A set of strings set by the merchant to identify this item. The meaning of these values vary by merchant, and are not guaranteed to be unique in any way.'
           type: array
           items:
             type: string
-            example: 'wh1000xm2'
+            example: wh1000xm2
         listPrice:
           $ref: '#/components/schemas/DocumentTaxableAmountDto'
         loyaltyRewards:
           $ref: '#/components/schemas/DocumentLoyaltyRewardsDto'
         name:
           type: string
-          description: "A user-presentable name for this item, which should be the main content of the line item."
-          example: ""
+          description: 'A user-presentable name for this item, which should be the main content of the line item.'
+          example: ''
         price:
           $ref: '#/components/schemas/DocumentTaxableAmountDto'
         priceBeforeDiscountsFees:
           $ref: '#/components/schemas/DocumentTaxableAmountDto'
         properties:
-          description: "Will be used to define miscellaneous item properties."
+          description: Will be used to define miscellaneous item properties.
           type: array
           items:
             type: object
             properties:
               name:
-                description: "A name that describes this property."
-                example: 'color'
+                description: A name that describes this property.
+                example: color
                 type: string
               value:
-                description: "The value for this property."
+                description: The value for this property.
                 type: string
-                example: 'red'
+                example: red
         serialNumbers:
-          description: "The serial number of the item."
+          description: The serial number of the item.
           type: array
           items:
             type: string
-            example: '1142961142968QWICA'
+            example: 1142961142968QWICA
         sku:
           type: string
-          description: "The SKU for this item as is on the receipt."
-          example: '11429681A/2'
+          description: The SKU for this item as is on the receipt.
+          example: 11429681A/2
         unitListPrice:
           $ref: '#/components/schemas/DocumentTaxableAmountDto'
         unitOfMeasure:
           type: string
-          description: "The unit of measure of the item."
-          example: 'L'
+          description: The unit of measure of the item.
+          example: L
         unitPrice:
           $ref: '#/components/schemas/DocumentTaxableAmountDto'
         unitQuantity:
           type: number
-          description: "The quantity of units of the item. If there is a unit of measure this will be the quantity of the specified units of measure."
+          description: The quantity of units of the item. If there is a unit of measure this will be the quantity of the specified units of measure.
           example: 2
-
     DocumentLoyaltyRewardsDto:
-      description: "Describes loyalty rewards read from the receipt."
+      description: Describes loyalty rewards read from the receipt.
       properties:
         accountNumber:
           type: string
-          description: "Loyalty rewards account number"
-          example: 'AN-4535-6628'
+          description: Loyalty rewards account number
+          example: AN-4535-6628
         currentBalance:
           type: number
-          description: "The current balance of the rewards program after adding the number of loyalty points."
+          description: The current balance of the rewards program after adding the number of loyalty points.
           example: 10500
         nextRewardLevel:
           type: number
-          description: "The milestone number of points needed to reach the next level of the rewards program."
+          description: The milestone number of points needed to reach the next level of the rewards program.
           example: 15000
         pointsAwarded:
           type: number
-          description: "The total number of points awarded for a given receipt or line item."
+          description: The total number of points awarded for a given receipt or line item.
           example: 500
         programName:
           type: string
-          description: "Loyalty rewards program name."
-          example: 'PC Optimum'
-
+          description: Loyalty rewards program name.
+          example: PC Optimum
     DocumentTaxableAmountDto:
       type: object
       properties:
@@ -3047,112 +3023,106 @@ components:
             $ref: '#/components/schemas/DocumentTaxDto'
         beforeTax:
           type: number
-          example: 12.20
+          example: 12.2
         afterTax:
           type: number
-          example: 12.20
-
+          example: 12.2
     DocumentPaymentDto:
       type: object
       properties:
         afterTax:
           type: number
-          description: "The amount paid with this payment."
+          description: The amount paid with this payment.
           example: 9.99
         cashBack:
           type: number
-          description: "Cash back amount if applicable."
+          description: Cash back amount if applicable.
           example: 9.99
         changeAdjustment:
           type: number
-          description: "The difference between the changeDue and the changeIssued amounts."
+          description: The difference between the changeDue and the changeIssued amounts.
           example: 9.99
         changeDue:
           type: number
-          description: "Change due amount for cash payments"
+          description: Change due amount for cash payments
           example: 9.99
         changeIssued:
           type: number
-          description: " Change amount that was actually issued (after rounding if any) for cash payments"
+          description: ' Change amount that was actually issued (after rounding if any) for cash payments'
           example: 9.99
         currencyCode:
           $ref: '#/components/schemas/CurrencyCodeEnum'
         maskedCardNumber:
           type: string
-          description: "A masked version of the card (if any) used in the payment.
-               Typically in the format **** NNNN for the last 4 digits of a credit card but MAY be different if other cards like gift cards are used."
-          example: "**** 9900"
+          description: A masked version of the card (if any) used in the payment. Typically in the format **** NNNN for the last 4 digits of a credit card but MAY be different if other cards like gift cards are used.
+          example: '**** 9900'
         type:
           $ref: '#/components/schemas/TenderTypesEnum'
-
     DocumentMerchantDto:
       type: object
       properties:
         addressLines:
-          description: "The address of the merchant on this document."
+          description: The address of the merchant on this document.
           type: array
           items:
             type: string
         merchantId:
           type: string
-          description: "The merchant id of the merchant as stored in sensibill's system"
+          description: The merchant id of the merchant as stored in sensibill's system
           example: homesense
         merchantName:
           type: string
-          description: "The name of the merchant."
+          description: The name of the merchant.
           example: Home Sense
         email:
           type: string
-          description: "The email for the merchant."
+          description: The email for the merchant.
           example: Home Sense
         geoLocation:
           type: string
-          description: "The geolocation for the merchant."
+          description: The geolocation for the merchant.
           example: +43.6645326-79.3845407
         storeName:
           type: string
-          description: "The specific store name of this merchant."
+          description: The specific store name of this merchant.
           example: Mike's Home Sense
         storeId:
-          description: "The store id as stored in the sensibill system."
+          description: The store id as stored in the sensibill system.
           type: string
           example: Mike's Home Sense
         telephone:
-          description: "The phone number for this merchant."
+          description: The phone number for this merchant.
           type: string
-          example: "(647) 258-0801"
+          example: (647) 258-0801
         channel:
           $ref: '#/components/schemas/OrderChannelTypesEnum'
         categoryCode:
           type: string
-          description: "The category this merchant belongs to."
+          description: The category this merchant belongs to.
           example: shopping
         taxIdNumber:
-          description: "The tax number for this merchant."
+          description: The tax number for this merchant.
           type: string
           example: 11111 1111 RT0001
         url:
-          description: "The home webpage for this merchant."
+          description: The home webpage for this merchant.
           type: string
           example: Home Sense
-
     OrderChannelTypesEnum:
       type: string
-      description: "Indicates if the receipt came from a brick and mortar or online channel. Not related to format of receipt."
+      description: Indicates if the receipt came from a brick and mortar or online channel. Not related to format of receipt.
       enum:
         - online
         - physical
-
     DeliveryDto:
       type: object
-      description: "Details about an expected delivery.
-                        Note: these details are as they appear on the receipt, they are NOT updated automatically"
+      description: 'Details about an expected delivery. Note: these details are as they appear on the receipt, they are NOT updated automatically'
       properties:
         addressLines:
           type: array
           items:
             type: string
-          description: ""
+          description: ''
         courier:
           $ref: '#/components/schemas/CourierDto'
         deliveryType:
@@ -3162,103 +3132,169 @@ components:
           format: date
         name:
           type: string
-          description: ""
+          description: ''
         telephoneNumber:
           type: string
-          description: ""
+          description: ''
         trackingNumber:
           type: string
-          description: ""
-
+          description: ''
     CourierDto:
-      description: "Information about the courier being used."
+      description: Information about the courier being used.
       type: object
       properties:
         name:
           type: string
-          description: "A user-presentable name for the courier."
+          description: A user-presentable name for the courier.
         serviceLevel:
           type: string
-          description: "A user-presentable shipping service level used."
-          example: 'Express Air Mail'
-
+          description: A user-presentable shipping service level used.
+          example: Express Air Mail
     DeliveryTypesEnum:
       type: string
-      description: "Type of delivery"
+      description: Type of delivery
       enum:
         - pickup
         - delivery
         - shipping
-
     DocumentAccountMetadataDto:
       type: object
       properties:
         account:
           type: string
-          pattern: ^[a-zA-Z0-9-_:.]+$
-          description: 'An optional identifier representing the bank account from the financial institution to associate this document with'
+          pattern: '^[a-zA-Z0-9-_:.]+$'
+          description: An optional identifier representing the bank account from the financial institution to associate this document with
           maxLength: 75
-          example: 'EsmtpT9xa2S4gXym9GHBJrLkigfjH'
+          example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
         transactionId:
           type: string
-          pattern: ^[a-zA-Z0-9-_:.]+$
-          description: 'An optional ID representing the transaction from the financial institution to associate this document with'
+          pattern: '^[a-zA-Z0-9-_:.]+$'
+          description: An optional ID representing the transaction from the financial institution to associate this document with
           maxLength: 75
-          example: 'EsmtpT9xa2S4gXym9GHBJrLkigfjH'
-
+          example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
+    PeriodUnitEnum:
+      type: string
+      description: Available period units.  Can be 'day', 'week', 'month' or 'year'.
+      enum:
+        - day
+        - week
+        - month
+        - year
+    ExpenseTypeEnum:
+      type: string
+      description: Expense type associated with the document. Can be either 'business' or 'personal'.
+      enum:
+        - business
+        - personal
+    DocumentUserMetadataPeriodDto:
+      type: object
+      properties:
+        unit:
+          $ref: '#/components/schemas/PeriodUnitEnum'
+          description: This parameter should be used together with the ''duration'' parameter. Document must have the ''documentDate'' set or it should be supplied as another edit parameter within the same request.
+          example: 'day'
+        duration:
+          type: integer
+          description: Number of period units which defines the total period duration. This parameter should be used together with the 'unit' parameter. Document must have the ''documentDate'' set or it should be supplied as another edit parameter within the same request.
+          example: 14
+    EditDocumentUserMetadataPeriodDto:
+      type: object
+      properties:
+        unit:
+          type: string
+          description: To unset the value pass an empty string. Otherwise must be a valid PeriodUnitEnum value. Document must have the ''documentDate'' set or it should be supplied as another edit parameter within the same request.
+          example: 'year'
+        duration:
+          type: integer
+          nullable: true
+          description: To unset pass null. Positive number of period units which defines the total period duration. This parameter should be used together with the 'unit' parameter. Document must have the ''documentDate'' set or it should be supplied as another edit parameter within the same request.
+          example: 1
+    DocumentUserMetadataDto:
+      type: object
+      properties:
+        expenseType:
+          $ref: '#/components/schemas/ExpenseTypeEnum'
+        notes:
+          type: string
+          description: General text note to the document.
+        warrantyPeriod:
+          type: object
+          description: |
+            The details about the document's warranty period. These fields can only be edited if the document date is known.
+          $ref: '#/components/schemas/DocumentUserMetadataPeriodDto'
+        returnPeriod:
+          type: object
+          description: |
+            The details about the document's return period. These fields can only be edited if the document date is known.
+          $ref: '#/components/schemas/DocumentUserMetadataPeriodDto'
+    EditDocumentUserMetadataDto:
+      type: object
+      properties:
+        expenseType:
+          type: string
+          description: To unset the value pass an empty string. Otherwise must be a valid ExpenseTypeEnum value.
+        notes:
+          type: string
+          description: To unset the value pass an empty string. 
+        warrantyPeriod:
+          type: object
+          description: |
+            The details about the document's warranty period. This can only be edited if the document date is populated. If either unit or duration is unset, the full warrantyPeriod structure is unset.
+          $ref: '#/components/schemas/EditDocumentUserMetadataPeriodDto'
+        returnPeriod:
+          type: object
+          description: |
+            The details about the document's return period. This can only be edited if the document date is populated. If either unit or duration is unset, the full returnPeriod structure is unset.
+          $ref: '#/components/schemas/EditDocumentUserMetadataPeriodDto'
     NullableDocumentAccountMetadataDto:
       type: object
       properties:
         account:
           type: string
           nullable: true
-          pattern: ^[a-zA-Z0-9-_:.]+$
+          pattern: '^[a-zA-Z0-9-_:.]+$'
           description: |
             An optional identifier representing the bank account from the financial institution to associate this document with.
             Should be set to `""` (an empty zero-length string) to unset the `account` previosuly set for the document.
           maxLength: 75
-          example: 'EsmtpT9xa2S4gXym9GHBJrLkigfjH'
+          example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
         transactionId:
           type: string
-          pattern: ^[a-zA-Z0-9-_:.]+$
-          description: 'An optional ID representing the transaction from the financial institution to associate this document with'
+          pattern: '^[a-zA-Z0-9-_:.]+$'
+          description: An optional ID representing the transaction from the financial institution to associate this document with
           maxLength: 75
-          example: 'EsmtpT9xa2S4gXym9GHBJrLkigfjH'
-          
-
+          example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
     SourceDocumentDto:
       properties:
         format:
-          $ref: '#/components/schemas/SourceDocumentFormatsEnum'
+          $ref: '#/components/schemas/AllDocumentSourceFormatsEnum'
         url:
           type: string
-          description: "The url to get or view the original receipt file (image, PDF or html)"
+          description: 'The url to get or view the original document file (i.e.: image, pdf, pdf_email, etc)'
         imagePreview:
           type: string
           description: |
-            The url of an image file to preview this receipt. In case of image receipts, this content will be the same of the url field.
-
-    SourceDocumentFormatsEnum:
-      description: "Defines the possible original formats for a receipt to have come from."
+            The url of an image file to preview this document. In case of image documents, this content will be the same of the url field.
+    AllDocumentSourceFormatsEnum:
+      description: Defines the possible original formats for a document to have come from.
       type: string
       enum:
-        - html
-        - image
         - pdf
-        - text
-
+        - image
+        - pdf_email
+        - html_email
+        - image_email
     GetDocumentResponseDto:
-      description: "Structure of the response on the document details endpoint"
+      description: Structure of the response on the document details endpoint
       type: object
       properties:
-          document:
-            $ref: '#/components/schemas/DocumentDto'
-          error:
-            $ref: '#/components/schemas/DocumentErrorDto'
-
+        document:
+          $ref: '#/components/schemas/DocumentDto'
+        error:
+          $ref: '#/components/schemas/DocumentErrorDto'
     DocumentsStatusResponseDto:
       type: object
-      description: 'Response schema for the documents/status endpoint'
+      description: Response schema for the documents/status endpoint
       required:
         - documents
       properties:
@@ -3268,15 +3304,13 @@ components:
           items:
             $ref: '#/components/schemas/DocumentStatusListItemDto'
         errors:
-          description: 'Optional property used to indicate and describe errors encountered while handling the request'
+          description: Optional property used to indicate and describe errors encountered while handling the request
           type: array
           items:
             type: string
             x-faker: random.words
-          
-    
     DocumentStatusListItemDto:
-      description: 'Schema for an entry in the documents/status endpoint response'
+      description: Schema for an entry in the documents/status endpoint response
       type: object
       properties:
         id:
@@ -3284,30 +3318,29 @@ components:
           maxLength: 20
           minLength: 20
           example: z6uuM0iqnvf8sCDBRYLJ
-          description: "This is a unique identifier which is used to identify the document in the Sensibill system."
+          description: This is a unique identifier which is used to identify the document in the Sensibill system.
         foreignId:
-          description: "A unique identifier that was passed on upload to ensure that retries can happen without overriding data."
+          description: A unique identifier that was passed on upload to ensure that retries can happen without overriding data.
           type: string
           maxLength: 20
           minLength: 20
           example: z6uuM0iqnvf8sCDBRYLJ
         arrivalDateTime:
-          description: "The date and time that the document was submitted to our system. With no explicit timezone information."
+          description: The date and time that the document was submitted to our system. With no explicit timezone information.
           type: string
           format: date-time
-          example: 2017-10-26T16:01:13.836Z
+          example: '2017-10-26T16:01:13.836Z'
         lastUpdateDateTime:
           type: string
-          description: "The date and time that the document was last updated in our system. This will typically be when a user has last changed data on the document. With no explicit timezone information."
+          description: The date and time that the document was last updated in our system. This will typically be when a user has last changed data on the document. With no explicit timezone information.
           format: date-time
-          example: 2017-10-26T16:01:13.836Z
+          example: '2017-10-26T16:01:13.836Z'
         documentType:
-          $ref: "#/components/schemas/DocumentTypeEnum"
+          $ref: '#/components/schemas/DocumentTypeEnum'
         status:
           $ref: '#/components/schemas/DocumentStatusTypeEnum'
-
     GetDocumentListResponseDto:
-      description: "Structure of the response on the document list endpoint"
+      description: Structure of the response on the document list endpoint
       type: object
       required:
         - documents
@@ -3318,139 +3351,141 @@ components:
           items:
             $ref: '#/components/schemas/DocumentListItemDto'
         count:
-          description: 'This field counts the total number of documents for the user existing in the system.<br>
-                If filter conditions are informed, this would only count the records matching those.'
+          description: 'This field counts the total number of documents for the user existing in the system.<br> If filter conditions are informed, this would only count the records matching those.'
           type: integer
           example: 1
-    
     DocumentListItemDto:
       type: object
       properties:
         id:
           type: string
-          description: "This is a unique identifier which is used to identify the document in the Sensibill system."
+          description: This is a unique identifier which is used to identify the document in the Sensibill system.
           example: z6uuM0iqnvf8sCDBRYLJ
         foreignId:
-          description: "A unique identifier that was passed on upload to ensure that retries can happen without overriding data."
+          description: A unique identifier that was passed on upload to ensure that retries can happen without overriding data.
           type: string
           example: "123456"
+        accountMetadata:
+          $ref: '#/components/schemas/DocumentAccountMetadataDto'
         arrivalDateTime:
-          description: "The date and time that the document was submitted to our system. With no explicit timezone information."
+          description: The date and time that the document was submitted to our system. With no explicit timezone information.
           type: string
           format: date-time
-          example: 2017-10-26T16:01:13.836Z
+          example: '2017-10-26T16:01:13.836Z'
         lastUpdateDateTime:
           type: string
-          description: "The date and time that the document was last updated in our system. This will typically be when a user has last changed data on the document. With no explicit timezone information."
+          description: The date and time that the document was last updated in our system. This will typically be when a user has last changed data on the document. With no explicit timezone information.
           format: date-time
-          example: 2017-10-26T16:01:13.836Z
+          example: '2017-10-26T16:01:13.836Z'
         documentType:
-          $ref: "#/components/schemas/DocumentTypeEnum"
+          $ref: '#/components/schemas/DocumentTypeEnum'
         description:
-          description: 'A user specified name / description for this document'
-          pattern: ^[a-zA-Z0-9 ]+$
+          description: A user specified name / description for this document
+          pattern: '^[a-zA-Z0-9 ]+$'
           maxLength: 100
           type: string
-          example: "My document description"
+          example: My document description
         status:
           $ref: '#/components/schemas/DocumentStatusTypeEnum'
         content:
           $ref: '#/components/schemas/DocumentListItemContentDto'
         source:
           $ref: '#/components/schemas/SourceDocumentDto'
-
+        userMetadata:
+          $ref: '#/components/schemas/DocumentUserMetadataDto'
     DocumentListItemContentDto:
       type: object
       properties:
         documentNumber:
-          description: "The document number that appears on the document. For example this can be invoice number."
+          description: The document number that appears on the document. For example this can be invoice number.
           type: string
-          example: "123910293-12"
+          example: 123910293-12
         currencyCode:
           $ref: '#/components/schemas/CurrencyCodeEnum'
         documentDate:
           type: string
           format: date
-          description: "The date on which this document was generated. This is only the date component of  the local time at which the purchase was made, with no explicit timezone information. see: 'documentGenerationTime'. Date is in ISO-8601 format."
+          description: 'The date on which this document was generated. This is only the date component of  the local time at which the purchase was made, with no explicit timezone information. see: ''documentGenerationTime''. Date is in ISO-8601 format.'
           example: '2017-09-01'
         documentTime:
-          description: "The time at which this document was generated. This is only the time component of the local time at which the purchase was made, with no explicit timezone information."
+          description: 'The time at which this document was generated. This is only the time component of the local time at which the purchase was made, with no explicit timezone information.'
           type: string
           example: '12:31:06'
         payments:
-          description: "The payments made on this document. This will be an array with the different payments made towards this document."
+          description: The payments made on this document. This will be an array with the different payments made towards this document.
           type: array
           items:
             $ref: '#/components/schemas/DocumentPaymentDto'
         merchant:
           $ref: '#/components/schemas/DocumentListMerchantDto'
         total:
-          description: "The total amount on the document. This will be the sum of items, fees, discounts and taxes but without any payments."
+          description: 'The total amount on the document. This will be the sum of items, fees, discounts and taxes but without any payments.'
           allOf:
             - $ref: '#/components/schemas/DocumentTaxableAmountDto'
         amountDue:
-          description: "This will be the final amount left to pay on the document"
+          description: This will be the final amount left to pay on the document
           allOf:
             - $ref: '#/components/schemas/DocumentTaxableAmountDto'
-
     DocumentListMerchantDto:
       type: object
-      description: "The merchant infomation on this document."
+      description: The merchant infomation on this document.
       properties:
         merchantName:
-          description: "The name of the merchant."
+          description: The name of the merchant.
           type: string
           example: Home Sense
         categoryCode:
-          description: "The category the merchant belongs to."
+          description: The category the merchant belongs to.
           type: string
           example: shopping
-
     DocumentDto:
       type: object
       properties:
         id:
           type: string
-          description: "This is a unique identifier which is used to identify the document in the Sensibill system."
+          description: This is a unique identifier which is used to identify the document in the Sensibill system.
           example: z6uuM0iqnvf8sCDBRYLJ
         foreignId:
           type: string
-          description: "A unique identifier that was passed on upload to ensure that retries can happen without overriding data."
+          description: A unique identifier that was passed on upload to ensure that retries can happen without overriding data.
           example: 123-receipt-clientId
+        accountMetadata:
+          $ref: '#/components/schemas/DocumentAccountMetadataDto'
         arrivalDateTime:
           type: string
-          description: "The date and time that the document was submitted to our system. With no explicit timezone information."
+          description: The date and time that the document was submitted to our system. With no explicit timezone information.
           format: date-time
-          example: 2017-10-26T16:01:13.836Z
+          example: '2017-10-26T16:01:13.836Z'
         lastUpdateDateTime:
           type: string
-          description: "The date and time that the document was last updated in our system. This will typically be when a user has last changed data on the document. With no explicit timezone information."
+          description: The date and time that the document was last updated in our system. This will typically be when a user has last changed data on the document. With no explicit timezone information.
           format: date-time
-          example: 2017-10-26T16:01:13.836Z
+          example: '2017-10-26T16:01:13.836Z'
         documentType:
-          $ref: "#/components/schemas/DocumentTypeEnum"
+          $ref: '#/components/schemas/DocumentTypeEnum'
         description:
-          description: "The document description. Might be also used as the document name or note."
+          description: The document description. Might be also used as the document name or note.
           type: string
-          pattern: ^[a-zA-Z0-9 ]+$
-          example: "My document description"
+          pattern: '^[a-zA-Z0-9 ]+$'
+          example: My document description
         status:
           $ref: '#/components/schemas/DocumentStatusTypeEnum'
         content:
           $ref: '#/components/schemas/DocumentContentDto'
         source:
           $ref: '#/components/schemas/SourceDocumentDto'
-
+        userMetadata:
+          $ref: '#/components/schemas/DocumentUserMetadataDto'
     DocumentContentDto:
       type: object
       properties:
         amountDue:
-          description: "This will be the final amount left to pay on the document"
+          description: This will be the final amount left to pay on the document
           allOf:
             - $ref: '#/components/schemas/DocumentTaxableAmountDto'
         barcodes:
           type: array
-          description: "A list of barcodes available on the document."
+          description: A list of barcodes available on the document.
           items:
             $ref: '#/components/schemas/DocumentContentBarcodeDto'
         countryCode:
@@ -3465,20 +3500,20 @@ components:
             $ref: '#/components/schemas/DocumentDiscountDto'
         documentNumber:
           type: string
-          description: "The document number that appears on the document. For example this can be invoice number."
-          example: "123910293-12"
+          description: The document number that appears on the document. For example this can be invoice number.
+          example: 123910293-12
         dueDate:
           type: string
           format: date
-          description: "The date on which the amountDue should be paid. Date is in ISO-8601 format."
+          description: The date on which the amountDue should be paid. Date is in ISO-8601 format.
           example: '2017-09-01'
         documentDate:
           type: string
           format: date
-          description: "The date on which this document was generated. This is only the date component of  the local time at which the purchase was made, with no explicit timezone information. see: 'documentEmissionTime'. Date is in ISO-8601 format."
+          description: 'The date on which this document was generated. This is only the date component of  the local time at which the purchase was made, with no explicit timezone information. see: ''documentEmissionTime''. Date is in ISO-8601 format.'
           example: '2017-09-01'
         documentTime:
-          description: "The time at which this document was generated. This is only the time component of the local time at which the purchase was made, with no explicit timezone information."
+          description: 'The time at which this document was generated. This is only the time component of the local time at which the purchase was made, with no explicit timezone information.'
           type: string
           example: '12:31:06'
         fees:
@@ -3491,185 +3526,180 @@ components:
             $ref: '#/components/schemas/DocumentItemDto'
         languageCode:
           type: string
-          description: "The language the original document is in."
+          description: The language the original document is in.
           example: english
         merchant:
           $ref: '#/components/schemas/DocumentMerchantDto'
         savings:
-          description: "Sum total of all savings found on the document."
+          description: Sum total of all savings found on the document.
           type: number
           example: 12.3
-        deliveries: 
+        deliveries:
           type: array
           items:
             $ref: '#/components/schemas/DeliveryDto'
         loyaltyRewards:
           $ref: '#/components/schemas/DocumentLoyaltyRewardsDto'
         payments:
-          description: "The payments made on this document. This will be an array with the different payments made towards this document."
+          description: The payments made on this document. This will be an array with the different payments made towards this document.
           type: array
           items:
             $ref: '#/components/schemas/DocumentPaymentDto'
         total:
-          description: "The total amount on the document. This will be the sum of items, fees, discounts, taxes and tips but without any payments."
+          description: 'The total amount on the document. This will be the sum of items, fees, discounts, taxes and tips but without any payments.'
           allOf:
             - $ref: '#/components/schemas/DocumentTaxableAmountDto'
         totalBeforeTips:
-          description: "The total amount minus any tips on the document. This will be the sum of items with discounts and fees but tips and payments."
+          description: The total amount minus any tips on the document. This will be the sum of items with discounts and fees but tips and payments.
           allOf:
             - $ref: '#/components/schemas/DocumentTaxableAmountDto'
         totalBeforeDiscountsFeesTips:
-          description: "The total amount minus any discounts, fees and tips on the document. This will be the sum of items but without fees, discounts, tip and any payments."
+          description: 'The total amount minus any discounts, fees and tips on the document. This will be the sum of items but without fees, discounts, tip and any payments.'
           allOf:
             - $ref: '#/components/schemas/DocumentTaxableAmountDto'
-
     DocumentContentCustomerDto:
-      description: "Information about the customer as presented on the document."
+      description: Information about the customer as presented on the document.
       type: object
       properties:
         customerId:
           type: string
-          description: "An Id assigned to the customer by the merchant."
-          example: '9357630YHE'
+          description: An Id assigned to the customer by the merchant.
+          example: 9357630YHE
         billingAddressLines:
-          description: "The billing address the customer has provided defined as an array of address lines."
+          description: The billing address the customer has provided defined as an array of address lines.
           type: array
           items:
             type: string
-            example: "['1 Finite Loop Cupertino', 'CA 95014']"
+            example: '[''1 Finite Loop Cupertino'', ''CA 95014'']'
         email:
-          description: "The customer email address as displayed on the document."
+          description: The customer email address as displayed on the document.
           type: string
           example: john@example.com
         name:
-          description: "The name of the customer."
+          description: The name of the customer.
           type: string
           example: john doe
         telephoneNumber:
-          description: "The phone number of the customer."
+          description: The phone number of the customer.
           type: string
           example: 905-123-1232
-
     DocumentContentBarcodeDto:
-      description: "Describes a barcode as read from a document."
+      description: Describes a barcode as read from a document.
       type: object
       properties:
         text:
-          description: "Data contained in the barcode."
+          description: Data contained in the barcode.
           type: string
         type:
-          description: "Original type of barcode, eg: UPC, EAN, QR"
+          description: 'Original type of barcode, eg: UPC, EAN, QR'
           type: string
-          example: "UPC"
-
+          example: UPC
     DocumentCreationResponseDto:
       type: object
       properties:
         id:
           type: string
-          description: "This is a unique identifier which is used to identify the document on Sensibill's system."
-          example: "XuncoaVG7XMTY0iWHTCa"
-
+          description: This is a unique identifier which is used to identify the document on Sensibill's system.
+          example: XuncoaVG7XMTY0iWHTCa
     DocumentDeleteResponseDto:
-      description: "The list of document Ids which were deleted from the system"
+      description: The list of document Ids which were deleted from the system
       type: object
       properties:
         ids:
           type: array
           items:
             type: string
-          example: ['XuncoaVG7XMTY0iWHTCa', 'BuDcoaVG74MTY0iWIYKq']
-
+          example:
+            - XuncoaVG7XMTY0iWHTCa
+            - BuDcoaVG74MTY0iWIYKq
     DocumentErrorDto:
-      description: "Describes the error related to the request if there was a failure"
+      description: Describes the error related to the request if there was a failure
       properties:
         errorDescription:
-          description: "An in depth description of the error for the request"
+          description: An in depth description of the error for the request
           type: string
         code:
-          description: "A unique code to help idenifty the type of error"
+          description: A unique code to help idenifty the type of error
           type: string
-
     EditDocumentTaxableAmountDto:
       type: object
       properties:
         taxes:
           type: array
           nullable: true
-          description: "The taxes of this amount. The content passed in the
-            PATCH call will completely replace the current content."
+          description: The taxes of this amount. The content passed in the PATCH call will completely replace the current content.
           items:
             $ref: '#/components/schemas/DocumentTaxDto'
         beforeTax:
           type: number
           nullable: true
-          description: "The total amount before taxes"
-          example: 12.20
+          description: The total amount before taxes
+          example: 12.2
         afterTax:
           type: number
           nullable: true
-          description: "The total amount after taxes"
-          example: 12.20
-
+          description: The total amount after taxes
+          example: 12.2
     EditDocumentMerchantDto:
       type: object
       properties:
         merchantName:
           type: string
           nullable: true
-          description: "The name of the merchant."
+          description: The name of the merchant.
           example: Home Sense
         taxIdNumber:
-          description: "The tax number for this merchant."
+          description: The tax number for this merchant.
           type: string
           nullable: true
           example: 11111 1111 RT0001
         categoryCode:
           type: string
           nullable: true
-          description: "The category this merchant belongs to. Use the endpoint /lookups/receiptcategories for a list of valid categories."
+          description: The category this merchant belongs to. Use the endpoint /lookups/receiptcategories for a list of valid categories.
           example: shopping
-
     EditDocumentRequestDto:
       type: object
-      description: "Object that contains the field that will be updated in a Document"
+      description: |
+        Object that contains the field that will be updated in a Document. Pass the field set to `""` (an empty zero-length string) to unset its value.'
+        Numeric or Enum fileds must be null to unset.
       properties:
         description:
           type: string
           description: |
-            A user specified name / description for this document. \
-            Should be set to `""` (an empty zero-length string) to unset the `description` previosuly set for the document.'
-          pattern: ^[a-zA-Z0-9 ]+$
+            A user specified name / description for this document.
+          pattern: '^[a-zA-Z0-9 ]+$'
           maxLength: 100
+          nullable: true
         accountMetadata:
           $ref: '#/components/schemas/NullableDocumentAccountMetadataDto'
         content:
           type: object
-          additionalProperties: false
           properties:
             merchant:
+              description: If the merchantName is empty or null, the whole merchant data structure will be unset.
               $ref: '#/components/schemas/EditDocumentMerchantDto'
             documentNumber:
               type: string
               nullable: true
-              description: "The document number that appears on the document. For example this can be invoice number."
-              example: "123910293-12"
+              description: The document number that appears on the document. For example this can be invoice number.
+              example: 123910293-12
             dueDate:
               type: string
-              format: date
               nullable: true
-              description: "The date on which the amountDue should be paid. Date is in ISO-8601 format."
+              format: date
+              description: The date on which the amountDue should be paid. Date is in ISO-8601 format.
               example: '2017-09-01'
             documentDate:
               type: string
-              format: date
               nullable: true
-              description: "The date on which this document was generated. This is only the date component of  the local time at which the purchase was made, with no explicit timezone information. see: 'documentEmissionTime'. Date is in ISO-8601 format."
+              format: date
+              description: 'The date on which this document was generated. This is only the date component of  the local time at which the purchase was made, with no explicit timezone information. see: ''documentEmissionTime''. Date is in ISO-8601 format.'
               example: '2017-09-01'
             documentTime:
               type: string
               nullable: true
-              description: "The time at which this document was generated. This is only the time component of the local time at which the purchase was made, with no explicit timezone information."
+              description: 'The time at which this document was generated. This is only the time component of the local time at which the purchase was made, with no explicit timezone information.'
               example: '12:31:06'
             amountDue:
               $ref: '#/components/schemas/EditDocumentTaxableAmountDto'
@@ -3679,54 +3709,38 @@ components:
               $ref: '#/components/schemas/EditDocumentTaxableAmountDto'
             currencyCode:
               $ref: '#/components/schemas/EditableCurrencyCodeEnum'
-
+        userMetadata:
+          $ref: '#/components/schemas/EditDocumentUserMetadataDto'
     EditDocumentResponseDto:
-      description: "Object with the Id of the updated Document"
+      description: Object with the Id of the updated Document
       type: object
       properties:
         id:
           type: string
-          description: "The Id of the updated Document"
-          example: "z6uuM0iqnvf8sCDBRYLJ"
-
+          description: The Id of the updated Document
+          example: z6uuM0iqnvf8sCDBRYLJ
   parameters:
-
-    #Authentication
-
     ClientIDParameter:
       name: client_id
       in: query
       schema:
         type: string
       required: true
-      description: This is the Client Key which you received when you created a developer
-        account with Sensibill. It is a very long, random string encoded in base64.
-
+      description: 'This is the Client Key which you received when you created a developer account with Sensibill. It is a very long, random string encoded in base64.'
     ResponseTypeParameter:
       name: response_type
       in: query
       schema:
         type: string
       required: true
-      description: This is the type of authorization grant being requested by the client.
-        The only valid value here is "code", and must be sent by the client (it isn't filled
-        in by default).
-
+      description: 'This is the type of authorization grant being requested by the client. The only valid value here is "code", and must be sent by the client (it isn''t filled in by default).'
     RedirectURIParameter:
       name: redirect_uri
       in: query
       schema:
         type: string
       required: true
-      description: This is the URL which the user-agent should be redirected to if the
-        login is successful. This is mostly only required by web-application clients
-        which would like to access a Sensibill user's account, server-based clients which are
-        handling authentication themselves (such as SSO) will likely ignore the redirect_uri
-        and may even have to intercept the redirect in a user-agent. Note that while
-        some clients may not need a redirection, all clients must provide a redirect
-        uri in accordance with the OAuth2 standard. This is true even if you set `redirect=false`
-        below. _You must always have a redirect_uri,  even if you don't use redirects. Always._
-
+      description: 'This is the URL which the user-agent should be redirected to if the login is successful. This is mostly only required by web-application clients which would like to access a Sensibill user''s account, server-based clients which are handling authentication themselves (such as SSO) will likely ignore the redirect_uri and may even have to intercept the redirect in a user-agent. Note that while some clients may not need a redirection, all clients must provide a redirect uri in accordance with the OAuth2 standard. This is true even if you set `redirect=false` below. _You must always have a redirect_uri,  even if you don''t use redirects. Always._'
     CredentialTypeParameter:
       name: credential_type
       in: query
@@ -3734,15 +3748,7 @@ components:
         type: string
         default: sensibill
       required: false
-      description: This represents the type of credentials that are being used to authenticate
-        the user. The default is to authenticate a user using the email address and password that
-        they provided to Sensibill when they registered. Some clients, referred to as SSO
-        clients, will handle their own authentication. They can provide a credential_type to
-        indicate what type of credentials they are using to authenticate a user. An example
-        here might be "abc_321_bank_internal", indicating the credentials are stored internally by
-        ABC321 Bank servers. Users may have multiple credentials stored, and thus can
-        be identified in multiple ways by third party systems.
-
+      description: 'This represents the type of credentials that are being used to authenticate the user. The default is to authenticate a user using the email address and password that they provided to Sensibill when they registered. Some clients, referred to as SSO clients, will handle their own authentication. They can provide a credential_type to indicate what type of credentials they are using to authenticate a user. An example here might be "abc_321_bank_internal", indicating the credentials are stored internally by ABC321 Bank servers. Users may have multiple credentials stored, and thus can be identified in multiple ways by third party systems.'
     RedirectParameter:
       name: redirect
       in: query
@@ -3750,57 +3756,35 @@ components:
         type: string
         default: 'true'
       required: false
-      description: Can be either "true" or "false". Tells whether or not the authorizationGrant
-        endpoint will issue a redirect if it successfully authenticates the user. Some
-        clients which are unable to intercept a redirect might need to use this so that
-        they can get the authorizationCode directly within the body.
-
+      description: Can be either "true" or "false". Tells whether or not the authorizationGrant endpoint will issue a redirect if it successfully authenticates the user. Some clients which are unable to intercept a redirect might need to use this so that they can get the authorizationCode directly within the body.
     GrantTypeParameter:
       name: grant_type
       in: query
       schema:
         type: string
       required: true
-      description: "This is the type of authentication the client is presenting for its access-token.
-        <br/><br/>If the client is looking for a client-token, then this should be set to 'client_credentials'.
-        <br/><br/>If the client is looking to swap an authorization grant for an access token, this should be set to 'authorization_code'
-        <br/><br/>If the client is looking to swap a refresh_token for a new access token, this should be set to 'refresh_token'"
-
+      description: 'This is the type of authentication the client is presenting for its access-token. <br/><br/>If the client is looking for a client-token, then this should be set to ''client_credentials''. <br/><br/>If the client is looking to swap an authorization grant for an access token, this should be set to ''authorization_code'' <br/><br/>If the client is looking to swap a refresh_token for a new access token, this should be set to ''refresh_token'''
     TokenRedirectURIParameter:
       name: redirect_uri
       in: query
       schema:
         type: string
       required: true
-      description: If the client is swapping an authorization code for an access token,
-        then this argument is required. If you are just obtaining a client token directly,
-        you do not need to provide a redirect_uri. This must be the same redirect_uri that was provided to the authorizationGrant endpoint, and
-        must also match the redirect_uri which was registered with your client when you received your client credentials.
-
+      description: 'If the client is swapping an authorization code for an access token, then this argument is required. If you are just obtaining a client token directly, you do not need to provide a redirect_uri. This must be the same redirect_uri that was provided to the authorizationGrant endpoint, and must also match the redirect_uri which was registered with your client when you received your client credentials.'
     CodeParameter:
       name: code
       in: query
       schema:
         type: string
       required: true
-      description: If the client is swapping an authorization code for an access token,
-        then this argument is required. If you are just obtaining a client token directly,
-        you do not need to provide a code. This parameter is the authorization_code which
-        you obtained when you used the `/authorizationGrant` endpoint.
-
+      description: 'If the client is swapping an authorization code for an access token, then this argument is required. If you are just obtaining a client token directly, you do not need to provide a code. This parameter is the authorization_code which you obtained when you used the `/authorizationGrant` endpoint.'
     RefreshTokenParameter:
       name: refresh_token
       in: query
       schema:
         type: string
       required: true
-      description: If the client is swapping a refresh_token for an access token, then
-        this argument is required. Otherwise, this parameter should be omitted. This parameter
-        is the refresh_token which you obtained when you last used the `/accessToken` endpoint.
-
-
-    #Users
-
+      description: 'If the client is swapping a refresh_token for an access token, then this argument is required. Otherwise, this parameter should be omitted. This parameter is the refresh_token which you obtained when you last used the `/accessToken` endpoint.'
     UserIdParameter:
       name: userID
       in: path
@@ -3808,44 +3792,34 @@ components:
       required: true
       schema:
         type: string
-
     ExcludeAlertsParameter:
       name: excludeAlerts
       in: query
       required: false
       schema:
         type: boolean
-      description: With this flag set to true, the alerts for the user are omitted. You
-        can retrieve the counts and objects for alerts using the /users/:userID/counts
-        endpoint.
-
+      description: 'With this flag set to true, the alerts for the user are omitted. You can retrieve the counts and objects for alerts using the /users/:userID/counts endpoint.'
     DeleteUserExportParameter:
-        name: export
-        in: query
-        required: false
-        schema:
-          type: boolean
-        description: 'Specifies whether or not to fire off an export prior to deleting the
-          user''s account. Should be either ''true'' or ''false''. '
-
+      name: export
+      in: query
+      required: false
+      schema:
+        type: boolean
+      description: 'Specifies whether or not to fire off an export prior to deleting the user''s account. Should be either ''true'' or ''false''. '
     DeleteUserExportEmailParameter:
-        name: exportEmail
-        in: query
-        required: false
-        schema:
-          type: string
-        description: If you have requested an export, you may provide the email address
-          you want the exported information to go to. If you do not supply an exportEmail,
-          the email address for the user will be used.
-
+      name: exportEmail
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'If you have requested an export, you may provide the email address you want the exported information to go to. If you do not supply an exportEmail, the email address for the user will be used.'
     LocaleParameter:
       name: locale
       in: query
       schema:
         type: string
       example: en-CA
-      description: Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to `/lookups/locales`. It defaults to the user's locale.
-
+      description: 'Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to `/lookups/locales`. It defaults to the user''s locale.'
     EmailParameter:
       name: email
       in: query
@@ -3855,7 +3829,6 @@ components:
         format: email
       example: test@test.com
       description: The email address for the user's account.
-
     UsernameParameter:
       name: username
       in: query
@@ -3864,28 +3837,20 @@ components:
         type: string
       example: tester
       description: The username to the user's account.
-
     UsernameAvailabilityCredentialTypeParameter:
       name: credentialType
       in: query
       required: false
       schema:
         type: string
-      description: The credential type for your client's users that you wish to check.
-        If your client only has one credential type, this parameter may be omitted.
-
-    #Exports
-
+      description: 'The credential type for your client''s users that you wish to check. If your client only has one credential type, this parameter may be omitted.'
     ExportIdParameter:
       name: id
       in: path
       description: A unique ID that identifies this export in the Sensibill system.
       required: true
       schema:
-        $ref: "#/components/schemas/GenericIdString"
-    
-    # Merchants
-
+        $ref: '#/components/schemas/GenericIdString'
     MerchantsNameParameter:
       name: name
       in: query
@@ -3893,27 +3858,20 @@ components:
       schema:
         type: string
       description: An optional name to perform a prefix search on.
-
-    # Documents
-
     DocumentIdParameter:
       name: id
       in: path
       description: A unique Id that identifies this document in the Sensibill system.
       required: true
       schema:
-        $ref: "#/components/schemas/GenericIdString"
-
+        $ref: '#/components/schemas/GenericIdString'
   requestBodies:
-
-    #Authentication
     JwtAuthenticateRequest:
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/JwtAuthenticateRequestDto'
-
     AccessTokenRequest:
       description: Access Token Request
       required: true
@@ -3921,9 +3879,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AccessTokenRequestDto'
-
-    #Users
-
     UserRequest:
       description: Register a user
       required: true
@@ -3931,7 +3886,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UserRequestDto'
-
     JwtUserRequest:
       description: Register a user
       required: true
@@ -3939,7 +3893,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/JwtUserRequestDto'
-
     UserUpdateRequest:
       description: Update a user
       required: true
@@ -3947,9 +3900,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UserUpdateDto'
-
-    #Exports
-
     ExportCreateRequest:
       description: Create a document export
       required: true
@@ -3957,28 +3907,22 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ExportCreateDto'
-
-    # Documents
-
     DocumentCreateRequest:
       required: true
       content:
         multipart/form-data:
           schema:
             $ref: '#/components/schemas/DocumentCreateDto'
-
     DocumentDeleteRequest:
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/DocumentDeleteDto'
-
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
 security:
   - bearerAuth: []
