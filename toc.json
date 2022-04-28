@@ -12,6 +12,11 @@
       "items": [
         {
           "type": "item",
+          "title": "April 27, 2022 Release",
+          "uri": "docs/2022.04.27.md"
+        },
+        {
+          "type": "item",
           "title": "March 30, 2022 Release",
           "uri": "docs/2022.03.30.md"
         },
