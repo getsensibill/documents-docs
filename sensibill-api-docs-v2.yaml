@@ -8,6 +8,7 @@ info:
     email: prodsupport@getsensibill.com
     name: Sensibill
   termsOfService: 'https://getsensibill.com/terms-of-service'
+
 x-json-schema-faker:
   locale: en
   min-items: 1
@@ -1546,48 +1547,6 @@ components:
                 enableMetrics:
                   type: boolean
                   example: false
-            intercepts:
-              type: object
-              properties:
-                enableSkipButton:
-                  type: boolean
-                  example: false
-                enableSuggestedFolders:
-                  type: boolean
-                  example: false
-                enableLocalPushNotification:
-                  type: boolean
-                  example: false
-                percentageOfUsersToShowIntercepts:
-                  type: integer
-                  default: 0
-                enableIntercepts:
-                  type: boolean
-                  example: false
-            iOSInboxSync:
-              type: object
-              properties:
-                outlookSyncEnabled:
-                  type: boolean
-                  example: false
-                gmailSyncEnabled:
-                  type: boolean
-                  example: false
-                inboxSyncEnabled:
-                  type: boolean
-                  example: false
-            androidInboxSync:
-              type: object
-              properties:
-                outlookSyncEnabled:
-                  type: boolean
-                  example: false
-                gmailSyncEnabled:
-                  type: boolean
-                  example: false
-                inboxSyncEnabled:
-                  type: boolean
-                  example: false
             camera:
               type: object
               properties:
@@ -1733,9 +1692,6 @@ components:
             enableEmailNotifications:
               type: boolean
               example: true
-            showEmailScanning:
-              type: boolean
-              example: true
             showForgotPassword:
               type: boolean
               example: true
@@ -1812,17 +1768,6 @@ components:
         locale:
           type: string
           description: 'Provides the locale for the user. Must be a supported value from the list of locale-codes, which can be obtained by going to /lookups/locales'
-        emailScanningEnabled:
-          type: boolean
-          description: Should email for the user be running
-        emailScanningMode:
-          type: string
-          description: 'How often emails should be scanned, one of ''onetime'', ''weekly'', ''daily'', ''hourly'''
-        emailScanningScanAfter:
-          type: string
-          format: date
-          example: '2015-11-12'
-          description: If set only email from after the given date will be imported. See RFC 3339 Section 5.6 for format.
     UserUpdateDto:
       allOf:
         - $ref: '#/components/schemas/userUpdateDtoProperties'
@@ -2245,28 +2190,6 @@ components:
                 push:
                   type: boolean
                   example: true
-        recentEmailScans:
-          type: array
-          items:
-            type: object
-            properties:
-              scanTime:
-                type: string
-                format: date-time
-                example: '2015-09-10T15:43:29.594Z'
-              emailsDownloaded:
-                type: integer
-                example: 79
-              folders:
-                type: array
-                items:
-                  type: string
-        emailScanningMode:
-          type: string
-          example: daily
-        emailScanningEnabled:
-          type: boolean
-          example: true
         locale:
           type: string
           example: en-CA
