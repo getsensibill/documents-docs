@@ -9,11 +9,13 @@ info:
     name: Sensibill
   termsOfService: 'https://getsensibill.com/terms-of-service'
 
+# https://github.com/faker-js/faker
 x-json-schema-faker:
   locale: en
   min-items: 1
   max-items: 3
   resolve-json-path: true
+  
 tags:
   - name: Home
     description: Home
@@ -1808,6 +1810,7 @@ components:
           description: Can be either "true" or "false". This parameter can be used by early integration partners during testing to create a number of ake testing receipts for the accounts they create.
     GenericIdString:
       type: string
+      minLength: 3
       maxLength: 75
       pattern: '^[a-zA-Z0-9-_:.]{3,75}$'
     CurrencyCodeDto:
@@ -3222,6 +3225,7 @@ components:
         - documents
       properties:
         documents:
+          description: A list of document objects with their status indicated
           type: array
           maxItems: 10
           items:
@@ -3229,11 +3233,12 @@ components:
         errors:
           description: Optional property used to indicate and describe errors encountered while handling the request
           type: array
+          maxItems: 10
           items:
-            type: string
-            x-faker: random.words
-    DocumentStatusListItemDto:
-      description: Schema for an entry in the documents/status endpoint response
+            $ref: '#/components/schemas/DocumentStatusErrorItemDto'
+
+    DocumentStatusErrorItemDto:
+      description: Represents an error that can occur while polling for document processing status
       type: object
       properties:
         id:
@@ -3242,11 +3247,25 @@ components:
           minLength: 20
           example: z6uuM0iqnvf8sCDBRYLJ
           description: This is a unique identifier which is used to identify the document in the Sensibill system.
+          x-faker: random.uuid
+        message:
+          type: string
+          maxLength: 100
+          example: z6uuM0iqnvf8sCDBRYLJ is not a valid document id
+          x-faker: random.words
+
+    DocumentStatusListItemDto:
+      description: Schema for an entry in the documents/status endpoint response
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/GenericIdString'
         foreignId:
           description: A unique identifier that was passed on upload to ensure that retries can happen without overriding data.
           type: string
-          maxLength: 20
-          minLength: 20
+          maxLength: 75
+          minLength: 3
+          pattern: ^[a-zA-Z0-9-_:.]{3,75}$
           example: z6uuM0iqnvf8sCDBRYLJ
         arrivalDateTime:
           description: The date and time that the document was submitted to our system. With no explicit timezone information.
