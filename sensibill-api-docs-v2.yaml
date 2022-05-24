@@ -349,7 +349,7 @@ paths:
           in: query
           description: |
             Array of `description` values to filter the documents. The filter is case insentive and matches any document where the
-            description contains the given value. Should ideally satisfy the /^[a-zA-Z0-9 ]+$/ pattern \
+            description contains the given value. Values should ideally satisfy the /^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$/gm pattern which primarily prohibits the `;` punctuation \
             **Example:** `filter.description='Dinner with friends'&filter.description='Children winter gear'
           required: false
           schema:
@@ -357,7 +357,7 @@ paths:
             items:
               type: string
               maxLength: 75
-              pattern: '^[a-zA-Z0-9 ]+$'
+              pattern: ^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$
             maxItems: 20
         - name: filter.documentDate
           in: query
@@ -1969,8 +1969,8 @@ components:
       properties:
         description:
           type: string
-          description: A user specified name or description for this document
-          pattern: '^[a-zA-Z0-9 ]+$'
+          description: A user specified name or description for this document. Values should ideally satisfy the /^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$/gm pattern which primarily prohibits the `;` punctuation.
+          pattern: ^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$
           maxLength: 75
         sourceFile:
           type: string
@@ -3608,10 +3608,9 @@ components:
       properties:
         description:
           type: string
-          description: |
-            A user specified name / description for this document.
-          pattern: '^[a-zA-Z0-9 ]+$'
-          maxLength: 100
+          description: A user specified name or description for this document. Values should ideally satisfy the /^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$/gm pattern which primarily prohibits the `;` punctuation \
+          pattern: ^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$
+          maxLength: 75
           nullable: true
         accountMetadata:
           $ref: '#/components/schemas/NullableDocumentAccountMetadataDto'
