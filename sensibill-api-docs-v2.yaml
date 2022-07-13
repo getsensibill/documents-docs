@@ -37,6 +37,7 @@ servers:
       environment:
         default: receipts-sandbox
         enum:
+          - beta
           - receipts-sandbox
 paths:
   /:
