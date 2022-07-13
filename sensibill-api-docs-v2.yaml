@@ -32,10 +32,12 @@ tags:
   - name: Users
     description: Users
 servers:
-  - url: https://receipts-sandbox.sensibill.io/api/v2
-    description: 'Public Server'
-  - url: https://beta.sensibill.io/api/v2
-    description: 'Internal/Beta Server'
+  - url: 'https://{environment}.sensibill.io/api/v2'
+    variables:
+      environment:
+        default: receipts-sandbox
+        enum:
+          - receipts-sandbox
     
 paths:
   /:
