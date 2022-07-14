@@ -34,7 +34,7 @@ tags:
 servers:
   - url: https://receipts-sandbox.sensibill.io/api/v2
     description: 'Public Server'
-  - url: https://beta.sensibill.io/api/v2
+  - url: https://beta.getsensibill.com/api/v2
     description: 'Internal/Beta Server'
 
 paths:
