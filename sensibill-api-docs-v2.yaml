@@ -31,6 +31,8 @@ tags:
     description: Merchants
   - name: Users
     description: Users
+  - name: Folders
+    description: Folders
 servers:
   - url: https://receipts-sandbox.sensibill.io/api/v2
     description: 'Public Server'
@@ -560,6 +562,16 @@ paths:
             items:
               $ref: '#/components/schemas/TenderTypesEnum'
             maxItems: 20
+        - name: filter.folders
+          in: query
+          description: |
+            Array of `folders` externalId values to filter the documents on. \
+            **Example:** `filter.folders='folderExternalId1'&filter.folders='folderExternalId2'`
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GenericIdString'
         - name: filter.returnPeriodDuration
           in: query
           description: |
@@ -1212,6 +1224,151 @@ paths:
           description: Bad Request. This will occur if you omit the username.
         '401':
           description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+  /folders:
+    get:
+      operationId: getFolders
+      tags:
+        - Folders
+      summary: List the folders for a user
+      description: This endpoint allows you to list the folders in the authenticating user's account.
+      parameters:
+        - $ref: '#/components/parameters/LocaleParameter'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFoldersListResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+    post:
+      operationId: createFolder
+      tags:
+        - Folders
+      summary: Add a new folder for a user
+      description: This endpoint allows you to add a folder to the authenticating user's account.
+      requestBody:
+        $ref: '#/components/requestBodies/FolderCreateRequest'
+      responses:
+        '200':
+          description: Success. The folder was successfully added.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderCreationResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+    delete:
+      operationId: deleteFolders
+      tags:
+        - Folders
+      summary: Delete multiple folders for a user
+      description: This endpoint allows you to perform a batch deletion of folders on a User object.
+      parameters:
+        - $ref: '#/components/parameters/FolderIdsParameter'
+        - $ref: '#/components/parameters/DeleteDocumentsParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/FoldersDeleteRequest'
+      responses:
+        '200':
+          description: Success. The folders were successfully removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyObjectResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '404':
+          description: Not Found. One or more folderIDs you have provided in the request do not belong to this user. See the user object for a list of their folders.
+  '/folders/{folderId}':
+    put:
+      operationId: upsertFolder
+      tags:
+        - Folders
+      summary: Update a folder for a user
+      description: This endpoint allows you to update a folder in the authenticating user's account.
+      parameters:
+        - $ref: '#/components/parameters/FolderIdParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/FolderUpdateRequest'
+      responses:
+        '200':
+          description: Success. The folder was successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyObjectResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '404':
+          description: Not Found. The folderID you have provided is not one of this user's folders. See the user object for a list of their folders.
+    delete:
+      operationId: deleteFolder
+      tags:
+        - Folders
+      summary: Delete a folder for a user
+      description: This endpoint allows you to delete a folder from the authenticating user's account.
+      parameters:
+        - $ref: '#/components/parameters/FolderIdParameter'
+        - $ref: '#/components/parameters/DeleteDocumentsParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/FolderDeleteRequest'
+      responses:
+        '200':
+          description: Success. The folder was successfully removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyObjectResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '404':
+          description: Not Found. The folderID you have provided is not one of this user's folders. See the user object for a list of their folders.
+  '/folders/{folderId}/documents':
+    put:
+      operationId: addDocumentsToFolder
+      tags:
+        - Folders
+      summary: Add document(s) to folder
+      description: This endpoint allows you to add one or more documents to a folder owned by the user
+      parameters:
+        - $ref: '#/components/parameters/FolderIdParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/AddDocumentsToFolderRequest'
+      responses:
+        '200':
+          description: Success. Documents were successfully added to folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsAddedOrRemovedFromFolderResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '404':
+          description: Not Found. The folderID or one of the receipt IDs you have provided do not exist or do not belong to the user.
+    delete:
+      operationId: removeDocumentFromFolder
+      tags:
+        - Folders
+      summary: Remove document(s) from folder
+      description: This endpoint allows you to remove multiple documents from a folder owned by the user
+      parameters:
+        - $ref: '#/components/parameters/FolderIdParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/RemoveDocumentsFromFolderRequest'
+      responses:
+        '200':
+          description: Success. Documents were successfully removed from the folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsAddedOrRemovedFromFolderResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '404':
+          description: Not Found. The folderID or one of the receipt IDs you have provided do not exist or do not belong to the user.
+  
 components:
   schemas:
     ApiInfoDto:
@@ -1322,6 +1479,154 @@ components:
             documentsDetail:
               type: string
               example: 'documents/:id'
+            listFolders:
+              type: string
+              example: folders
+            createFolder:
+              type: string
+              example: folders
+            deleteFolders:
+              type: string
+              example: folders
+            updateFolder:
+              type: string
+              example: 'folders/:folderId'
+            deleteFolder:
+              type: string
+              example: 'folders/:folderId'
+            addDocumentsToFolder:
+              type: string
+              example: 'folders/:folderId/documents'
+            deleteDocumentsFromFolder:
+              type: string
+              example: 'folders/:folderId/documents'
+    FolderCreateRequestDto:
+      type: object
+      required:
+        - name
+        - color
+      properties:
+        name:
+          type: string
+          example: MyOtherFolder
+          description: The name for this folder. A user may not have two folders with the same name.
+        color:
+          type: string
+          example: aa0000
+          description: 'Six hex digits representing the color of this folder, e.g. <code>cc0000</code> or <code>9b1515</code>.'
+    FolderUpdateRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: MyOtherFolder
+          description: The name for this folder. A user may not have two folders with the same name.
+        color:
+          type: string
+          example: aa0000
+          description: 'Six hex digits representing the color of this folder, e.g. <code>cc0000</code> or <code>9b1515</code>.'
+    FolderDeleteRequestDto:
+      type: object
+      properties:
+        deleteDocuments:
+          type: boolean
+          default: false
+          description: Delete any documents that are in this folder.
+    FoldersDeleteRequestDto:
+      type: object
+      required:
+        - folders
+      properties:
+        folders:
+          type: array
+          items:
+            type: string
+            description: List of folder IDs that you want deleted.
+            example: 6OeYUlNyyeVHEmHMLmgZ
+        deleteDocuments:
+          type: boolean
+          default: false
+          description: Delete any documents that are in this folder.
+    GetFoldersListResponseDto:
+      type: object
+      required:
+        - folders
+      properties:
+        folders:
+          type: array
+          items:
+            $ref: '#/components/schemas/FolderListItemDto'
+    FolderListItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 6OeYUlNyyeVHEmHMLmgZ
+          description: The id of the folder
+        name:
+          type: string
+          example: Renovations-2021-Jan
+          description: The name for this folder. A user may not have two folders with the same name.
+        color:
+          type: string
+          example: cc0000
+          description: Six hex digits representing the color of this folder.
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2015-09-30T17:56:45.236Z'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2015-11-30T17:56:45.236Z'
+        count:
+          type: integer
+          example: 3
+        totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/FolderListItemTotalsDto'
+    FolderListItemTotalsDto:
+      type: object
+      properties:
+        amount:
+          type: number
+          example: 35.53
+          description: The total amount of all receipts in the folder matching the currency code.
+        count:
+          type: integer
+          example: 3
+          description: The count of all reeipts in the folder matching the currency code. Must be a valid currency code as returned by our /lookups/currencies endpoint
+        currencyCode:
+          type: string
+          example: CAD
+          description: The currency code associated with the total amount of the receipts in the folder matching this currency. It will be a valid currency code as returned by our /lookups/currencies endpoint
+        displayAmount:
+          type: string
+          example: $35.53
+          description: 'The total amount of all receipts in the folder matching the currency code formatted based on the specified locale, or if not specified the locale of the user.'
+    FolderCreationResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 9k-mU2YuNiakP0O2mCvF
+    DocumentsAddedOrRemovedFromFolderResponseDto:
+      type: object
+      properties:
+        updated:
+          type: integer
+          example: 2
+    AddOrRemoveDocumentsFromFolderDto:
+      type: object
+      required:
+        - documentIds
+      properties:
+        documentIds:
+          type: array
+          items:
+            type: string
+            example: Iw6DUSraLoGOnHiL2Ps4pBz8F1oQCndA4UhzS80OAHDg0LxpJzRtmUr89sFrYS2DfQfbhhkF8kPe5jF9_nFE
     JwtAuthenticateRequestDto:
       type: object
       required:
@@ -3139,6 +3444,11 @@ components:
       properties:
         expenseType:
           $ref: '#/components/schemas/ExpenseTypeEnum'
+        folders:
+          description: The folders this document belongs to
+          type: array
+          items:
+            type: string
         notes:
           type: string
           description: General text note to the document.
@@ -3660,6 +3970,29 @@ components:
           description: The Id of the updated Document
           example: z6uuM0iqnvf8sCDBRYLJ
   parameters:
+    FolderIdParameter:
+      name: folderId
+      in: path
+      description: A unique ID that identifies this folder in the Sensibill system.
+      required: true
+      schema:
+        type: string
+    FolderIdsParameter:
+      name: folders
+      in: query
+      description: 'This is a list of folder IDs that you want deleted. It should be either an array in JSON form, or a comma separated list and may be passed as a query parameter or in a JSON body in the request.'
+      required: true
+      schema:
+        type: string
+        example: '6OeYUlNyyeVHEmHMLmgZ,ARpUx0qRIRdK7SZzG7Uo'
+    DeleteDocumentsParameter:
+      name: deleteDocuments
+      in: query
+      description: Soft delete any documents that are in this folder. This means the document will stay in Sensibill's system but it will not be accessible by the user. This may be passed as a query parameter or in a JSON body in the request.
+      required: false
+      schema:
+        type: boolean
+        default: false
     ClientIDParameter:
       name: client_id
       in: query
@@ -3806,6 +4139,48 @@ components:
       schema:
         $ref: '#/components/schemas/GenericIdString'
   requestBodies:
+    FolderCreateRequest:
+      description: Add a new folder for a user
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FolderCreateRequestDto'
+    FolderUpdateRequest:
+      description: Add a new folder for a user
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FolderUpdateRequestDto'
+    FolderDeleteRequest:
+      description: Delete a folder for a user
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FolderDeleteRequestDto'
+    FoldersDeleteRequest:
+      description: Delete multiple folders for a user
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FoldersDeleteRequestDto'
+    AddDocumentsToFolderRequest:
+      description: Add multiple documents to a folder
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddOrRemoveDocumentsFromFolderDto'
+    RemoveDocumentsFromFolderRequest:
+      description: Remove multiple documents from a folder
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddOrRemoveDocumentsFromFolderDto'
     JwtAuthenticateRequest:
       required: true
       content:
