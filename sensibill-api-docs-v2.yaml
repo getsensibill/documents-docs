@@ -1020,13 +1020,32 @@ paths:
           description: Forbidden. This will occur if you attempt to use a client token with this endpoint. This endpoint must be used with a user-token.
         '404':
           description: Not Found. The export ID you have provided is not one of this user's exports.
+  /lookups/documentcategories:
+    get:
+      operationId: getDocumentCategories
+      tags:
+        - Lookups
+      summary: Document categories
+      description: This API call allows for retrieval of a list of document categories. To call this endpoint, you can use either a client-token or a user-token.
+      parameters:
+        - $ref: '#/components/parameters/ScaleParameter'
+        - $ref: '#/components/parameters/LocaleParameter'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetLookupCategoryListResponseDto'
+        '401':
+          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
   /lookups/currencies:
     get:
       operationId: getCurrencies
       tags:
         - Lookups
       summary: Supported Currencies
-      description: 'This API call allows you to retrieve the list of currencies that we currently support in our system. To call this endpoint, you can use either a client-token or a user-token.'
+      description: This API call allows you to retrieve the list of currencies that we currently support in our system. To call this endpoint, you can use either a client-token or a user-token.
       parameters:
         - $ref: '#/components/parameters/LocaleParameter'
       responses:
@@ -1035,25 +1054,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LookupCurrenciesResponse'
+                $ref: '#/components/schemas/GetLookupCurrencyListResponseDto'
         '401':
-          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
   /lookups/locales:
     get:
       operationId: getLocales
       tags:
         - Lookups
       summary: Supported Locales
-      description: 'This API call allows you to retrieve the list of locales that we currently support in our system. To call this endpoint, you can use either a client-token or a user-token.'
+      description: This API call allows you to retrieve the list of locales that we currently support in our system. To call this endpoint, you can use either a client-token or a user-token.
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LookupLocalesResponse'
+                $ref: '#/components/schemas/GetLookupLocaleListResponseDto'
         '401':
-          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
   /merchants:
     get:
       operationId: getMerchants
@@ -3024,14 +3043,37 @@ components:
           type: integer
           example: 11042
           description: 'The size of the contents in bytes, when available.'
-    LookupCurrenciesResponse:
+    GetLookupCategoryListResponseDto:
+      type: object
+      properties:
+        documentCategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentCategoryListItemDto'
+    DocumentCategoryListItemDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: shopping
+          description: The code representing the document category.
+        name:
+          type: string
+          example: General Retail
+          description: The name of the document category.
+        icon:
+          type: string
+          format: uri
+          example: 'https://receipts-sandbox.sensibill.io/img/categories/select-category/select-category-general-retail-active@3x.png'
+          description: The URL of the icon associated with the document category.
+    GetLookupCurrencyListResponseDto:
       type: object
       properties:
         currencies:
           type: array
           items:
-            $ref: '#/components/schemas/LookupCurrenciesDto'
-    LookupCurrenciesDto:
+            $ref: '#/components/schemas/DocumentCurrencyListItemDto'
+    DocumentCurrencyListItemDto:
       type: object
       properties:
         name:
@@ -3046,14 +3088,14 @@ components:
           type: string
           example: $
           description: The internationally recognized symbol representing the currency.
-    LookupLocalesResponse:
+    GetLookupLocaleListResponseDto:
       type: object
       properties:
         locales:
           type: array
           items:
-            $ref: '#/components/schemas/LookupLocalesDto'
-    LookupLocalesDto:
+            $ref: '#/components/schemas/DocumentLocaleListItemDto'
+    DocumentLocaleListItemDto:
       type: object
       properties:
         name:
@@ -4086,13 +4128,23 @@ components:
       schema:
         type: string
       description: 'If you have requested an export, you may provide the email address you want the exported information to go to. If you do not supply an exportEmail, the email address for the user will be used.'
+    ScaleParameter:
+      name: scale
+      in: query
+      required: false
+      schema:
+        type: string
+        pattern: ^[2|3]x$
+        default: 3x
+      description: This provides the scale factor to use for the images returned from the endpoint. Can either be '2x' or '3x'. Defaults to '3x' for higher resolution images.
     LocaleParameter:
       name: locale
       in: query
       schema:
         type: string
+        pattern: ^[a-z]{2,2}-[A-Z]{2,2}$
       example: en-CA
-      description: 'Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to `/lookups/locales`. It defaults to the user''s locale.'
+      description: Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to `/lookups/locales`. It defaults to the user's locale.
     EmailParameter:
       name: email
       in: query
