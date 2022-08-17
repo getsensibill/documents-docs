@@ -3532,13 +3532,15 @@ components:
           pattern: '^[a-zA-Z0-9-_:.]+$'
           description: |
             An optional identifier representing the bank account from the financial institution to associate this document with.
-            Should be set to `""` (an empty zero-length string) to unset the `account` previosuly set for the document.
+            Should be set to an empty zero-length string to unset the `account` previosuly set for the document.
           maxLength: 75
           example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
         transactionId:
           type: string
           pattern: '^[a-zA-Z0-9-_:.]+$'
-          description: An optional ID representing the transaction from the financial institution to associate this document with
+          description: |
+            An optional ID representing the transaction from the financial institution to associate this document with
+            Should be set to an empty zero-length string to unset the `transactionId` previosuly set for the document.
           maxLength: 75
           example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
     SourceDocumentDto:
