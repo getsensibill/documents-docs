@@ -744,9 +744,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentCreationResponseDto'
         '400':
-          description: 'Bad Request. This will occur if you provide an invalid value for a request parameter, an invalid parameter or invalid body.'
+          description: Bad Request. This will occur if you provide an invalid value for a request parameter, an invalid parameter or invalid body.
         '401':
-          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
         '403':
           description: Forbidden. This will occur if you try to use this endpoint without being setup for documents.
         '500':
@@ -1577,9 +1577,19 @@ components:
             $ref: '#/components/schemas/FolderListItemDto'
     FolderListItemDto:
       type: object
+      required:
+        - id
+        - name
+        - color
+        - updatedAt
+        - createdAt
+        - count
       properties:
         id:
           type: string
+          minLength: 20
+          maxLength: 35
+          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
           example: 6OeYUlNyyeVHEmHMLmgZ
           description: The id of the folder
         name:
@@ -1607,6 +1617,11 @@ components:
             $ref: '#/components/schemas/FolderListItemTotalsDto'
     FolderListItemTotalsDto:
       type: object
+      required:
+        - count
+        - amount
+        - currencyCode
+        - displayAmount
       properties:
         amount:
           type: number
@@ -1626,12 +1641,19 @@ components:
           description: 'The total amount of all receipts in the folder matching the currency code formatted based on the specified locale, or if not specified the locale of the user.'
     FolderCreationResponseDto:
       type: object
+      required:
+        - id
       properties:
         id:
           type: string
+          minLength: 20
+          maxLength: 35
+          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
           example: 9k-mU2YuNiakP0O2mCvF
     DocumentsAddedOrRemovedFromFolderResponseDto:
       type: object
+      required:
+        - updated
       properties:
         updated:
           type: integer
@@ -2154,42 +2176,6 @@ components:
           type: string
           example: GST
     CurrencyCodeEnum:
-      description: 3 character ISO-4217 currency code
-      type: string
-      enum:
-        - USD
-        - CAD
-        - GBP
-        - EUR
-        - NZD
-        - AUD
-        - BRL
-        - CLP
-        - CNY
-        - CZK
-        - DKK
-        - HKD
-        - HUF
-        - INR
-        - IDR
-        - ILS
-        - JPY
-        - MYR
-        - MXN
-        - NOK
-        - PKR
-        - PHP
-        - PLN
-        - RUB
-        - SGD
-        - ZAR
-        - KRW
-        - SEK
-        - CHF
-        - TWD
-        - THB
-        - TRY
-    EditableCurrencyCodeEnum:
       description: 3 character ISO-4217 currency code
       type: string
       nullable: true
@@ -2945,6 +2931,14 @@ components:
         - noDocumentsFound
     ExportCreateResponseDto:
       type: object
+      required:
+        - id
+        - status
+        - criteria
+        - createdAt
+        - outputFormats
+        - documentsCount
+        - destructionTime
       properties:
         destructionTime:
           type: string
@@ -2987,6 +2981,16 @@ components:
         $ref: '#/components/schemas/ExportsResponseDto'
     ExportsResponseDto:
       type: object
+      required:
+        - id
+        - status
+        - documents
+        - criteria
+        - resultSize
+        - createdAt
+        - updatedAt
+        - outputFormats
+        - destructionTime
       properties:
         destructionTime:
           type: string
@@ -3039,6 +3043,7 @@ components:
           type: string
           example: IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA
           description: This is a unique identifier which is used to identify the export request on Sensibill's system.
+          # TODO inherited from v1. Should be fileSize instead
         filesize:
           type: integer
           example: 11042
@@ -3068,6 +3073,8 @@ components:
           description: The URL of the icon associated with the document category.
     GetLookupCurrencyListResponseDto:
       type: object
+      required:
+        - currencies
       properties:
         currencies:
           type: array
@@ -3075,11 +3082,15 @@ components:
             $ref: '#/components/schemas/DocumentCurrencyListItemDto'
     DocumentCurrencyListItemDto:
       type: object
+      required:
+        - name
+        - code
+        - symbol
       properties:
         name:
           type: string
           example: United States Dollar
-          description: The name of the currency in English.
+          description: The name of the currency in English, or translated if a non-English locale was provided used to handle the request
         code:
           type: string
           example: USD
@@ -3090,6 +3101,8 @@ components:
           description: The internationally recognized symbol representing the currency.
     GetLookupLocaleListResponseDto:
       type: object
+      required:
+        - locales
       properties:
         locales:
           type: array
@@ -3097,6 +3110,9 @@ components:
             $ref: '#/components/schemas/DocumentLocaleListItemDto'
     DocumentLocaleListItemDto:
       type: object
+      required:
+        - name
+        - code
       properties:
         name:
           type: string
@@ -3108,11 +3124,16 @@ components:
           description: The short code of the locale.
     MerchantsDto:
       type: object
+      required:
+        - merchants
       properties:
         merchants:
           type: array
           items:
             type: object
+            required:
+              - name
+              - merchantID
             properties:
               merchantID:
                 type: string
@@ -3120,7 +3141,7 @@ components:
               name:
                 type: string
                 example: Amazon
-              receiptCateogry:
+              documentCateogry:
                 type: string
                 example: General Retail
     CountryCode:
@@ -3446,7 +3467,7 @@ components:
           example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
     PeriodUnitEnum:
       type: string
-      description: Available period units.  Can be 'day', 'week', 'month' or 'year'.
+      description: Available period units.  Can be `day`, `week`, `month` or `year`.
       enum:
         - day
         - week
@@ -3454,7 +3475,7 @@ components:
         - year
     ExpenseTypeEnum:
       type: string
-      description: Expense type associated with the document. Can be either 'business' or 'personal'.
+      description: Expense type associated with the document. Can be either `business` or `personal`.
       enum:
         - business
         - personal
@@ -3463,7 +3484,7 @@ components:
       properties:
         unit:
           $ref: '#/components/schemas/PeriodUnitEnum'
-          description: This parameter should be used together with the ''duration'' parameter. Document must have the ''documentDate'' set or it should be supplied as another edit parameter within the same request.
+          description: This parameter should be used together with the `duration` parameter. Document must have the `documentDate` set or it should be supplied as another edit parameter within the same request.
           example: 'day'
         duration:
           type: integer
@@ -3543,10 +3564,10 @@ components:
             Should be set to an empty zero-length string to unset the `transactionId` previosuly set for the document.
           maxLength: 75
           example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
-    SourceDocumentDto:
+    DocumentSourceDto:
       properties:
         format:
-          $ref: '#/components/schemas/AllDocumentSourceFormatsEnum'
+          $ref: '#/components/schemas/DocumentSourceFormatsEnum'
         url:
           type: string
           description: 'The url to get or view the original document file (i.e.: image, pdf, pdf_email, etc)'
@@ -3554,15 +3575,6 @@ components:
           type: string
           description: |
             The url of an image file to preview this document. In case of image documents, this content will be the same of the url field.
-    AllDocumentSourceFormatsEnum:
-      description: Defines the possible original formats for a document to have come from.
-      type: string
-      enum:
-        - pdf
-        - image
-        - pdf_email
-        - html_email
-        - image_email
     GetDocumentResponseDto:
       description: Structure of the response on the document details endpoint
       type: object
@@ -3570,7 +3582,7 @@ components:
         document:
           $ref: '#/components/schemas/DocumentDto'
         error:
-          $ref: '#/components/schemas/DocumentErrorDto'
+          $ref: '#/components/schemas/GetDocumentErrorDto'
     DocumentsStatusResponseDto:
       type: object
       description: Response schema for the documents/status endpoint
@@ -3578,7 +3590,7 @@ components:
         - documents
       properties:
         documents:
-          description: A list of document objects with their status indicated
+          description: A list of document objects with their processing status indicated
           type: array
           maxItems: 10
           items:
@@ -3593,10 +3605,13 @@ components:
     DocumentStatusErrorItemDto:
       description: Represents an error that can occur while polling for document processing status
       type: object
+      required:
+        - id
+        - message
       properties:
         id:
           type: string
-          maxLength: 20
+          maxLength: 35
           minLength: 20
           example: z6uuM0iqnvf8sCDBRYLJ
           description: This is a unique identifier which is used to identify the document in the Sensibill system.
@@ -3610,6 +3625,11 @@ components:
     DocumentStatusListItemDto:
       description: Schema for an entry in the documents/status endpoint response
       type: object
+      required:
+        - id
+        - status
+        - documentType
+        - arrivalDateTime
       properties:
         id:
           $ref: '#/components/schemas/GenericIdString'
@@ -3643,14 +3663,23 @@ components:
       properties:
         documents:
           type: array
+          maxItems: 100
           items:
             $ref: '#/components/schemas/DocumentListItemDto'
         count:
           description: 'This field counts the total number of documents for the user existing in the system.<br> If filter conditions are informed, this would only count the records matching those.'
           type: integer
+          minimum: 0
+          maximum: 100
           example: 1
     DocumentListItemDto:
       type: object
+      required:
+        - id
+        - status
+        - documentType
+        - arrivalDateTime
+        - lastUpdateDateTime
       properties:
         id:
           type: string
@@ -3685,7 +3714,7 @@ components:
         content:
           $ref: '#/components/schemas/DocumentListItemContentDto'
         source:
-          $ref: '#/components/schemas/SourceDocumentDto'
+          $ref: '#/components/schemas/DocumentSourceDto'
         userMetadata:
           $ref: '#/components/schemas/DocumentUserMetadataDto'
     DocumentListItemContentDto:
@@ -3735,6 +3764,12 @@ components:
           example: shopping
     DocumentDto:
       type: object
+      required:
+        - id
+        - status
+        - documentType
+        - arrivalDateTime
+        - lastUpdateDateTime
       properties:
         id:
           type: string
@@ -3768,7 +3803,7 @@ components:
         content:
           $ref: '#/components/schemas/DocumentContentDto'
         source:
-          $ref: '#/components/schemas/SourceDocumentDto'
+          $ref: '#/components/schemas/DocumentSourceDto'
         userMetadata:
           $ref: '#/components/schemas/DocumentUserMetadataDto'
     DocumentContentDto:
@@ -3891,24 +3926,37 @@ components:
           example: UPC
     DocumentCreationResponseDto:
       type: object
+      required:
+        - id
       properties:
         id:
           type: string
+          minLength: 20
+          maxLength: 35
+          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
           description: This is a unique identifier which is used to identify the document on Sensibill's system.
-          example: XuncoaVG7XMTY0iWHTCa
+          example: NPd1RuBD7qv2cJ5yuOzM
     DocumentDeleteResponseDto:
       description: The list of document Ids which were deleted from the system
       type: object
+      required:
+        - ids
       properties:
         ids:
           type: array
           items:
             type: string
+            minLength: 20
+            maxLength: 35
+            pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
           example:
             - XuncoaVG7XMTY0iWHTCa
             - BuDcoaVG74MTY0iWIYKq
-    DocumentErrorDto:
+    GetDocumentErrorDto:
       description: Describes the error related to the request if there was a failure
+      required:
+        - code
+        - errorDescription
       properties:
         errorDescription:
           description: An in depth description of the error for the request
@@ -4002,15 +4050,20 @@ components:
             total:
               $ref: '#/components/schemas/EditDocumentTaxableAmountDto'
             currencyCode:
-              $ref: '#/components/schemas/EditableCurrencyCodeEnum'
+              $ref: '#/components/schemas/CurrencyCodeEnum'
         userMetadata:
           $ref: '#/components/schemas/EditDocumentUserMetadataDto'
     EditDocumentResponseDto:
       description: Object with the Id of the updated Document
       type: object
+      required:
+        - id
       properties:
         id:
           type: string
+          minLength: 20
+          maxLength: 35
+          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
           description: The Id of the updated Document
           example: z6uuM0iqnvf8sCDBRYLJ
   parameters:
