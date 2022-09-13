@@ -2116,8 +2116,7 @@ components:
           type: string
           description: 'Provides the locale for the user. Must be a supported value from the list of locale-codes, which can be obtained by going to /lookups/locales'
     UserUpdateDto:
-      allOf:
-        - $ref: '#/components/schemas/userUpdateDtoProperties'
+      $ref: '#/components/schemas/userUpdateDtoProperties'
     commonRegistrationParameters:
       type: object
       properties:
@@ -3158,24 +3157,25 @@ components:
       description: Contains info about one applied discount.
       allOf:
         - $ref: '#/components/schemas/DocumentTaxableAmountDto'
-      properties:
-        description:
-          description: A user-presentable description of this discount.
-          type: string
-          example: 10.00%
-        methodCode:
-          description: A code used by the merchant to identify this discount
-          type: string
-          example: Home Sense
-        percent:
-          description: 'May be set if this discount is percent based, where a value of N represents an N% discount.'
-          type: number
-        type:
-          $ref: '#/components/schemas/DiscountTypesEnum'
-        taxes:
-          type: array
-          items:
-            $ref: '#/components/schemas/DocumentTaxDto'
+        - type: object
+          properties:
+            description:
+              description: A user-presentable description of this discount.
+              type: string
+              example: 10.00%
+            methodCode:
+              description: A code used by the merchant to identify this discount
+              type: string
+              example: Home Sense
+            percent:
+              description: 'May be set if this discount is percent based, where a value of N represents an N% discount.'
+              type: number
+            type:
+              $ref: '#/components/schemas/DiscountTypesEnum'
+            taxes:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentTaxDto'
     DiscountTypesEnum:
       description: May be set to describe how this discount was obtained.
       type: string
@@ -3186,16 +3186,17 @@ components:
       description: Contains info about one applied fee.
       allOf:
         - $ref: '#/components/schemas/DocumentTaxableAmountDto'
-      properties:
-        description:
-          description: A user-presentable description of this fee.
-          type: string
-        type:
-          $ref: '#/components/schemas/FeeTypesEnum'
-        taxes:
-          type: array
-          items:
-            $ref: '#/components/schemas/DocumentTaxDto'
+        - type: object
+          properties:
+            description:
+              description: A user-presentable description of this fee.
+              type: string
+            type:
+              $ref: '#/components/schemas/FeeTypesEnum'
+            taxes:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentTaxDto'
     FeeTypesEnum:
       description: May be set to give more details on the type of fee.
       type: string
@@ -3744,12 +3745,10 @@ components:
           $ref: '#/components/schemas/DocumentListMerchantDto'
         total:
           description: 'The total amount on the document. This will be the sum of items, fees, discounts and taxes but without any payments.'
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
         amountDue:
           description: This will be the final amount left to pay on the document
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
     DocumentListMerchantDto:
       type: object
       description: The merchant infomation on this document.
@@ -3811,8 +3810,7 @@ components:
       properties:
         amountDue:
           description: This will be the final amount left to pay on the document
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
         barcodes:
           type: array
           description: A list of barcodes available on the document.
@@ -3877,16 +3875,13 @@ components:
             $ref: '#/components/schemas/DocumentPaymentDto'
         total:
           description: 'The total amount on the document. This will be the sum of items, fees, discounts, taxes and tips but without any payments.'
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
         totalBeforeTips:
           description: The total amount minus any tips on the document. This will be the sum of items with discounts and fees but tips and payments.
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
         totalBeforeDiscountsFeesTips:
           description: 'The total amount minus any discounts, fees and tips on the document. This will be the sum of items but without fees, discounts, tip and any payments.'
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
     DocumentContentCustomerDto:
       description: Information about the customer as presented on the document.
       type: object
