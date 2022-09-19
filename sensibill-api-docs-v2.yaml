@@ -3873,6 +3873,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentPaymentDto'
+        tipAmount:
+          description: 'The tip (gratuity) amount on the document.'
+          type: number
         total:
           description: 'The total amount on the document. This will be the sum of items, fees, discounts, taxes and tips but without any payments.'
           $ref: '#/components/schemas/DocumentTaxableAmountDto'
@@ -4040,6 +4043,11 @@ components:
               example: '12:31:06'
             amountDue:
               $ref: '#/components/schemas/EditDocumentTaxableAmountDto'
+            tipAmount:
+              description: 'The total tips associated to this document. Pass null to unset.'
+              type: number
+              nullable: true
+              example: 12.5
             totalBeforeDiscountsFeesTips:
               $ref: '#/components/schemas/EditDocumentTaxableAmountDto'
             total:
