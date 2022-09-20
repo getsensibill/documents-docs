@@ -733,7 +733,10 @@ paths:
         - Documents
       operationId: postDocument
       summary: Create a new document
-      description: This allows clients to submit new documents to be processed by the system
+      description: |
+            This allows clients to submit new documents to be processed by the system.
+            Only clients with the feature flag enableInvoice enabled are allowed to submit documentType = 'invoice'.
+            Contact Sensibill support for more information about the enableInvoice feature flag.
       requestBody:
         $ref: '#/components/requestBodies/DocumentCreateRequest'
       responses:
@@ -2226,6 +2229,9 @@ components:
         $ref: '#/components/schemas/DocumentSourceFormatsEnum'
       maxItems: 2
     DocumentTypeEnum:
+      description: |
+        The document type that is being posted.
+        Only clients with the feature flag enableInvoice enabled are allowed to submit `documentType = 'invoice'`.
       type: string
       enum:
         - invoice
@@ -2287,6 +2293,9 @@ components:
             The binary data to be attached within a multi-part form.
             The file type can be either JPG, GIF, PNG or PDF and the maximum file size for the file is 5 MB.
         documentType:
+          description: |
+            The document type that is being posted.
+            Only clients with the feature flag enableInvoice enabled are allowed to submit `documentType = 'invoice'`.
           $ref: '#/components/schemas/DocumentTypeEnum'
         foreignId:
           type: string
