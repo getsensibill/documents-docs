@@ -816,12 +816,7 @@ paths:
         The schema defined below outlines the fields which can be updated. 
         To unset a specific field you can pass empty string or null. Numeric or Enum fileds must be null to unset.
       parameters:
-        - name: id
-          in: path
-          description: A unique ID that identifies this document in the Sensibill system.
-          required: true
-          schema:
-            $ref: '#/components/schemas/GenericIdString'
+        - $ref: '#/components/parameters/DocumentIdParameter'
       requestBody:
         description: An object composed of all the fields you want to edit for the given document.
         required: true
@@ -2222,6 +2217,9 @@ components:
       enum:
         - pdf
         - image
+        - pdf_email
+        - html_email
+        - image_email
     DocumentSourceFormatsArray:
       type: array
       description: Array of sourceFormats for the operation.
@@ -3065,6 +3063,10 @@ components:
             $ref: '#/components/schemas/DocumentCategoryListItemDto'
     DocumentCategoryListItemDto:
       type: object
+      required:
+        - code
+        - name
+        - icon
       properties:
         code:
           type: string
@@ -3575,6 +3577,11 @@ components:
           maxLength: 75
           example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
     DocumentSourceDto:
+      type: object
+      required:
+        - url
+        - format
+        - imagePreview
       properties:
         format:
           $ref: '#/components/schemas/DocumentSourceFormatsEnum'
@@ -3588,6 +3595,8 @@ components:
     GetDocumentResponseDto:
       description: Structure of the response on the document details endpoint
       type: object
+      required:
+        - document
       properties:
         document:
           $ref: '#/components/schemas/DocumentDto'
