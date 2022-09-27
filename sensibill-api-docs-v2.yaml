@@ -2217,15 +2217,17 @@ components:
       enum:
         - pdf
         - image
+        - raw_text
         - pdf_email
         - html_email
         - image_email
+        - text_email
     DocumentSourceFormatsArray:
       type: array
       description: Array of sourceFormats for the operation.
       items:
         $ref: '#/components/schemas/DocumentSourceFormatsEnum'
-      maxItems: 2
+      maxItems: 7
     DocumentTypeEnum:
       description: |
         The document type that is being posted.
