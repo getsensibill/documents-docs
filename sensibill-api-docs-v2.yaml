@@ -31,6 +31,8 @@ tags:
     description: Merchants
   - name: Users
     description: Users
+  - name: Folders
+    description: Folders
 servers:
   - url: https://receipts-sandbox.sensibill.io/api/v2
     description: 'Public Server'
@@ -560,6 +562,16 @@ paths:
             items:
               $ref: '#/components/schemas/TenderTypesEnum'
             maxItems: 20
+        - name: filter.folders
+          in: query
+          description: |
+            Array of `folders` externalId values to filter the documents on. \
+            **Example:** `filter.folders='folderExternalId1'&filter.folders='folderExternalId2'`
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GenericIdString'
         - name: filter.returnPeriodDuration
           in: query
           description: |
@@ -721,7 +733,10 @@ paths:
         - Documents
       operationId: postDocument
       summary: Create a new document
-      description: This allows clients to submit new documents to be processed by the system
+      description: |
+            This allows clients to submit new documents to be processed by the system.
+            Only clients with the feature flag enableInvoice enabled are allowed to submit documentType = 'invoice'.
+            Contact Sensibill support for more information about the enableInvoice feature flag.
       requestBody:
         $ref: '#/components/requestBodies/DocumentCreateRequest'
       responses:
@@ -732,9 +747,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentCreationResponseDto'
         '400':
-          description: 'Bad Request. This will occur if you provide an invalid value for a request parameter, an invalid parameter or invalid body.'
+          description: Bad Request. This will occur if you provide an invalid value for a request parameter, an invalid parameter or invalid body.
         '401':
-          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
         '403':
           description: Forbidden. This will occur if you try to use this endpoint without being setup for documents.
         '500':
@@ -801,12 +816,7 @@ paths:
         The schema defined below outlines the fields which can be updated. 
         To unset a specific field you can pass empty string or null. Numeric or Enum fileds must be null to unset.
       parameters:
-        - name: id
-          in: path
-          description: A unique ID that identifies this document in the Sensibill system.
-          required: true
-          schema:
-            $ref: '#/components/schemas/GenericIdString'
+        - $ref: '#/components/parameters/DocumentIdParameter'
       requestBody:
         description: An object composed of all the fields you want to edit for the given document.
         required: true
@@ -1008,13 +1018,32 @@ paths:
           description: Forbidden. This will occur if you attempt to use a client token with this endpoint. This endpoint must be used with a user-token.
         '404':
           description: Not Found. The export ID you have provided is not one of this user's exports.
+  /lookups/documentcategories:
+    get:
+      operationId: getDocumentCategories
+      tags:
+        - Lookups
+      summary: Document categories
+      description: This API call allows for retrieval of a list of document categories. To call this endpoint, you can use either a client-token or a user-token.
+      parameters:
+        - $ref: '#/components/parameters/ScaleParameter'
+        - $ref: '#/components/parameters/LocaleParameter'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetLookupCategoryListResponseDto'
+        '401':
+          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
   /lookups/currencies:
     get:
       operationId: getCurrencies
       tags:
         - Lookups
       summary: Supported Currencies
-      description: 'This API call allows you to retrieve the list of currencies that we currently support in our system. To call this endpoint, you can use either a client-token or a user-token.'
+      description: This API call allows you to retrieve the list of currencies that we currently support in our system. To call this endpoint, you can use either a client-token or a user-token.
       parameters:
         - $ref: '#/components/parameters/LocaleParameter'
       responses:
@@ -1023,25 +1052,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LookupCurrenciesResponse'
+                $ref: '#/components/schemas/GetLookupCurrencyListResponseDto'
         '401':
-          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
   /lookups/locales:
     get:
       operationId: getLocales
       tags:
         - Lookups
       summary: Supported Locales
-      description: 'This API call allows you to retrieve the list of locales that we currently support in our system. To call this endpoint, you can use either a client-token or a user-token.'
+      description: This API call allows you to retrieve the list of locales that we currently support in our system. To call this endpoint, you can use either a client-token or a user-token.
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LookupLocalesResponse'
+                $ref: '#/components/schemas/GetLookupLocaleListResponseDto'
         '401':
-          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+          description: Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.
   /merchants:
     get:
       operationId: getMerchants
@@ -1212,6 +1241,151 @@ paths:
           description: Bad Request. This will occur if you omit the username.
         '401':
           description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+  /folders:
+    get:
+      operationId: getFolders
+      tags:
+        - Folders
+      summary: List the folders for a user
+      description: This endpoint allows you to list the folders in the authenticating user's account.
+      parameters:
+        - $ref: '#/components/parameters/LocaleParameter'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFoldersListResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+    post:
+      operationId: createFolder
+      tags:
+        - Folders
+      summary: Add a new folder for a user
+      description: This endpoint allows you to add a folder to the authenticating user's account.
+      requestBody:
+        $ref: '#/components/requestBodies/FolderCreateRequest'
+      responses:
+        '200':
+          description: Success. The folder was successfully added.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderCreationResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+    delete:
+      operationId: deleteFolders
+      tags:
+        - Folders
+      summary: Delete multiple folders for a user
+      description: This endpoint allows you to perform a batch deletion of folders on a User object.
+      parameters:
+        - $ref: '#/components/parameters/FolderIdsParameter'
+        - $ref: '#/components/parameters/DeleteDocumentsParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/FoldersDeleteRequest'
+      responses:
+        '200':
+          description: Success. The folders were successfully removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyObjectResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '404':
+          description: Not Found. One or more folderIDs you have provided in the request do not belong to this user. See the user object for a list of their folders.
+  '/folders/{folderId}':
+    put:
+      operationId: upsertFolder
+      tags:
+        - Folders
+      summary: Update a folder for a user
+      description: This endpoint allows you to update a folder in the authenticating user's account.
+      parameters:
+        - $ref: '#/components/parameters/FolderIdParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/FolderUpdateRequest'
+      responses:
+        '200':
+          description: Success. The folder was successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyObjectResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '404':
+          description: Not Found. The folderID you have provided is not one of this user's folders. See the user object for a list of their folders.
+    delete:
+      operationId: deleteFolder
+      tags:
+        - Folders
+      summary: Delete a folder for a user
+      description: This endpoint allows you to delete a folder from the authenticating user's account.
+      parameters:
+        - $ref: '#/components/parameters/FolderIdParameter'
+        - $ref: '#/components/parameters/DeleteDocumentsParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/FolderDeleteRequest'
+      responses:
+        '200':
+          description: Success. The folder was successfully removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyObjectResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '404':
+          description: Not Found. The folderID you have provided is not one of this user's folders. See the user object for a list of their folders.
+  '/folders/{folderId}/documents':
+    put:
+      operationId: addDocumentsToFolder
+      tags:
+        - Folders
+      summary: Add document(s) to folder
+      description: This endpoint allows you to add one or more documents to a folder owned by the user
+      parameters:
+        - $ref: '#/components/parameters/FolderIdParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/AddDocumentsToFolderRequest'
+      responses:
+        '200':
+          description: Success. Documents were successfully added to folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsAddedOrRemovedFromFolderResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '404':
+          description: Not Found. The folderID or one of the receipt IDs you have provided do not exist or do not belong to the user.
+    delete:
+      operationId: removeDocumentFromFolder
+      tags:
+        - Folders
+      summary: Remove document(s) from folder
+      description: This endpoint allows you to remove multiple documents from a folder owned by the user
+      parameters:
+        - $ref: '#/components/parameters/FolderIdParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/RemoveDocumentsFromFolderRequest'
+      responses:
+        '200':
+          description: Success. Documents were successfully removed from the folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsAddedOrRemovedFromFolderResponseDto'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+        '404':
+          description: Not Found. The folderID or one of the receipt IDs you have provided do not exist or do not belong to the user.
+  
 components:
   schemas:
     ApiInfoDto:
@@ -1322,6 +1496,176 @@ components:
             documentsDetail:
               type: string
               example: 'documents/:id'
+            listFolders:
+              type: string
+              example: folders
+            createFolder:
+              type: string
+              example: folders
+            deleteFolders:
+              type: string
+              example: folders
+            updateFolder:
+              type: string
+              example: 'folders/:folderId'
+            deleteFolder:
+              type: string
+              example: 'folders/:folderId'
+            addDocumentsToFolder:
+              type: string
+              example: 'folders/:folderId/documents'
+            deleteDocumentsFromFolder:
+              type: string
+              example: 'folders/:folderId/documents'
+    FolderCreateRequestDto:
+      type: object
+      required:
+        - name
+        - color
+      properties:
+        name:
+          type: string
+          example: MyOtherFolder
+          description: The name for this folder. A user may not have two folders with the same name.
+        color:
+          type: string
+          example: aa0000
+          description: 'Six hex digits representing the color of this folder, e.g. <code>cc0000</code> or <code>9b1515</code>.'
+    FolderUpdateRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: MyOtherFolder
+          description: The name for this folder. A user may not have two folders with the same name.
+        color:
+          type: string
+          example: aa0000
+          description: 'Six hex digits representing the color of this folder, e.g. <code>cc0000</code> or <code>9b1515</code>.'
+    FolderDeleteRequestDto:
+      type: object
+      properties:
+        deleteDocuments:
+          type: boolean
+          default: false
+          description: Delete any documents that are in this folder.
+    FoldersDeleteRequestDto:
+      type: object
+      required:
+        - folders
+      properties:
+        folders:
+          type: array
+          items:
+            type: string
+            description: List of folder IDs that you want deleted.
+            example: 6OeYUlNyyeVHEmHMLmgZ
+        deleteDocuments:
+          type: boolean
+          default: false
+          description: Delete any documents that are in this folder.
+    GetFoldersListResponseDto:
+      type: object
+      required:
+        - folders
+      properties:
+        folders:
+          type: array
+          items:
+            $ref: '#/components/schemas/FolderListItemDto'
+    FolderListItemDto:
+      type: object
+      required:
+        - id
+        - name
+        - color
+        - updatedAt
+        - createdAt
+        - count
+      properties:
+        id:
+          type: string
+          minLength: 20
+          maxLength: 35
+          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
+          example: 6OeYUlNyyeVHEmHMLmgZ
+          description: The id of the folder
+        name:
+          type: string
+          example: Renovations-2021-Jan
+          description: The name for this folder. A user may not have two folders with the same name.
+        color:
+          type: string
+          example: cc0000
+          description: Six hex digits representing the color of this folder.
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2015-09-30T17:56:45.236Z'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2015-11-30T17:56:45.236Z'
+        count:
+          type: integer
+          example: 3
+        totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/FolderListItemTotalsDto'
+    FolderListItemTotalsDto:
+      type: object
+      required:
+        - count
+        - amount
+        - currencyCode
+        - displayAmount
+      properties:
+        amount:
+          type: number
+          example: 35.53
+          description: The total amount of all receipts in the folder matching the currency code.
+        count:
+          type: integer
+          example: 3
+          description: The count of all reeipts in the folder matching the currency code. Must be a valid currency code as returned by our /lookups/currencies endpoint
+        currencyCode:
+          type: string
+          example: CAD
+          description: The currency code associated with the total amount of the receipts in the folder matching this currency. It will be a valid currency code as returned by our /lookups/currencies endpoint
+        displayAmount:
+          type: string
+          example: $35.53
+          description: 'The total amount of all receipts in the folder matching the currency code formatted based on the specified locale, or if not specified the locale of the user.'
+    FolderCreationResponseDto:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          minLength: 20
+          maxLength: 35
+          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
+          example: 9k-mU2YuNiakP0O2mCvF
+    DocumentsAddedOrRemovedFromFolderResponseDto:
+      type: object
+      required:
+        - updated
+      properties:
+        updated:
+          type: integer
+          example: 2
+    AddOrRemoveDocumentsFromFolderDto:
+      type: object
+      required:
+        - documentIds
+      properties:
+        documentIds:
+          type: array
+          items:
+            type: string
+            example: Iw6DUSraLoGOnHiL2Ps4pBz8F1oQCndA4UhzS80OAHDg0LxpJzRtmUr89sFrYS2DfQfbhhkF8kPe5jF9_nFE
     JwtAuthenticateRequestDto:
       type: object
       required:
@@ -1770,8 +2114,7 @@ components:
           type: string
           description: 'Provides the locale for the user. Must be a supported value from the list of locale-codes, which can be obtained by going to /lookups/locales'
     UserUpdateDto:
-      allOf:
-        - $ref: '#/components/schemas/userUpdateDtoProperties'
+      $ref: '#/components/schemas/userUpdateDtoProperties'
     commonRegistrationParameters:
       type: object
       properties:
@@ -1832,42 +2175,6 @@ components:
     CurrencyCodeEnum:
       description: 3 character ISO-4217 currency code
       type: string
-      enum:
-        - USD
-        - CAD
-        - GBP
-        - EUR
-        - NZD
-        - AUD
-        - BRL
-        - CLP
-        - CNY
-        - CZK
-        - DKK
-        - HKD
-        - HUF
-        - INR
-        - IDR
-        - ILS
-        - JPY
-        - MYR
-        - MXN
-        - NOK
-        - PKR
-        - PHP
-        - PLN
-        - RUB
-        - SGD
-        - ZAR
-        - KRW
-        - SEK
-        - CHF
-        - TWD
-        - THB
-        - TRY
-    EditableCurrencyCodeEnum:
-      description: 3 character ISO-4217 currency code
-      type: string
       nullable: true
       enum:
         - USD
@@ -1910,13 +2217,21 @@ components:
       enum:
         - pdf
         - image
+        - raw_text
+        - pdf_email
+        - html_email
+        - image_email
+        - text_email
     DocumentSourceFormatsArray:
       type: array
       description: Array of sourceFormats for the operation.
       items:
         $ref: '#/components/schemas/DocumentSourceFormatsEnum'
-      maxItems: 2
+      maxItems: 7
     DocumentTypeEnum:
+      description: |
+        The document type that is being posted.
+        Only clients with the feature flag enableInvoice enabled are allowed to submit `documentType = 'invoice'`.
       type: string
       enum:
         - invoice
@@ -1978,6 +2293,9 @@ components:
             The binary data to be attached within a multi-part form.
             The file type can be either JPG, GIF, PNG or PDF and the maximum file size for the file is 5 MB.
         documentType:
+          description: |
+            The document type that is being posted.
+            Only clients with the feature flag enableInvoice enabled are allowed to submit `documentType = 'invoice'`.
           $ref: '#/components/schemas/DocumentTypeEnum'
         foreignId:
           type: string
@@ -2621,6 +2939,14 @@ components:
         - noDocumentsFound
     ExportCreateResponseDto:
       type: object
+      required:
+        - id
+        - status
+        - criteria
+        - createdAt
+        - outputFormats
+        - documentsCount
+        - destructionTime
       properties:
         destructionTime:
           type: string
@@ -2663,6 +2989,16 @@ components:
         $ref: '#/components/schemas/ExportsResponseDto'
     ExportsResponseDto:
       type: object
+      required:
+        - id
+        - status
+        - documents
+        - criteria
+        - resultSize
+        - createdAt
+        - updatedAt
+        - outputFormats
+        - destructionTime
       properties:
         destructionTime:
           type: string
@@ -2715,24 +3051,58 @@ components:
           type: string
           example: IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA
           description: This is a unique identifier which is used to identify the export request on Sensibill's system.
+          # TODO inherited from v1. Should be fileSize instead
         filesize:
           type: integer
           example: 11042
           description: 'The size of the contents in bytes, when available.'
-    LookupCurrenciesResponse:
+    GetLookupCategoryListResponseDto:
       type: object
+      properties:
+        documentCategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentCategoryListItemDto'
+    DocumentCategoryListItemDto:
+      type: object
+      required:
+        - code
+        - name
+        - icon
+      properties:
+        code:
+          type: string
+          example: shopping
+          description: The code representing the document category.
+        name:
+          type: string
+          example: General Retail
+          description: The name of the document category.
+        icon:
+          type: string
+          format: uri
+          example: 'https://receipts-sandbox.sensibill.io/img/categories/select-category/select-category-general-retail-active@3x.png'
+          description: The URL of the icon associated with the document category.
+    GetLookupCurrencyListResponseDto:
+      type: object
+      required:
+        - currencies
       properties:
         currencies:
           type: array
           items:
-            $ref: '#/components/schemas/LookupCurrenciesDto'
-    LookupCurrenciesDto:
+            $ref: '#/components/schemas/DocumentCurrencyListItemDto'
+    DocumentCurrencyListItemDto:
       type: object
+      required:
+        - name
+        - code
+        - symbol
       properties:
         name:
           type: string
           example: United States Dollar
-          description: The name of the currency in English.
+          description: The name of the currency in English, or translated if a non-English locale was provided used to handle the request
         code:
           type: string
           example: USD
@@ -2741,15 +3111,20 @@ components:
           type: string
           example: $
           description: The internationally recognized symbol representing the currency.
-    LookupLocalesResponse:
+    GetLookupLocaleListResponseDto:
       type: object
+      required:
+        - locales
       properties:
         locales:
           type: array
           items:
-            $ref: '#/components/schemas/LookupLocalesDto'
-    LookupLocalesDto:
+            $ref: '#/components/schemas/DocumentLocaleListItemDto'
+    DocumentLocaleListItemDto:
       type: object
+      required:
+        - name
+        - code
       properties:
         name:
           type: string
@@ -2761,11 +3136,16 @@ components:
           description: The short code of the locale.
     MerchantsDto:
       type: object
+      required:
+        - merchants
       properties:
         merchants:
           type: array
           items:
             type: object
+            required:
+              - name
+              - merchantID
             properties:
               merchantID:
                 type: string
@@ -2773,7 +3153,7 @@ components:
               name:
                 type: string
                 example: Amazon
-              receiptCateogry:
+              documentCateogry:
                 type: string
                 example: General Retail
     CountryCode:
@@ -2790,24 +3170,25 @@ components:
       description: Contains info about one applied discount.
       allOf:
         - $ref: '#/components/schemas/DocumentTaxableAmountDto'
-      properties:
-        description:
-          description: A user-presentable description of this discount.
-          type: string
-          example: 10.00%
-        methodCode:
-          description: A code used by the merchant to identify this discount
-          type: string
-          example: Home Sense
-        percent:
-          description: 'May be set if this discount is percent based, where a value of N represents an N% discount.'
-          type: number
-        type:
-          $ref: '#/components/schemas/DiscountTypesEnum'
-        taxes:
-          type: array
-          items:
-            $ref: '#/components/schemas/DocumentTaxDto'
+        - type: object
+          properties:
+            description:
+              description: A user-presentable description of this discount.
+              type: string
+              example: 10.00%
+            methodCode:
+              description: A code used by the merchant to identify this discount
+              type: string
+              example: Home Sense
+            percent:
+              description: 'May be set if this discount is percent based, where a value of N represents an N% discount.'
+              type: number
+            type:
+              $ref: '#/components/schemas/DiscountTypesEnum'
+            taxes:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentTaxDto'
     DiscountTypesEnum:
       description: May be set to describe how this discount was obtained.
       type: string
@@ -2818,16 +3199,17 @@ components:
       description: Contains info about one applied fee.
       allOf:
         - $ref: '#/components/schemas/DocumentTaxableAmountDto'
-      properties:
-        description:
-          description: A user-presentable description of this fee.
-          type: string
-        type:
-          $ref: '#/components/schemas/FeeTypesEnum'
-        taxes:
-          type: array
-          items:
-            $ref: '#/components/schemas/DocumentTaxDto'
+        - type: object
+          properties:
+            description:
+              description: A user-presentable description of this fee.
+              type: string
+            type:
+              $ref: '#/components/schemas/FeeTypesEnum'
+            taxes:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentTaxDto'
     FeeTypesEnum:
       description: May be set to give more details on the type of fee.
       type: string
@@ -3099,7 +3481,7 @@ components:
           example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
     PeriodUnitEnum:
       type: string
-      description: Available period units.  Can be 'day', 'week', 'month' or 'year'.
+      description: Available period units.  Can be `day`, `week`, `month` or `year`.
       enum:
         - day
         - week
@@ -3107,7 +3489,7 @@ components:
         - year
     ExpenseTypeEnum:
       type: string
-      description: Expense type associated with the document. Can be either 'business' or 'personal'.
+      description: Expense type associated with the document. Can be either `business` or `personal`.
       enum:
         - business
         - personal
@@ -3116,7 +3498,7 @@ components:
       properties:
         unit:
           $ref: '#/components/schemas/PeriodUnitEnum'
-          description: This parameter should be used together with the ''duration'' parameter. Document must have the ''documentDate'' set or it should be supplied as another edit parameter within the same request.
+          description: This parameter should be used together with the `duration` parameter. Document must have the `documentDate` set or it should be supplied as another edit parameter within the same request.
           example: 'day'
         duration:
           type: integer
@@ -3139,6 +3521,11 @@ components:
       properties:
         expenseType:
           $ref: '#/components/schemas/ExpenseTypeEnum'
+        folders:
+          description: The folders this document belongs to
+          type: array
+          items:
+            type: string
         notes:
           type: string
           description: General text note to the document.
@@ -3180,19 +3567,26 @@ components:
           pattern: '^[a-zA-Z0-9-_:.]+$'
           description: |
             An optional identifier representing the bank account from the financial institution to associate this document with.
-            Should be set to `""` (an empty zero-length string) to unset the `account` previosuly set for the document.
+            Should be set to an empty zero-length string to unset the `account` previosuly set for the document.
           maxLength: 75
           example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
         transactionId:
           type: string
           pattern: '^[a-zA-Z0-9-_:.]+$'
-          description: An optional ID representing the transaction from the financial institution to associate this document with
+          description: |
+            An optional ID representing the transaction from the financial institution to associate this document with
+            Should be set to an empty zero-length string to unset the `transactionId` previosuly set for the document.
           maxLength: 75
           example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
-    SourceDocumentDto:
+    DocumentSourceDto:
+      type: object
+      required:
+        - url
+        - format
+        - imagePreview
       properties:
         format:
-          $ref: '#/components/schemas/AllDocumentSourceFormatsEnum'
+          $ref: '#/components/schemas/DocumentSourceFormatsEnum'
         url:
           type: string
           description: 'The url to get or view the original document file (i.e.: image, pdf, pdf_email, etc)'
@@ -3200,23 +3594,16 @@ components:
           type: string
           description: |
             The url of an image file to preview this document. In case of image documents, this content will be the same of the url field.
-    AllDocumentSourceFormatsEnum:
-      description: Defines the possible original formats for a document to have come from.
-      type: string
-      enum:
-        - pdf
-        - image
-        - pdf_email
-        - html_email
-        - image_email
     GetDocumentResponseDto:
       description: Structure of the response on the document details endpoint
       type: object
+      required:
+        - document
       properties:
         document:
           $ref: '#/components/schemas/DocumentDto'
         error:
-          $ref: '#/components/schemas/DocumentErrorDto'
+          $ref: '#/components/schemas/GetDocumentErrorDto'
     DocumentsStatusResponseDto:
       type: object
       description: Response schema for the documents/status endpoint
@@ -3224,7 +3611,7 @@ components:
         - documents
       properties:
         documents:
-          description: A list of document objects with their status indicated
+          description: A list of document objects with their processing status indicated
           type: array
           maxItems: 10
           items:
@@ -3239,10 +3626,13 @@ components:
     DocumentStatusErrorItemDto:
       description: Represents an error that can occur while polling for document processing status
       type: object
+      required:
+        - id
+        - message
       properties:
         id:
           type: string
-          maxLength: 20
+          maxLength: 35
           minLength: 20
           example: z6uuM0iqnvf8sCDBRYLJ
           description: This is a unique identifier which is used to identify the document in the Sensibill system.
@@ -3256,6 +3646,11 @@ components:
     DocumentStatusListItemDto:
       description: Schema for an entry in the documents/status endpoint response
       type: object
+      required:
+        - id
+        - status
+        - documentType
+        - arrivalDateTime
       properties:
         id:
           $ref: '#/components/schemas/GenericIdString'
@@ -3289,14 +3684,23 @@ components:
       properties:
         documents:
           type: array
+          maxItems: 100
           items:
             $ref: '#/components/schemas/DocumentListItemDto'
         count:
           description: 'This field counts the total number of documents for the user existing in the system.<br> If filter conditions are informed, this would only count the records matching those.'
           type: integer
+          minimum: 0
+          maximum: 100
           example: 1
     DocumentListItemDto:
       type: object
+      required:
+        - id
+        - status
+        - documentType
+        - arrivalDateTime
+        - lastUpdateDateTime
       properties:
         id:
           type: string
@@ -3331,7 +3735,7 @@ components:
         content:
           $ref: '#/components/schemas/DocumentListItemContentDto'
         source:
-          $ref: '#/components/schemas/SourceDocumentDto'
+          $ref: '#/components/schemas/DocumentSourceDto'
         userMetadata:
           $ref: '#/components/schemas/DocumentUserMetadataDto'
     DocumentListItemContentDto:
@@ -3361,12 +3765,10 @@ components:
           $ref: '#/components/schemas/DocumentListMerchantDto'
         total:
           description: 'The total amount on the document. This will be the sum of items, fees, discounts and taxes but without any payments.'
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
         amountDue:
           description: This will be the final amount left to pay on the document
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
     DocumentListMerchantDto:
       type: object
       description: The merchant infomation on this document.
@@ -3381,6 +3783,12 @@ components:
           example: shopping
     DocumentDto:
       type: object
+      required:
+        - id
+        - status
+        - documentType
+        - arrivalDateTime
+        - lastUpdateDateTime
       properties:
         id:
           type: string
@@ -3414,7 +3822,7 @@ components:
         content:
           $ref: '#/components/schemas/DocumentContentDto'
         source:
-          $ref: '#/components/schemas/SourceDocumentDto'
+          $ref: '#/components/schemas/DocumentSourceDto'
         userMetadata:
           $ref: '#/components/schemas/DocumentUserMetadataDto'
     DocumentContentDto:
@@ -3422,8 +3830,7 @@ components:
       properties:
         amountDue:
           description: This will be the final amount left to pay on the document
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
         barcodes:
           type: array
           description: A list of barcodes available on the document.
@@ -3486,18 +3893,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DocumentPaymentDto'
+        tipAmount:
+          description: 'The tip (gratuity) amount on the document.'
+          type: number
         total:
           description: 'The total amount on the document. This will be the sum of items, fees, discounts, taxes and tips but without any payments.'
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
         totalBeforeTips:
           description: The total amount minus any tips on the document. This will be the sum of items with discounts and fees but tips and payments.
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
         totalBeforeDiscountsFeesTips:
           description: 'The total amount minus any discounts, fees and tips on the document. This will be the sum of items but without fees, discounts, tip and any payments.'
-          allOf:
-            - $ref: '#/components/schemas/DocumentTaxableAmountDto'
+          $ref: '#/components/schemas/DocumentTaxableAmountDto'
     DocumentContentCustomerDto:
       description: Information about the customer as presented on the document.
       type: object
@@ -3537,24 +3944,37 @@ components:
           example: UPC
     DocumentCreationResponseDto:
       type: object
+      required:
+        - id
       properties:
         id:
           type: string
+          minLength: 20
+          maxLength: 35
+          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
           description: This is a unique identifier which is used to identify the document on Sensibill's system.
-          example: XuncoaVG7XMTY0iWHTCa
+          example: NPd1RuBD7qv2cJ5yuOzM
     DocumentDeleteResponseDto:
       description: The list of document Ids which were deleted from the system
       type: object
+      required:
+        - ids
       properties:
         ids:
           type: array
           items:
             type: string
+            minLength: 20
+            maxLength: 35
+            pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
           example:
             - XuncoaVG7XMTY0iWHTCa
             - BuDcoaVG74MTY0iWIYKq
-    DocumentErrorDto:
+    GetDocumentErrorDto:
       description: Describes the error related to the request if there was a failure
+      required:
+        - code
+        - errorDescription
       properties:
         errorDescription:
           description: An in depth description of the error for the request
@@ -3643,23 +4063,56 @@ components:
               example: '12:31:06'
             amountDue:
               $ref: '#/components/schemas/EditDocumentTaxableAmountDto'
+            tipAmount:
+              description: 'The total tips associated to this document. Pass null to unset.'
+              type: number
+              nullable: true
+              example: 12.5
             totalBeforeDiscountsFeesTips:
               $ref: '#/components/schemas/EditDocumentTaxableAmountDto'
             total:
               $ref: '#/components/schemas/EditDocumentTaxableAmountDto'
             currencyCode:
-              $ref: '#/components/schemas/EditableCurrencyCodeEnum'
+              $ref: '#/components/schemas/CurrencyCodeEnum'
         userMetadata:
           $ref: '#/components/schemas/EditDocumentUserMetadataDto'
     EditDocumentResponseDto:
       description: Object with the Id of the updated Document
       type: object
+      required:
+        - id
       properties:
         id:
           type: string
+          minLength: 20
+          maxLength: 35
+          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
           description: The Id of the updated Document
           example: z6uuM0iqnvf8sCDBRYLJ
   parameters:
+    FolderIdParameter:
+      name: folderId
+      in: path
+      description: A unique ID that identifies this folder in the Sensibill system.
+      required: true
+      schema:
+        type: string
+    FolderIdsParameter:
+      name: folders
+      in: query
+      description: 'This is a list of folder IDs that you want deleted. It should be either an array in JSON form, or a comma separated list and may be passed as a query parameter or in a JSON body in the request.'
+      required: true
+      schema:
+        type: string
+        example: '6OeYUlNyyeVHEmHMLmgZ,ARpUx0qRIRdK7SZzG7Uo'
+    DeleteDocumentsParameter:
+      name: deleteDocuments
+      in: query
+      description: Soft delete any documents that are in this folder. This means the document will stay in Sensibill's system but it will not be accessible by the user. This may be passed as a query parameter or in a JSON body in the request.
+      required: false
+      schema:
+        type: boolean
+        default: false
     ClientIDParameter:
       name: client_id
       in: query
@@ -3753,13 +4206,23 @@ components:
       schema:
         type: string
       description: 'If you have requested an export, you may provide the email address you want the exported information to go to. If you do not supply an exportEmail, the email address for the user will be used.'
+    ScaleParameter:
+      name: scale
+      in: query
+      required: false
+      schema:
+        type: string
+        pattern: ^[2|3]x$
+        default: 3x
+      description: This provides the scale factor to use for the images returned from the endpoint. Can either be '2x' or '3x'. Defaults to '3x' for higher resolution images.
     LocaleParameter:
       name: locale
       in: query
       schema:
         type: string
+        pattern: ^[a-z]{2,2}-[A-Z]{2,2}$
       example: en-CA
-      description: 'Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to `/lookups/locales`. It defaults to the user''s locale.'
+      description: Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to `/lookups/locales`. It defaults to the user's locale.
     EmailParameter:
       name: email
       in: query
@@ -3806,6 +4269,48 @@ components:
       schema:
         $ref: '#/components/schemas/GenericIdString'
   requestBodies:
+    FolderCreateRequest:
+      description: Add a new folder for a user
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FolderCreateRequestDto'
+    FolderUpdateRequest:
+      description: Add a new folder for a user
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FolderUpdateRequestDto'
+    FolderDeleteRequest:
+      description: Delete a folder for a user
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FolderDeleteRequestDto'
+    FoldersDeleteRequest:
+      description: Delete multiple folders for a user
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FoldersDeleteRequestDto'
+    AddDocumentsToFolderRequest:
+      description: Add multiple documents to a folder
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddOrRemoveDocumentsFromFolderDto'
+    RemoveDocumentsFromFolderRequest:
+      description: Remove multiple documents from a folder
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddOrRemoveDocumentsFromFolderDto'
     JwtAuthenticateRequest:
       required: true
       content:
