@@ -2313,11 +2313,14 @@ components:
         ids:
           description: An array of documents ids that should be deleted from the system.
           type: array
+          minItems: 1
+          maxItems: 10
           items:
-            type: string
+            $ref: '#/components/schemas/GenericIdString'
           example:
             - XuncoaVG7XMTY0iWHTCa
             - BuDcoaVG74MTY0iWIYKq
+
     TenderTypesEnum:
       type: string
       enum:
@@ -3623,6 +3626,27 @@ components:
           items:
             $ref: '#/components/schemas/DocumentStatusErrorItemDto'
 
+    DocumentsDeleteErrorItemDto:
+      description: Represents an error that can occur while deleting one or more documents
+      type: object
+      required:
+        - id
+        - message
+      properties:
+        id:
+          type: string
+          maxLength: 35
+          minLength: 3
+          example: z6uuM0iqnvf8sCDBRYLJ
+          description: This is a unique identifier intended to identify the document in the Sensibill system.
+          x-faker: random.uuid
+        message:
+          type: string
+          maxLength: 100
+          example: z6uuM0iqnvf8sCDBRYLJ is not a valid document id
+          x-faker: random.words
+          
+          
     DocumentStatusErrorItemDto:
       description: Represents an error that can occur while polling for document processing status
       type: object
@@ -3635,7 +3659,7 @@ components:
           maxLength: 35
           minLength: 20
           example: z6uuM0iqnvf8sCDBRYLJ
-          description: This is a unique identifier which is used to identify the document in the Sensibill system.
+          description: This is a unique identifier intended to identify the document in the Sensibill system.
           x-faker: random.uuid
         message:
           type: string
@@ -3962,14 +3986,20 @@ components:
       properties:
         ids:
           type: array
+          minItems: 1
+          maxItems: 10
           items:
-            type: string
-            minLength: 20
-            maxLength: 35
-            pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
+            $ref: '#/components/schemas/GenericIdString'
           example:
             - XuncoaVG7XMTY0iWHTCa
             - BuDcoaVG74MTY0iWIYKq
+        errors:
+          description: Optional property used to indicate and describe errors encountered while handling the request
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/DocumentsDeleteErrorItemDto'
+
     GetDocumentErrorDto:
       description: Describes the error related to the request if there was a failure
       required:
