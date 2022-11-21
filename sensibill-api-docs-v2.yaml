@@ -3722,6 +3722,7 @@ components:
       required:
         - id
         - status
+        - content
         - documentType
         - arrivalDateTime
         - lastUpdateDateTime
@@ -3764,6 +3765,8 @@ components:
           $ref: '#/components/schemas/DocumentUserMetadataDto'
     DocumentListItemContentDto:
       type: object
+      required:
+        - currencyCode
       properties:
         documentNumber:
           description: The document number that appears on the document. For example this can be invoice number.
@@ -3810,6 +3813,7 @@ components:
       required:
         - id
         - status
+        - content
         - documentType
         - arrivalDateTime
         - lastUpdateDateTime
@@ -3851,6 +3855,8 @@ components:
           $ref: '#/components/schemas/DocumentUserMetadataDto'
     DocumentContentDto:
       type: object
+      required:
+        - currencyCode
       properties:
         amountDue:
           description: This will be the final amount left to pay on the document
@@ -4050,10 +4056,12 @@ components:
           description: The category this merchant belongs to. Use the endpoint /lookups/receiptcategories for a list of valid categories.
           example: shopping
     EditDocumentRequestDto:
-      type: object
       description: |
         Object that contains the field that will be updated in a Document. Pass the field set to `""` (an empty zero-length string) to unset its value.'
         Numeric or Enum fileds must be null to unset.
+      type: object
+      required:
+        - content
       properties:
         description:
           type: string
@@ -4065,6 +4073,8 @@ components:
           $ref: '#/components/schemas/NullableDocumentAccountMetadataDto'
         content:
           type: object
+          required:
+            - currencyCode
           properties:
             merchant:
               description: If the merchantName is empty or null, the whole merchant data structure will be unset.
