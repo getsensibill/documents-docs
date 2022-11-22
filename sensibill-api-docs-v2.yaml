@@ -3791,6 +3791,11 @@ components:
           description: 'The time at which this document was generated. This is only the time component of the local time at which the purchase was made, with no explicit timezone information.'
           type: string
           example: '12:31:06'
+        dueDate:
+          type: string
+          format: date
+          description: The date on which the amountDue should be paid. Date is in ISO-8601 format.
+          example: '2017-09-01'
         payments:
           description: The payments made on this document. This will be an array with the different payments made towards this document.
           type: array
