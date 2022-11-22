@@ -4081,8 +4081,6 @@ components:
         Object that contains the field that will be updated in a Document. Pass the field set to `""` (an empty zero-length string) to unset its value.'
         Numeric or Enum fileds must be null to unset.
       type: object
-      required:
-        - content
       properties:
         description:
           type: string
@@ -4094,8 +4092,6 @@ components:
           $ref: '#/components/schemas/NullableDocumentAccountMetadataDto'
         content:
           type: object
-          required:
-            - currencyCode
           properties:
             merchant:
               $ref: '#/components/schemas/EditDocumentMerchantDto'
