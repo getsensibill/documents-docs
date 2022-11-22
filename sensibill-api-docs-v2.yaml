@@ -233,7 +233,6 @@ paths:
           required: false
           schema:
             type: boolean
-            format: boolean
         - name: filter.accountMetadata.transactionId
           in: query
           description: |
@@ -250,12 +249,11 @@ paths:
           description: |
             This is used to match and include documents where a value *exists* for the `accountMetadata.transactionId` property. \
             Only `true` or `false` boolean values are accepted. A mix of operators with basic values is not supported. 
-            If `accountMetadata.account.exists` is provided together with plain values for account, this `exists` operator is ignored. \
+            If `accountMetadata.transactionId.exists` is provided together with plain values for transactionId, this `exists` operator is ignored. \
             **Example:** To filter all documents with `accountMetadata.transactionId` not set, use `filter.accountMetadata.transactionId.exists=false`
           required: false
           schema:
             type: boolean
-            format: boolean
         - name: filter.amountDue
           in: query
           description: |
@@ -330,11 +328,12 @@ paths:
           required: false
           schema:
             type: array
+            maxItems: 20
             items:
               type: string
-              format: '/^[a-zA-Z0-9-_ ]+$/'
+              pattern: ^[a-zA-Z0-9-_ ]+$
+              minLength: 3
               maxLength: 25
-            maxItems: 20
         - name: filter.currencyCode
           in: query
           description: |
@@ -350,7 +349,7 @@ paths:
           in: query
           description: |
             Array of `description` values to filter the documents. The filter is case insentive and matches any document where the
-            description contains the given value. Values should ideally satisfy the /^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$/gm pattern which primarily prohibits the `;` punctuation \
+            description contains the given value. Values should ideally satisfy the /^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]{0,75}$/ pattern which prohibits the `;` punctuation \
             **Example:** `filter.description='Dinner with friends'&filter.description='Children winter gear'
           required: false
           schema:
@@ -358,7 +357,7 @@ paths:
             items:
               type: string
               maxLength: 75
-              pattern: ^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$
+              pattern: ^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]{0,75}$
             maxItems: 20
         - name: filter.documentDate
           in: query
@@ -526,7 +525,8 @@ paths:
             type: array
             items:
               type: string
-              format: '/^[a-zA-Z0-9-_ ]+$/'
+              maxLength: 30
+              pattern: ^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]$
             maxItems: 20
         - name: filter.merchantTaxIdNumber
           in: query
@@ -538,7 +538,8 @@ paths:
             type: array
             items:
               type: string
-              format: '/^[a-zA-Z0-9-_:. ]+$/'
+              maxLength: 25
+              pattern: ^[a-zA-Z0-9-_:. ]+$
             maxItems: 20
         - name: filter.notes
           in: query
@@ -551,6 +552,8 @@ paths:
             type: array
             items:
               type: string
+              maxLength: 75
+              pattern: ^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]$
         - name: filter.paymentTender
           in: query
           description: |
@@ -572,6 +575,7 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/GenericIdString'
+            maxItems: 20
         - name: filter.returnPeriodDuration
           in: query
           description: |
@@ -584,6 +588,7 @@ paths:
             items:
               type: number
               minimum: 0
+            maxItems: 20
         - name: filter.returnPeriodDuration.gte
           in: query
           description: |
@@ -617,6 +622,7 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/PeriodUnitEnum'
+            maxItems: 20
         - name: filter.total
           in: query
           description: |
@@ -680,6 +686,7 @@ paths:
             items:
               type: number
               minimum: 0
+            maxItems: 20
         - name: filter.warrantyPeriodDuration.gte
           in: query
           description: |
@@ -713,6 +720,7 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/PeriodUnitEnum'
+            maxItems: 20
       responses:
         '200':
           description: Success. The list of documents was successfully retrieved.
@@ -1585,9 +1593,9 @@ components:
       properties:
         id:
           type: string
-          minLength: 20
-          maxLength: 35
-          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
+          minLength: 5
+          maxLength: 75
+          pattern: ^[a-zA-Z0-9-_:.]{5,75}$
           example: 6OeYUlNyyeVHEmHMLmgZ
           description: The id of the folder
         name:
@@ -1644,9 +1652,9 @@ components:
       properties:
         id:
           type: string
-          minLength: 20
-          maxLength: 35
-          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
+          minLength: 5
+          maxLength: 75
+          pattern: ^[a-zA-Z0-9-_:.]{5,75}$
           example: 9k-mU2YuNiakP0O2mCvF
     DocumentsAddedOrRemovedFromFolderResponseDto:
       type: object
@@ -2152,14 +2160,14 @@ components:
           description: Can be either "true" or "false". This parameter can be used by early integration partners during testing to create a number of ake testing receipts for the accounts they create.
     GenericIdString:
       type: string
-      minLength: 3
+      minLength: 5
       maxLength: 75
-      pattern: '^[a-zA-Z0-9-_:.]{3,75}$'
+      pattern: ^[a-zA-Z0-9-_:.]{5,75}$
     CurrencyCodeDto:
       type: string
       maxLength: 3
       minLength: 3
-      pattern: '^[A-Z]{3}$'
+      pattern: ^[A-Z]{3}$
     DocumentTaxDto:
       type: object
       properties:
@@ -2171,6 +2179,7 @@ components:
           example: 1.2
         type:
           type: string
+          maxLength: 15
           example: GST
     CurrencyCodeEnum:
       description: 3 character ISO-4217 currency code
@@ -2211,7 +2220,7 @@ components:
         - TRY
     DocumentTimeDto:
       type: string
-      format: '^\d{2}:\d{2}$'
+      pattern: ^\d{2}:\d{2}$
     DocumentSourceFormatsEnum:
       type: string
       enum:
@@ -2242,11 +2251,13 @@ components:
         - arrivalDateTime
         - documentDate
         - documentTime
+      default: arrivalDateTime
     DocumentOrderByEnum:
       type: string
       enum:
         - ASC
         - DESC
+      default: DESC
     DocumentStatusTypeEnum:
       type: string
       description: |
@@ -2278,14 +2289,13 @@ components:
     DocumentCreateDto:
       type: object
       required:
-        - sourceFile
         - documentType
       properties:
         description:
           type: string
-          description: A user specified name or description for this document. Values should ideally satisfy the /^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$/gm pattern which primarily prohibits the `;` punctuation.
-          pattern: ^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$
+          description: A user specified name or description for this document. Values should ideally satisfy the /^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]{0,75}$/ pattern which prohibits the `;` punctuation.
           maxLength: 75
+          pattern: ^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]{0,75}$
         sourceFile:
           type: string
           format: binary
@@ -2293,12 +2303,11 @@ components:
             The binary data to be attached within a multi-part form.
             The file type can be either JPG, GIF, PNG or PDF and the maximum file size for the file is 5 MB.
         documentType:
-          description: |
-            The document type that is being posted.
-            Only clients with the feature flag enableInvoice enabled are allowed to submit `documentType = 'invoice'`.
           $ref: '#/components/schemas/DocumentTypeEnum'
         foreignId:
           type: string
+          maxLength: 75
+          pattern: ^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]{0,75}$
           description: |
             An integrator supplied identifier that must be unique. In case of upload failure or loss of document Id this 
             foreignId can be used on a new request with the source file to receive the original document id without our system reprocessing the source file.
@@ -2613,6 +2622,7 @@ components:
           example: '2015-08-30T00:00:00.000Z'
         merchantName:
           type: string
+          maxLength: 500
           example: Home Depot
           description: The name of the merchant. If no merchant is set this will contain the string 'Merchant?'
         renderURL:
@@ -2660,14 +2670,15 @@ components:
         accountMetadata.account:
           type: array
           items:
-            $ref: '#/components/schemas/GenericIdString'
+            type: string
+            maxLength: 75
+            pattern: ^[a-zA-Z0-9-_:.]{5,75}$
           maxItems: 20
           description: |
             Array of `accountMetadata.account` to filter the documents. Should ideally satisfy the `/^[a-zA-Z0-9-_:.]+$/` pattern \
             **Example:** `accountMetadata.account='ACC102030'&accountMetadata.account='405060'`
         accountMetadata.account.exists:
           type: boolean
-          format: boolean
           description: |
             This is used to match and include documents where a value *exists* for the `accountMetadata.account` property. \
             Only `true` or `false` boolean values are accepted. A mix of operators with basic values is not supported. 
@@ -2676,14 +2687,15 @@ components:
         accountMetadata.transactionId:
           type: array
           items:
-            $ref: '#/components/schemas/GenericIdString'
+            type: string
+            maxLength: 75
+            pattern: ^[a-zA-Z0-9-_:.]{5,75}$
           maxItems: 20
           description: |
             Array of `accountMetadata.transactionId` to filter the documents. Should ideally satisfy the `/^[a-zA-Z0-9-_:.]+$/` pattern. \
             **Example:** `accountMetadata.transactionId='TX00001'&accountMetadata.transactionId='TX00002'`
         accountMetadata.transactionId.exists:
           type: boolean
-          format: boolean
           description: |
             This is used to match and include documents where a value *exists* for the `accountMetadata.transactionId` property. \
             Only `true` or `false` boolean values are accepted. A mix of operators with basic values is not supported. 
@@ -2738,7 +2750,7 @@ components:
           type: array
           items:
             type: string
-            format: '/^[a-zA-Z0-9-_ ]+$/'
+            pattern: ^[a-zA-Z0-9-_ ]+$
             maxLength: 25
           maxItems: 20
           description: |
@@ -2752,13 +2764,14 @@ components:
             Array of currencyCode to filter the documents. Example: `currencyCode=['CAD', 'USD']`
         description:
           type: array
+          maxItems: 20
           items:
             type: string
             maxLength: 75
-            pattern: '^[a-zA-Z0-9 ]+$'
+            pattern: ^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]{0,75}$
           description: |
-            Array of description values to filter the documents. The filter is case insentive and matches any document where the
-            description contains the given value. Should ideally satisfy the pattern /^[a-zA-Z0-9 ]+$/
+            Array of description values to filter the documents. The filter is case insentive and matches any document where the \
+            description contains the given value. Should ideally satisfy the pattern /^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]{0,75}$/ \
             Example: `description=['Dinner with friends','Children winter gear','My very specific description']`
           example:
             - Dinner with friends
@@ -2809,13 +2822,13 @@ components:
             - '23:14'
         documentTime.gte:
           type: string
-          format: '^\d{2}:\d{2}$'
+          pattern: ^\d{2}:\d{2}$
           description: |
             This is a filter condition `greater than or equal` on the documentTime to filter the documents.
             Example with single operator: `documentTime.gte='10:00'`
         documentTime.lte:
           type: string
-          format: '^\d{2}:\d{2}$'
+          pattern: ^\d{2}:\d{2}$
           description: |
             This is a filter condition `less than or equal` on the documentTime to filter the documents.
             Example with single operator: `filter.documentTime.gte='10:00'`
@@ -2864,10 +2877,11 @@ components:
         merchantName:
           description: Array of merchantName to filter the documents.
           type: array
+          maxItems: 10
           items:
             type: string
-            format: '^[a-zA-Z0-9-_ ]+$'
-            maxLength: 25
+            pattern: ^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]$
+            maxLength: 500
         merchantTaxIdNumber:
           description: Array of merchantTaxIdNumber to filter the documents.
           type: array
@@ -2976,7 +2990,6 @@ components:
           type: number
           maximum: 500
           minimum: 0
-          format: integer
           example: 5
           description: The number of documents that matches the given criteria. The final number of documents in the export can be different from this one if documents are created or deleted between this POST request and the time when the request is processed.
         status:
@@ -3382,6 +3395,7 @@ components:
           example: homesense
         merchantName:
           type: string
+          maxLength: 500
           description: The name of the merchant.
           example: Home Sense
         email:
@@ -3408,6 +3422,8 @@ components:
           $ref: '#/components/schemas/OrderChannelTypesEnum'
         categoryCode:
           type: string
+          pattern: ^[a-zA-Z0-9-_ ]+$
+          maxLength: 25
           description: The category this merchant belongs to.
           example: shopping
         taxIdNumber:
@@ -3472,24 +3488,27 @@ components:
       properties:
         account:
           type: string
-          pattern: '^[a-zA-Z0-9-_:.]+$'
+          pattern: ^[a-zA-Z0-9-_:.]{5,75}$
           description: An optional identifier representing the bank account from the financial institution to associate this document with
           maxLength: 75
           example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
         transactionId:
           type: string
-          pattern: '^[a-zA-Z0-9-_:.]+$'
+          pattern: ^[a-zA-Z0-9-_:.]{5,75}$
           description: An optional ID representing the transaction from the financial institution to associate this document with
           maxLength: 75
           example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
     PeriodUnitEnum:
       type: string
-      description: Available period units.  Can be `day`, `week`, `month` or `year`.
+      description: |
+        Available period units.  Can be `day`, `week`, `month` or `year`.
+        As a parameter, this should be used together with the `duration` parameter. Document must have the `documentDate` set or it should be supplied as another edit parameter within the same request.
       enum:
         - day
         - week
         - month
         - year
+      example: 'day'
     ExpenseTypeEnum:
       type: string
       description: Expense type associated with the document. Can be either `business` or `personal`.
@@ -3498,17 +3517,19 @@ components:
         - personal
     DocumentUserMetadataPeriodDto:
       type: object
+      description: The details about the document's warranty or return period. These fields can only be edited if the document date is known.
       properties:
         unit:
           $ref: '#/components/schemas/PeriodUnitEnum'
-          description: This parameter should be used together with the `duration` parameter. Document must have the `documentDate` set or it should be supplied as another edit parameter within the same request.
-          example: 'day'
         duration:
           type: integer
           description: Number of period units which defines the total period duration. This parameter should be used together with the 'unit' parameter. Document must have the ''documentDate'' set or it should be supplied as another edit parameter within the same request.
           example: 14
     EditDocumentUserMetadataPeriodDto:
       type: object
+      description: |
+            The details about the document's warranty or return period. This can only be edited if the document date is populated. 
+            If either unit or duration is unset, the full applicable warrantyPeriod or returnPeriod structure is unset.
       properties:
         unit:
           type: string
@@ -3533,14 +3554,8 @@ components:
           type: string
           description: General text note to the document.
         warrantyPeriod:
-          type: object
-          description: |
-            The details about the document's warranty period. These fields can only be edited if the document date is known.
           $ref: '#/components/schemas/DocumentUserMetadataPeriodDto'
         returnPeriod:
-          type: object
-          description: |
-            The details about the document's return period. These fields can only be edited if the document date is known.
           $ref: '#/components/schemas/DocumentUserMetadataPeriodDto'
     EditDocumentUserMetadataDto:
       type: object
@@ -3552,22 +3567,15 @@ components:
           type: string
           description: To unset the value pass an empty string. 
         warrantyPeriod:
-          type: object
-          description: |
-            The details about the document's warranty period. This can only be edited if the document date is populated. If either unit or duration is unset, the full warrantyPeriod structure is unset.
           $ref: '#/components/schemas/EditDocumentUserMetadataPeriodDto'
         returnPeriod:
-          type: object
-          description: |
-            The details about the document's return period. This can only be edited if the document date is populated. If either unit or duration is unset, the full returnPeriod structure is unset.
           $ref: '#/components/schemas/EditDocumentUserMetadataPeriodDto'
     NullableDocumentAccountMetadataDto:
       type: object
       properties:
         account:
           type: string
-          nullable: true
-          pattern: '^[a-zA-Z0-9-_:.]+$'
+          pattern: ^[a-zA-Z0-9-_:.]{0,75}$
           description: |
             An optional identifier representing the bank account from the financial institution to associate this document with.
             Should be set to an empty zero-length string to unset the `account` previosuly set for the document.
@@ -3575,7 +3583,7 @@ components:
           example: EsmtpT9xa2S4gXym9GHBJrLkigfjH
         transactionId:
           type: string
-          pattern: '^[a-zA-Z0-9-_:.]+$'
+          pattern: ^[a-zA-Z0-9-_:.]{0,75}$
           description: |
             An optional ID representing the transaction from the financial institution to associate this document with
             Should be set to an empty zero-length string to unset the `transactionId` previosuly set for the document.
@@ -3635,8 +3643,8 @@ components:
       properties:
         id:
           type: string
-          maxLength: 35
-          minLength: 3
+          maxLength: 75
+          minLength: 5
           example: z6uuM0iqnvf8sCDBRYLJ
           description: This is a unique identifier intended to identify the document in the Sensibill system.
           x-faker: random.uuid
@@ -3682,8 +3690,8 @@ components:
           description: A unique identifier that was passed on upload to ensure that retries can happen without overriding data.
           type: string
           maxLength: 75
-          minLength: 3
-          pattern: ^[a-zA-Z0-9-_:.]{3,75}$
+          minLength: 5
+          pattern: ^[a-zA-Z0-9-_:.]{5,75}$
           example: z6uuM0iqnvf8sCDBRYLJ
         arrivalDateTime:
           description: The date and time that the document was submitted to our system. With no explicit timezone information.
@@ -3751,8 +3759,8 @@ components:
           $ref: '#/components/schemas/DocumentTypeEnum'
         description:
           description: A user specified name / description for this document
-          pattern: '^[a-zA-Z0-9 ]+$'
-          maxLength: 100
+          pattern: ^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]{0,75}$
+          maxLength: 75
           type: string
           example: My document description
         status:
@@ -3803,10 +3811,13 @@ components:
         merchantName:
           description: The name of the merchant.
           type: string
+          maxLength: 500
           example: Home Sense
         categoryCode:
           description: The category the merchant belongs to.
           type: string
+          pattern: ^[a-zA-Z0-9-_ ]+$
+          maxLength: 25
           example: shopping
     DocumentDto:
       type: object
@@ -3843,7 +3854,8 @@ components:
         description:
           description: The document description. Might be also used as the document name or note.
           type: string
-          pattern: '^[a-zA-Z0-9 ]+$'
+          pattern: ^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]{0,75}$
+          maxLength: 75
           example: My document description
         status:
           $ref: '#/components/schemas/DocumentStatusTypeEnum'
@@ -3979,9 +3991,9 @@ components:
       properties:
         id:
           type: string
-          minLength: 20
-          maxLength: 35
-          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
+          minLength: 5
+          maxLength: 75
+          pattern: ^[a-zA-Z0-9-_:.]{5,75}$
           description: This is a unique identifier which is used to identify the document on Sensibill's system.
           example: NPd1RuBD7qv2cJ5yuOzM
     DocumentDeleteResponseDto:
@@ -3992,7 +4004,7 @@ components:
       properties:
         ids:
           type: array
-          minItems: 1
+          minItems: 0
           maxItems: 10
           items:
             $ref: '#/components/schemas/GenericIdString'
@@ -4039,20 +4051,24 @@ components:
           example: 12.2
     EditDocumentMerchantDto:
       type: object
+      description: If the merchantName is empty or null, the whole merchant data structure will be unset.
       properties:
         merchantName:
           type: string
           nullable: true
+          maxLength: 500
           description: The name of the merchant.
           example: Home Sense
         taxIdNumber:
           description: The tax number for this merchant.
           type: string
+          maxLength: 25
           nullable: true
           example: 11111 1111 RT0001
         categoryCode:
           type: string
           nullable: true
+          maxLength: 25
           description: The category this merchant belongs to. Use the endpoint /lookups/receiptcategories for a list of valid categories.
           example: shopping
     EditDocumentRequestDto:
@@ -4065,10 +4081,10 @@ components:
       properties:
         description:
           type: string
-          description: A user specified name or description for this document. Values should ideally satisfy the /^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$/gm pattern which primarily prohibits the `;` punctuation \
-          pattern: ^[a-zA-Z0-9.?!\-,:_@#'" ]{1,75}$
+          description: A user specified name or description for this document. Values should ideally satisfy the /^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]{0,75}$/ pattern which prohibits the `;` punctuation
           maxLength: 75
           nullable: true
+          pattern: ^[a-zA-Z0-9.?!\-,\\\/:_@#'" ]{0,75}$
         accountMetadata:
           $ref: '#/components/schemas/NullableDocumentAccountMetadataDto'
         content:
@@ -4077,10 +4093,10 @@ components:
             - currencyCode
           properties:
             merchant:
-              description: If the merchantName is empty or null, the whole merchant data structure will be unset.
               $ref: '#/components/schemas/EditDocumentMerchantDto'
             documentNumber:
               type: string
+              maxLength: 75
               nullable: true
               description: The document number that appears on the document. For example this can be invoice number.
               example: 123910293-12
@@ -4098,6 +4114,7 @@ components:
               example: '2017-09-01'
             documentTime:
               type: string
+              maxLength: 12
               nullable: true
               description: 'The time at which this document was generated. This is only the time component of the local time at which the purchase was made, with no explicit timezone information.'
               example: '12:31:06'
@@ -4124,9 +4141,9 @@ components:
       properties:
         id:
           type: string
-          minLength: 20
-          maxLength: 35
-          pattern: '^[a-zA-Z0-9-_:.]{20,35}$'
+          minLength: 5
+          maxLength: 75
+          pattern: ^[a-zA-Z0-9-_:.]{5,75}$
           description: The Id of the updated Document
           example: z6uuM0iqnvf8sCDBRYLJ
   parameters:
@@ -4260,6 +4277,7 @@ components:
       in: query
       schema:
         type: string
+        maxLength: 5
         pattern: ^[a-z]{2,2}-[A-Z]{2,2}$
       example: en-CA
       description: Allows you to specify the locale in which the response should be returned. It must be a supported value from the list of locale-codes, which can be obtained by going to `/lookups/locales`. It defaults to the user's locale.
