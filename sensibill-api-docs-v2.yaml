@@ -460,6 +460,16 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/ExpenseTypeEnum'
+        - name: filter.folder
+          in: query
+          description: |
+            Will only return documents that are in one or more of the folder IDs specified. The folder IDs should match those set on the user that the document belongs to.
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/GenericIdString'
+            maxItems: 20
         - name: filter.foreignId
           in: query
           description: |
@@ -2837,6 +2847,12 @@ components:
           description: 'Array of `documentType` to filter the documents. Currently supported values are [invoice, receipt].'
           items:
             $ref: '#/components/schemas/DocumentTypeEnum'
+          maxItems: 20
+        folder:
+          type: array
+          description: 'Will only return documents that are in one or more of the folder IDs specified. The folder IDs should match those set on the user that the document belongs to.'
+          items:
+            $ref: '#/components/schemas/GenericIdString'
           maxItems: 20
         foreignId:
           type: array
