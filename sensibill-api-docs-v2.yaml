@@ -3052,7 +3052,7 @@ components:
         fileURL:
           type: string
           example: 'https://receipts-sandbox.sensibill.io/api/v2/exports/IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA/contents'
-          description: The URL that can be used to download the contents of the export.
+          description: The URL that can be used to download the contents of the export. Response header Content-Type is set depending on the exported file format.
         outputFormats:
           type: array
           items:
