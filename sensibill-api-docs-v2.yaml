@@ -2952,12 +2952,7 @@ components:
         outputFormats:
           type: array
           items:
-            type: string
-            description: |
-              Indicates which formats should be generated. Valid values are:
-              * 'csv' - indicates a comma separated file should be produced summarizing the exported data
-              * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
-              * 'pdf' - indicates individual documents should be exported to a PDF file
+            $ref: '#/components/schemas/ExportOutputFormatsEnum'
             example: csv
         criteria:
           $ref: '#/components/schemas/ListDocumentsCriteriaDto'
@@ -2970,6 +2965,17 @@ components:
       enum:
         - queued
         - noDocumentsFound
+    ExportOutputFormatsEnum:
+      description: |
+        Indicates which formats should be generated. Valid values are:
+        * 'csv' - indicates a comma separated file should be produced summarizing the exported data
+        * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
+        * 'pdf' - indicates individual documents should be exported to a PDF file
+      type: string
+      enum:
+        - csv
+        - pdf
+        - xlsx
     ExportCreateResponseDto:
       type: object
       required:
@@ -2992,12 +2998,7 @@ components:
         outputFormats:
           type: array
           items:
-            type: string
-            description: |
-              Indicates which formats should be generated. Valid values are:
-              * 'csv' - indicates a comma separated file should be produced summarizing the exported data
-              * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
-              * 'pdf' - indicates individual documents should be exported to a PDF file
+            $ref: '#/components/schemas/ExportOutputFormatsEnum'
             example: csv
         documentsCount:
           type: number
@@ -3056,12 +3057,7 @@ components:
         outputFormats:
           type: array
           items:
-            type: string
-            description: |
-              Indicates which formats should be generated. Valid values are:
-              * 'csv' - indicates a comma separated file should be produced summarizing the exported data
-              * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
-              * 'pdf' - indicates individual documents should be exported to a PDF file
+            $ref: '#/components/schemas/ExportOutputFormatsEnum'
             example: csv
         documents:
           type: array
