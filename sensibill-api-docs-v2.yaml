@@ -4072,7 +4072,7 @@ components:
           type: string
           nullable: true
           maxLength: 500
-          description: The name of the merchant.
+          description: The name of the merchant. When this property is set in a PATCH request, the categoryCode might be updated automatically.
           example: Home Sense
         taxIdNumber:
           description: The tax number for this merchant.
