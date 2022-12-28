@@ -2950,10 +2950,15 @@ components:
         - criteria
       properties:
         outputFormats:
+          description: |
+            Indicates which formats should be generated. Valid values are:
+            * 'csv' - indicates a comma separated file should be produced summarizing the exported data
+            * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
+            * 'pdf' - indicates individual documents should be exported to a PDF file
           type: array
           items:
             $ref: '#/components/schemas/ExportOutputFormatsEnum'
-            example: csv
+          example: ['csv']
         criteria:
           $ref: '#/components/schemas/ListDocumentsCriteriaDto'
         locale:
@@ -2996,10 +3001,15 @@ components:
           format: date-time
           example: '2020-12-18T21:58:15.875Z'
         outputFormats:
+          description: |
+            Indicates which formats were requested. Valid values are:
+            * 'csv' - indicates a comma separated file should be produced summarizing the exported data
+            * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
+            * 'pdf' - indicates individual documents should be exported to a PDF file
           type: array
           items:
             $ref: '#/components/schemas/ExportOutputFormatsEnum'
-            example: csv
+          example: ['csv']
         documentsCount:
           type: number
           maximum: 500
@@ -3055,10 +3065,15 @@ components:
           example: 'https://receipts-sandbox.sensibill.io/api/v2/exports/IncaCskJ1GiopEYJMjaMLdEgFaDirOUdniwV3Aipl91f4cAWt3hq3eAmB8fZd_xQ9qGNWLswQhjuGzTOiRhA/contents'
           description: The URL that can be used to download the contents of the export. Response header Content-Type is set depending on the exported file format.
         outputFormats:
+          description: |
+            Indicates which formats were requested. Valid values are:
+            * 'csv' - indicates a comma separated file should be produced summarizing the exported data
+            * 'xlsx' - indicates an excel spreadsheet should be produced summarizing the exported data
+            * 'pdf' - indicates individual documents should be exported to a PDF file
           type: array
           items:
             $ref: '#/components/schemas/ExportOutputFormatsEnum'
-            example: csv
+          example: ['csv']
         documents:
           type: array
           items:
