@@ -23,6 +23,33 @@ The general high-level flow is:
 <!--theme: info-->
 > To get your Client Account set up please contact Sensibill Support Team.
 
+### Custom Headers for Direct API Ingegrations
+
+Sensibill needs to be able to monitor the usage of the Sensibill API functionality by the operating system. It helps our Product and Engineering Team to make more informed decisions.
+
+Usually, it can be successfully achieved by looking at the `User-Agent` standard header.
+
+However, for the communications that originate from the Integration Service and for the integration patterns where the Sensibill API gets accessed from the client's backend system (**Figure 4** above) the `User-Agent` header may not be present or may contain the information about the backend system issuing the request rather than the end-user's OS.
+
+For that reason, Sensibill introduced a custom header called `sb-request-origin`. The purpose of the header is to capture the end-user's User Agent so it needs to be assigned the value of the original `User-Agent` header that came with the request originating on the end-user facing client side app.
+
+<!--theme: info-->
+> A custom  `sb-request-origin` header should be populated with the data from the standard `User-Agent` header of the request which originated on the end-user facing client app and sent with each request to the Sensibill API for all integrations where communication with the Sensibill API happens directly from the client's backend system.
+
+#### Example:
+
+- A user submits a receipt for processing from their iOS Safari browser app.
+- The request lands on the client's backend system first (**Figure 4** above).
+- That request contains a `User-Agent` header with the following value:
+  ```
+  User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1
+  ```
+- The client's backend needs to send that image to Sensibill's API. The `User-Agent` header will be populated with the value describing the backend system and the custom `sb-request-origin header` will be added with the value from the original browser app's request. 
+- The Sensibill API will end up receiving a request which contains the following headers:
+  ```
+  User-Agent: <somes erver version>
+  sb-request-origin: Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1
+  ```
 ---
 
 **Next -> [Authentication](./Authentication.md)**
