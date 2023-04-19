@@ -1390,6 +1390,7 @@ paths:
       description: This endpoint allows you to remove multiple documents from a folder owned by the user
       parameters:
         - $ref: '#/components/parameters/FolderIdParameter'
+        - $ref: '#/components/parameters/DocumentIdsParameter'
       requestBody:
         $ref: '#/components/requestBodies/RemoveDocumentsFromFolderRequest'
       responses:
@@ -4182,6 +4183,14 @@ components:
       name: folders
       in: query
       description: 'This is a list of folder IDs that you want deleted. It should be either an array in JSON form, or a comma separated list and may be passed as a query parameter or in a JSON body in the request.'
+      required: true
+      schema:
+        type: string
+        example: '6OeYUlNyyeVHEmHMLmgZ,ARpUx0qRIRdK7SZzG7Uo'
+    DocumentIdsParameter:
+      name: documentIds
+      in: query
+      description: 'This is a list of document IDs that you want deleted from the folder. It should be a comma separated list and may be passed as a query parameter or in a JSON body in the request.'
       required: true
       schema:
         type: string
