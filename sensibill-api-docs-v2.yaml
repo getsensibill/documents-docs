@@ -2687,7 +2687,7 @@ components:
           maxItems: 20
           description: |
             Array of `accountMetadata.account` to filter the documents. Should ideally satisfy the `/^[a-zA-Z0-9-_:.]+$/` pattern \
-            **Example:** `accountMetadata.account='ACC102030'&accountMetadata.account='405060'`
+            **Example:** `'accountMetadata.account': ['ACC102030', '405060']`
         accountMetadata.account.exists:
           type: boolean
           description: |
@@ -2704,7 +2704,7 @@ components:
           maxItems: 20
           description: |
             Array of `accountMetadata.transactionId` to filter the documents. Should ideally satisfy the `/^[a-zA-Z0-9-_:.]+$/` pattern. \
-            **Example:** `accountMetadata.transactionId='TX00001'&accountMetadata.transactionId='TX00002'`
+            **Example:** `'accountMetadata.transactionId': ['TX00001', 'TX00002']`
         accountMetadata.transactionId.exists:
           type: boolean
           description: |
@@ -2720,7 +2720,7 @@ components:
           maxItems: 20
           description: |
             Array of `amountDue` values to filter the documents. `afterTax` is the document property considered for the match. \
-            **Example:** `filter.amountDue=1000.55&filter.amountDue=1010.90`
+            **Example:** `'filter.amountDue': [1000.55, 1010.90]`
         amountDue.gte:
           type: number
           minimum: 0
@@ -3012,7 +3012,7 @@ components:
             $ref: '#/components/schemas/ExportOutputFormatsEnum'
           example: ['csv']
         documentsCount:
-          type: number
+          type: integer
           maximum: 500
           minimum: 0
           example: 5
