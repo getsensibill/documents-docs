@@ -2298,13 +2298,13 @@ components:
     ExportItemStatusEnum:
       type: string
       description: |
-        The status of the export. Possible values are: `'queued'`, `'processing'`, `'completed'`, `'failed'`
+        The status of the export. Possible values are: `'queued'`, `'running'`, `'completed'`, `'failed'`
       example: completed
       enum:
         - failed
         - queued
         - completed
-        - processing
+        - running
         - noDocumentsFound
     DocumentCreateDto:
       type: object
