@@ -575,17 +575,6 @@ paths:
             items:
               $ref: '#/components/schemas/TenderTypesEnum'
             maxItems: 20
-        - name: filter.folders
-          in: query
-          description: |
-            Array of `folders` externalId values to filter the documents on. \
-            **Example:** `filter.folders='folderExternalId1'&filter.folders='folderExternalId2'`
-          required: false
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/GenericIdString'
-            maxItems: 20
         - name: filter.returnPeriodDuration
           in: query
           description: |
@@ -1236,6 +1225,26 @@ paths:
                 $ref: '#/components/schemas/EmailAvailabilityResponseDto'
         '400':
           description: 'Bad Request. This will occur if you omit the email address, or the email address provided is not well formed.'
+        '401':
+          description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
+  /users/receiptEmailAvailability:
+    get:
+      operationId: getReceiptEmailAvailability
+      tags:
+        - Users
+      summary: Check for the availability of a receipt email address.
+      description: 'This endpoint allows you to check whether a particular receipt email address to register a new account is available or not before you register a new user. If the given email address is available, then this endpoint will return back a JSON object with the property available set to true. If the email address is taken, then this endpoint will return back the property available set to false, along with a list of alternative email addresses. <br/><br/>This endpoint can be used with either a client token or a user token.'
+      parameters:
+        - $ref: '#/components/parameters/ReceiptEmailParameter'
+      responses:
+        '200':
+          description: 'Success. This status code will be issued both when the email address is available, and when it is taken. You need to check the body of the response to see whether or not the email address is available.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptEmailAvailabilityResponseDto'
+        '400':
+          description: Bad Request. This will occur if you omit the email address or if the email address is not well formed.
         '401':
           description: 'Unauthorized. This will occur if you do not supply an access-token to this endpoint, or if you provide an expired or invalid access token.'
   /users/usernameAvailability:
@@ -2289,13 +2298,13 @@ components:
     ExportItemStatusEnum:
       type: string
       description: |
-        The status of the export. Possible values are: `'queued'`, `'processing'`, `'completed'`, `'failed'`
+        The status of the export. Possible values are: `'queued'`, `'running'`, `'completed'`, `'failed'`
       example: completed
       enum:
         - failed
         - queued
         - completed
-        - processing
+        - running
         - noDocumentsFound
     DocumentCreateDto:
       type: object
@@ -2665,6 +2674,19 @@ components:
           type: boolean
           example: true
           description: This is a flag that states if the email address is available or not for a new user registration.
+    ReceiptEmailAvailabilityResponseDto:
+      type: object
+      properties:
+        available:
+          type: boolean
+          example: 'true'
+          description: This is a flag that states if the email address is available or not.
+        alternatives:
+          type: array
+          items:
+            type: string
+            example: bob_smith@abc321bank.com
+          description: 'This is a list of possible email addresses which are similar to the email address which the client requested availability for. If the email address is available, this list will be omitted.'
     UsernameAvailabilityResponseDto:
       type: object
       properties:
@@ -4323,6 +4345,15 @@ components:
         format: email
       example: test@test.com
       description: The email address for the user's account.
+    ReceiptEmailParameter:
+      name: email
+      in: query
+      required: true
+      schema:
+        type: string
+        format: email
+      example: test@test.com
+      description: The email address to the user's document processing account.
     UsernameParameter:
       name: username
       in: query
