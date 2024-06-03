@@ -1887,20 +1887,6 @@ components:
         featureOptions:
           type: object
           properties:
-            insights:
-              type: object
-              properties:
-                deactivationDate:
-                  type: string
-                activationDate:
-                  type: string
-            achievements:
-              type: object
-              properties:
-                deactivationDate:
-                  type: string
-                activationDate:
-                  type: string
             outgoingEmail:
               type: object
               properties:
